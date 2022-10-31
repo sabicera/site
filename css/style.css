@@ -206,7 +206,7 @@ tr:nth-child(odd) {
     }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 750px) {
     .brand-title {
         align-self: center;
         padding-left: 0;
