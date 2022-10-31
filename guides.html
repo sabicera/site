@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="java/script.js" defer></script>
+    <script src="https://kit.fontawesome.com/fba8dc9637.js" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYK45NJVF1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HYK45NJVF1');
+    </script>
+    <!---<head>
+    <title>Example.com homepage</title>
+    <meta name="google-site-verification" google-site-verification=NzDR8THkhc9aoERcgDzzVBnfEs7gggd1elwWG2BgJ44/>
+    </head>--->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+</head>
+<body>
+<!----------- Navbar ------------>
+    <nav class="navbar">
+        <div class="brand-title">Ramnuda&copy;</div>
+        <a href="#" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
+        <div class="navbar-links">
+            <ul><li><a href="index.html">Home</a></li>
+                <li><a href="downloads.html">Downloads</a></li>
+                <li><a href="cdkeys.html">Buy Keys</a></li>
+                <li><a href="guides.html">Guides</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
+<!----------- Main ------------>
+    <nav class="main">
+        <h1>Various Tips & Tricks for Window users</h1>
+        <table>
+            <tr>
+                <caption><h2><i class="fa-solid fa-triangle-exclamation"></i>  Use CMD for this one  <i class="fa-solid fa-triangle-exclamation"></i></h2></caption>
+                <th>PowerShell latest version</th>
+                <td id="text1">install --id Microsoft.Powershell --source winget</td>
+                <td><button onclick="copy('text1')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Microsoft Edge latest version</th>
+                <td id="text2">winget.exe install --id Microsoft.Edge --source winget</td>
+                <td><button onclick="copy('text2')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Power Plan - High Performance</th>
+                <td id="text3">powercfg.exe /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c</td>
+                <td><button onclick="copy('text3')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Turn off screen - Never</th>
+                <td id="text4">powercfg.exe /change -monitor-timeout-ac 0</td>
+                <td><button onclick="copy('text4')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Put to sleep - Never</th>
+                <td id="text5">powercfg.exe /x -standby-timeout-ac 0</td>
+                <td><button onclick="copy('text5')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Hibernation - Off</th>
+                <td id="text6">powercfg.exe /hibernate off</td>
+                <td><button onclick="copy('text6')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Check your BIOS version</th>
+                <td id="text7">wmic bios get biosversion</td>
+                <td><button onclick="copy('text7')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Display your Windows version</th>
+                <td id="text7">winver</td>
+                <td><button onclick="copy('text7')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+            <tr>
+                <th>Power Efficiency Diagnostics Report</th>
+                <td id="text7">powercfg/energy</td>
+                <td><button onclick="copy('text7')"><i class="fa-regular fa-clipboard"></i></button></td>
+            </tr>
+        </table>
+<!----------- Buy me a coffe ------------>
+        <a href="https://www.buymeacoffee.com/sabicera" class="buymeacoffee" target="_blank" rel="noropener" rel="noreferrer"><img src="images/bmc-full-logo.svg" alt=""></a>
+    </nav>
+<!----------- Footer ------------>
+    <nav class="footer">
+        <p>Ramnuda &copy; 2022  |  All rights reserved</p>
+    </nav>
+        <a href="#" class="to-top"><i class="fa-solid fa-chevron-up"></i></a>
+    </body> 
+</html>
