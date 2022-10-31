@@ -200,6 +200,12 @@ tr:nth-child(odd) {
     opacity: 1;
 }
 
+@media (max-width: 1000px) {
+    .navbar {
+        padding: 0 5%;
+    }
+}
+
 @media (max-width: 650px) {
     .brand-title {
         align-self: center;
