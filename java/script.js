@@ -6,7 +6,6 @@ toggleButton.addEventListener('click', () => {
     navbarLinks.classList.toggle('active')
 })
 
-
 //------------//To Top Buttton//----------//
 const toTop = document.querySelector(".to-top");
 
