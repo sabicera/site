@@ -26,18 +26,18 @@
 </head>
 <body>
 <!-- Navbar -->
-<nav class="navbar">
-    <div class="brand-title"><a href="index.html">Ramnuda&copy;</a></div>
-    <a href="#" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
-    <div class="navbar-links">
-        <ul><li><a href="index.html">Home</a></li>
-            <li><a href="downloads.html">Downloads</a></li>
-            <li><a href="cdkeys.html">Buy Keys</a></li>
-            <li><a href="guides.html">Guides</a></li>
-            <li><a href="about.html">About</a></li>
-        </ul>
-    </div>
-</nav>
+    <nav class="navbar">
+        <div class="brand-title"><a href="index.html">Ramnuda&copy;</a></div>
+        <a href="#" title="Menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
+        <div class="navbar-links">
+            <ul><li><a href="index.html">Home</a></li>
+                <li><a href="downloads.html">Downloads</a></li>
+                <li><a href="cdkeys.html">Buy Keys</a></li>
+                <li><a href="guides.html">Guides</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
 <!-- Main -->
     <nav class="main">
         <h1>Various Tips & Tricks for Window users</h1>
@@ -51,42 +51,42 @@
             <tr>
                 <th>Microsoft Edge latest version</th>
                 <td id="text2">winget.exe install --id Microsoft.Edge --source winget</td>
-                <td><button onclick="copy('text2')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text2')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Power Plan - High Performance</th>
                 <td id="text3">powercfg.exe /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c</td>
-                <td><button onclick="copy('text3')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text3')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Turn off screen - Never</th>
                 <td id="text4">powercfg.exe /change -monitor-timeout-ac 0</td>
-                <td><button onclick="copy('text4')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text4')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Put to sleep - Never</th>
                 <td id="text5">powercfg.exe /x -standby-timeout-ac 0</td>
-                <td><button onclick="copy('text5')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text5')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Hibernation - Off</th>
                 <td id="text6">powercfg.exe /hibernate off</td>
-                <td><button onclick="copy('text6')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text6')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Check your BIOS version</th>
                 <td id="text7">wmic bios get biosversion</td>
-                <td><button onclick="copy('text7')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text7')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Display your Windows version</th>
                 <td id="text8">winver</td>
-                <td><button onclick="copy('text8')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text8')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
                 <th>Power Efficiency Diagnostics Report</th>
                 <td id="text9">powercfg/energy</td>
-                <td><button onclick="copy('text9')"><i class="fa-regular fa-clipboard"></i></button></td>
+                <td><button onclick="copy('text9')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
         </table>
 <!-- Buy me a coffe -->
