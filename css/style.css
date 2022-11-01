@@ -33,6 +33,14 @@ body {
     margin: .5rem;
 }
 
+.brand-title a{
+    color: #fff;
+}
+
+.brand-title a:hover {
+    color: aqua;
+}
+
 .navbar-links ul {
     margin: 0;
     padding: 0;
