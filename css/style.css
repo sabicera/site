@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
+:root {
+    --background_dark: #262626;
+    --background_light: #fefeff;
+    --primary_text_light: #e5e5e5;
+    --primary_text_dark: #31485c;
+    --menu_hover_light: #ebeaeb;
+    --menu_hover_dark: #2d2c2c;
+    --hover_blue: #45badd;
+    --hover_text: #d8d8d9c0;
+    --table_primary: #d8d8d9ea;
+    --table_secondary: #feffff;
+}
+
 * {
     font-family: Montserrat, sans-serif;
     box-sizing: border-box;
@@ -16,7 +29,7 @@ body {
     padding: 0;
     min-width: 300px;
     min-height: 100vh;
-    background-color:lightgray ;
+    background-color:var(--background_light) ;
 }
 
 .navbar {
@@ -24,8 +37,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #333;
-    color: #fff;
+    background-color: var(--background_dark);
+    color: var(--background_light);
 }
 
 .brand-title {
@@ -34,11 +47,11 @@ body {
 }
 
 .brand-title a{
-    color: #fff;
+    color: var(--menu_hover_light);
 }
 
 .brand-title a:hover {
-    color: aqua;
+    color: var(--hover_blue);
 }
 
 .navbar-links ul {
@@ -52,13 +65,15 @@ body {
 }
 
 .navbar-links li a {
-    color: #fff;
+    color: var(--menu_hover_light);
     padding: 1rem;
     display: block;
 }
 
 .navbar-links li a:hover {
-    color: cyan;
+    color: var(--hover_blue);
+    background-color: #31485c;
+    border-radius: 10px;
 }
 
 .toggle-button {
@@ -73,16 +88,16 @@ body {
 }
 
 .toggle-button .bar {
-    height: 3px;
+    height: 4px;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--background_light);
     border-radius: 10px;
 }
 
 button {
     cursor: pointer;
-    background: cyan;
-    border: 2px solid #333;
+    background: var(--hover_blue);
+    border: .5px solid #333;
     border-radius: 5px;
     line-height: normal;
 }
@@ -130,7 +145,7 @@ table {
 
 table, th, td {
     margin: 0px 0;
-    border: 2px solid #333;
+    border: .5px solid var(--background_dark);
     text-align: center;
     margin-bottom: 50px;
 }
@@ -140,11 +155,11 @@ th, td {
 }
 
 tr:nth-child(even) {
-    background-color: rgb(202 201 207);
+    background-color: var(--table_secondary);
 }
 
 tr:nth-child(odd) {
-    background-color: rgba(255, 255, 255, 0.705);
+    background-color: var(--table_primary);
 }
 
 .main .buymeacoffee {
@@ -158,7 +173,7 @@ tr:nth-child(odd) {
     align-items: center;
     border: 2px solid #000;
     border-radius: 10px;
-    background-color: teal;
+    background-color: var(--hover_blue);
 }
 
 .main .buymeacoffee img {
@@ -184,19 +199,19 @@ tr:nth-child(odd) {
 }
 
 .to-top {
-    background: cyan;
+    background: var(--hover_blue);
     position: fixed;
     bottom: 16px;
     right: 32px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    border: 2px solid #000;
+    border: 1px solid #000;
     align-items: center;
     display: flex;
     justify-content: center;
     font-size: 32px;
-    color: #1f1f1f;
+    color: var(--background_dark);
     opacity: 0;
     pointer-events: none;
     transition: all .4s;
@@ -259,12 +274,12 @@ tr:nth-child(odd) {
     table {
         width: 100%;
         border-collapse: collapse;
-        border-spacing: 1px;
+        border-spacing: 0;
     }
     
     table, th, td {
         margin: 20px 0;
-        border: 1px solid #333;
+        border: .5px solid #333;
         text-align: center;
         font-size: 10px;
     }
@@ -286,8 +301,8 @@ tr:nth-child(odd) {
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 2px solid #000;
+        border: 3px solid #000;
         border-radius: 10px;
-        background-color: teal;
+        background-color: var(--hover_blue);
     }
 }
