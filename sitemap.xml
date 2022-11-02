@@ -1,47 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--Created using XmlSitemapGenerator.org - Free HTML, RSS and XML sitemap generator-->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url>
-    <loc>https://sabicera.000webhostapp.com</loc>
-    <image:image>
-      <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-      <!--ERROR - Object reference not set to an instance of an object.-->
-      <url>
-        <loc>https://sabicera.000webhostapp.com/about.html</loc>
-        <image:image>
-          <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-          <!--ERROR - Object reference not set to an instance of an object.-->
-          <url>
-            <loc>https://sabicera.000webhostapp.com/guides.html</loc>
-            <image:image>
-              <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-              <!--ERROR - Object reference not set to an instance of an object.-->
-              <url>
-                <loc>https://sabicera.000webhostapp.com/cdkeys.html</loc>
-                <image:image>
-                  <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-                  <!--ERROR - Object reference not set to an instance of an object.-->
-                  <url>
-                    <loc>https://sabicera.000webhostapp.com/downloads.html</loc>
-                    <image:image>
-                      <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-                      <!--ERROR - Object reference not set to an instance of an object.-->
-                      <url>
-                        <loc>https://sabicera.000webhostapp.com/index.html</loc>
-                        <image:image>
-                          <image:loc>https://sabicera.000webhostapp.com/images/bmc-full-logo.svg</image:loc>
-                          <!--ERROR - Object reference not set to an instance of an object.-->
-                        </image:image>
-                        <!--Created using XmlSitemapGenerator.org - Free HTML, RSS and XML sitemap generator-->
-                      </url>
-                    </image:image>
-                  </url>
-                </image:image>
-              </url>
-            </image:image>
-          </url>
-        </image:image>
-      </url>
-    </image:image>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <url><loc>https://sabicera.github.io/site/</loc></url>
+  <url><loc>https://sabicera.github.io/site/about.html</loc></url>
+  <url><loc>https://sabicera.github.io/site/guides.html</loc></url>
+  <url><loc>https://sabicera.github.io/site/cdkeys.html</loc></url>
+  <url><loc>https://sabicera.github.io/site/downloads.html</loc></url>
+  <url><loc>https://sabicera.github.io/site/index.html</loc></url>
 </urlset>
+<!--Created using XmlSitemapGenerator.org - Free HTML, RSS and XML sitemap generator-->
