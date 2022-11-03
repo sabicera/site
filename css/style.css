@@ -140,8 +140,8 @@ button {
     align-items: center;
     width: 50px;
     bottom: 0;
-    display: flex;
-    margin: 20px auto;
+    /*display: flex;
+    margin: 20px auto;*/
     height: 50px;
     justify-content: center;
     background: var(--hover_blue);
