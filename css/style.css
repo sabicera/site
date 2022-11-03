@@ -138,7 +138,7 @@ button {
 .main button {
     cursor: pointer;
     align-items: center;
-    width: 200px;
+    width: 50px;
     bottom: 0;
     display: flex;
     margin: 20px auto;
