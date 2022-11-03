@@ -192,6 +192,10 @@ tr:nth-child(odd) {
     background-color: var(--hover_blue);
 }
 
+.cdkeys a {
+    color: #000;
+}
+
 .main .buymeacoffee {
     position: static;
     padding: 20px 0;
