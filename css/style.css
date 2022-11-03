@@ -135,6 +135,19 @@ button {
     height: 30px;
 }
 
+.main button {
+    cursor: pointer;
+    align-items: center;
+    width: 200px;
+    bottom: 0;
+    display: flex;
+    margin: 50px auto;
+    height: 50px;
+    justify-content: center;
+    background: var(--hover_blue);
+    border: 2px solid #333;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
