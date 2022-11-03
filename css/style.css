@@ -141,7 +141,7 @@ button {
     width: 200px;
     bottom: 0;
     display: flex;
-    margin: 50px auto;
+    margin: 20px auto;
     height: 50px;
     justify-content: center;
     background: var(--hover_blue);
