@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Widnows setup">
-    <meta name="keywords" content="WINDOWS ISO,WINDOWS SETUP, LATEST, CUSTOM, OFFICIAL, DOWNLOADS, CLEAN ISO, GUIDE">
-    <title>Windows 11 installation</title>
+    <meta name="description" content="How to update BIOS">
+    <meta name="keywords" content="BIOS UPDATE, GUIDE, HOW TO">
+    <title>BIOS update</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/java/script.js" defer></script>
     <script src="https://kit.fontawesome.com/fba8dc9637.js" crossorigin="anonymous"></script>
@@ -51,42 +51,29 @@
 </header>
 <!-- Main -->
     <main>
-        <h1>How to install Windows 10 / 11 all editions from start to finish.</h1>
-        <p>In this topic you will get a full guide of how to download windows 10 / 11,
-             create installation USB and boot from it. 
-             A USB with at least 8GB or storage is needed. This guide is referred for clean setup of Windows, meaning all data on the drive you will choose has to be <b>DELETED !!</b>
-        </p>
-        <h2>1. Get the ISO</h2>
-        <p>Get my latest Windows custom ISO for:
-        <p>Window 11 from <a href="https://tinyurl.com/mryufxmm" title="Custom Win 11"><b>here</b></a></p>
-        <p>Window 10 from <a href="https://tinyurl.com/bde4ah3y" title="custom Win 10"><b>here</b></a></p>
-        <p>OR</p>
-        <p> untouched ISO with <a href="https://tinyurl.com/yebpdj92" title="Windows 11">this</a> for Windows 11 and Windows 10 with <a href="https://tinyurl.com/3w3jywff" title="Windows 10">this</a></p>
-        <h2>2. Write the ISO to the USB</h2>
-        <p><b>From this purpose we'll use a free software called <a href="https://tinyurl.com/bdcshhe4" title="Rufus">Rufus.</a>
-            Run the .exe you just donwloaded</b></p>
-        <p>1. Choose you usb flash drive in the <b>"Device"</b> menu</p>
-        <p>2. Press <b>"SELECT"</b> and choose the <b>.iso</b> file from the folder where you saved it</p>
-        <p>3. Press <b>"START"</b> to create your Windows installation disk</p>
-        <p>4. When it says <b>READY</b> you can close the program</p>
-        <h2>3. Boot from USB</h2>
-        <p>Warning!! Different manufacturers use different keys to enter BOOT MENU</p>
-        <p>Please read your motherboards manual to find which keys is it</p>
-        <p>For the majority of desktop PCs the DEL key is for BIOS setup menu, entering this menu you can the BOOT order choosing the drive you just made</p>
-        <h2>4. Proceed with the setup</h2>
-        <p>If your computer doesn't meet the requiremnts use the following steps</p>
-        <p>Press SHIFT + F10 to open command prompt</p>
-        <p>type "regedit"</p>
-        <p>find HKEY_LOCAL_MACHINE\SYSTEM\Setup</p>
-        <p>create key with the name "LabConfig"</p>
-        <p>create new key->DWORD and name it BypassTPMCheck, set attribute to 1</p>
-        <p>create new key->DWORD and name it BypassSecureBoot, set attribute to 1</p>
-        <p>create new key->DWORD and name it BypassRAMCheck, set attribute to 1</p>
-        <h2>To skip Microsoft account login</h2>
-        <p>Press SHIFT + F10 to open command prompt</p>
-        <p>type "OOBE\BYPASSNRO" or "netsh wlan disconnect" if you setup your WIFI</p>
-        <h2>5. Enjoy your fresh Windows installation !!</h2>
-    <!-- Buy me a coffe -->
+        <h1>How to update your BIOS</h1>
+        <p>full guide, from start to finish</p>
+        <h2 style="color: red">“please be aware that if anything goes wrong during the update your motherboard will be bricked, unless it has recovery options”</h2>
+        <h1>What you will need:</h1>
+        <p>1. USB flash drive (to save the file)</p>
+        <p>2. Internet connection (to download the file)</p>
+        <p>3. A reason to update BIOS(new CPU installation, etc)</p>
+        <h1>Avoid if any of this is true:</h1>
+        <p>1. A systems that randomly crashes, or other instabilities</p>
+        <p>2. Loss of electricity during the update</p>
+        <p>3. No real benefit of doing an update</p>
+        <h1>How to update the BIOS / UEFI</h1>
+        <p>1. Find your motherboard's model and bios version</p>
+        <p>2. Go to motherboard's manufacturer website to find the correct bios and download the files. Please read all instructions and check for compatibility issues.</p>
+        <p>3. Follow any instructions provided from the manufacturer, of how to copy to USB flash drive (filesystem / directories / etc). Usually a simple unzip and copy-paste of the file to the root directory of USB it’s enough.</p>
+        <p>4. Boot to BIOS setup page pressing the corresponded key (in our case is DEL key)</p>
+        <p>5. Under the Tools tab you'll find the bios update utility, find your USB drive and select the corresponding bios file. Proceed with the update and wait until it’s finished. The system will reboot or will prompt you a message to reboot manually.</p>
+        <p>6. All done. You may enter BIOS again to change any settings.</p>
+        <h1>Take extra care for:</h1>
+        <h2>All bios settings will be reset to default. Write down any settings you need to carry to the new version (RAID setups, etc).</h2>
+        <h2>Make sure CPU is compatible with the version you want to update</h2>
+        <h2 style="color: red">If you don't feel comfortable doing so, do NOT update your BIOS. Better find a local PC store or a technician who can do it no problem</h2>
+<!-- Buy me a coffe -->
     <a href="https://tinyurl.com/54ef33rm" class="buymeacoffee" title="Buy me a Beer" target="_blank" rel="noropener noreferrer"><img src="/images/bmc-full-logo.svg" alt=""></a>
 </main>
 <!-- ADS -->
