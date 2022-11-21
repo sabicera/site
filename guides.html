@@ -25,26 +25,38 @@
 </head>
 <body>
 <!-- Navbar -->
-    <nav class="navbar">
-        <div class="brand-title"><a href="index.html">Ramnuda&copy;</a></div>
-        <a href="#" title="Menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
-        <div class="navbar-links">
-            <ul><li><a href="index.html">Home</a></li>
-                <li><a href="downloads.html">Downloads</a></li>
-                <li><a href="cdkeys.html">Buy Keys</a></li>
-                <li><a href="guides.html">Guides</a></li>
-                <li><a href="about.html">About</a></li>
-            </ul>
-        </div>
+<header>
+    <nav>
+        <a href="/index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
+        <a href="" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
+        <ul class="menu">
+            <li><a href="">Downloads</a>
+                <ul class="submenu">
+                    <li><a href="/downloads/windows.html">Windows ISO</a></li>
+                    <li><a href="/downloads/drivers.html">GPU Drivers</a></li>
+                    <li><a href="/downloads/programs.html">Programs</a></li>
+                </ul>
+            </li>
+            <li><a href="">Guides</a>
+                <ul class="submenu">
+                    <li><a href="/guides/psuefficiency.html">PSU Efficiency</a></li>
+                    <li><a href="/guides/win-install.html">Windows setup</a></li>
+                    <li><a href="/guides/biosupdate.html">Bios Update</a></li>
+                    <li><a href="/guides/random.html">Random</a></li>
+                </ul>
+            </li>
+            <li><a href="/cdkeys.html">Buy CDKeys</a></li>
+        </ul>
     </nav>
+</header>
 <!-- Main -->
-    <nav class="main">
+    <main>
         <h1>Various Tips & Tricks for Window users</h1>
         <table>
             <caption><h2><i class="fa-solid fa-triangle-exclamation"></i>  Use CMD for this one  <i class="fa-solid fa-triangle-exclamation"></i></h2></caption>
             <tr>
                 <th>PowerShell latest version</th>
-                <td id="text1">install --id Microsoft.Powershell --source winget</td>
+                <td id="text1">winget.exe install --id Microsoft.Powershell --source winget</td>
                 <td><button onclick="copy('text1')"><i class="fa-regular fa-clipboard" title="Copy this command"></i></button></td>
             </tr>
             <tr>
@@ -93,17 +105,35 @@
             <tr>
                 <th>Windows installation</th>
                 <td>For Windows 10 and 11</td>
-                <td><button><a href="https://www.ramnuda.com/guides/win-install.html"><i class="fab fa-readme" title="Link to Guide"></i></a></button>
+                <td><a href="/guides/win-install.html" class="button"><i class="fab fa-readme" title="Link to Guide"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <th>PSU Efficiency Ratings</th>
+                <td>Required Efficiency depending on % of Rated Load</td>
+                <td><a href="/guides/psuefficiency.html" class="button"><i class="fab fa-readme" title="Link to Guide"></i></a>
                 </td>
             </tr>
         </table>
-<!-- Buy me a coffe -->
-        <a href="https://www.buymeacoffee.com/sabicera" title="Buy me a Beer" class="buymeacoffee" target="_blank" rel="noropener noreferrer"><img src="images/bmc-full-logo.svg" alt=""></a>
-    </nav>
+    <!-- Buy me a coffe -->
+    <a href="https://tinyurl.com/54ef33rm" class="buymeacoffee" title="Buy me a Beer" target="_blank" rel="noropener noreferrer"><img src="/images/bmc-full-logo.svg" alt=""></a>
+</main>
+<!-- ADS -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2884944032532595"
+crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-2884944032532595"
+    data-ad-slot="2084684463"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 <!-- Footer -->
-    <nav class="footer">
-        <p>Ramnuda &copy; 2022  |  All rights reserved</p>
-    </nav>
-        <a href="#" title="Go up" class="to-top"><i class="fa-solid fa-chevron-up"></i></a>
-    </body> 
+<footer>
+    <h1 class="footer">Ramnuda &copy; 2022  |  All rights reserved</h1>
+</footer>
+<a href="" title="Go up" class="to-top"><i class="fa-solid fa-chevron-up"></i></a>
+</body> 
 </html>

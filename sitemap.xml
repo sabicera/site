@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--Created using XmlSitemapGenerator.org - Free HTML, RSS and XML sitemap generator-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-  <url><loc>https://ramnuda.com/</loc></url>
-  <url><loc>https://ramnuda.com/about.html</loc></url>
-  <url><loc>https://ramnuda.com/guides.html</loc></url>
-  <url><loc>https://ramnuda.com/cdkeys.html</loc></url>
-  <url><loc>https://ramnuda.com/downloads.html</loc></url>
+  <!--<url><loc>https://ramnuda.com/</loc></url>-->
   <url><loc>https://ramnuda.com/index.html</loc></url>
+  <url><loc>https://ramnuda.com/downloads/drivers.html</loc></url>
+  <url><loc>https://ramnuda.com/downloads/programs.html</loc></url>
+  <url><loc>https://ramnuda.com/downloads/windows.html</loc></url>
+  <url><loc>https://ramnuda.com/cdkeys.html</loc></url>
+  <!--<url><loc>https://ramnuda.com/guides.html</loc></url>-->
+  <url><loc>https://ramnuda.com/guides/psuefficiency.html</loc></url>
+  <url><loc>https://ramnuda.com/guides/win-install.html</loc></url>
+  <url><loc>https://ramnuda.com/guides/random.html</loc></url>
+  <url><loc>https://ramnuda.com/about.html</loc></url>
 </urlset>
 <!--Created using XmlSitemapGenerator.org - Free HTML, RSS and XML sitemap generator-->
