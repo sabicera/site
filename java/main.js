@@ -2,14 +2,14 @@ class MyHeader extends HTMLElement {
     connectedCallBack() {
         this.innerHTML = `
         <header>
-            <a href="index.html" class="">
+            <a href="home.html" class="">
                 <img src="#">
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="downloads.html">Downloads</a></li>
-                    <li><a href="guides.html">Guides</a></li>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="2.html">Downloads</a></li>
+                    <li><a href="3.html">Guides</a></li>
                 </ul>
             </nav>
         </header>
