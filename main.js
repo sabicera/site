@@ -3,14 +3,14 @@
 header.innerHTML = `
 <header>
     <nav>
-        <a href="/index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
+        <a href="index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
         <a href="" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
         <ul class="menu">
             <li><a href="#">Downloads</a>
                 <ul class="submenu">
-                    <li><a href="./downloads/windows.html">Windows ISO</a></li>
-                    <li><a href="./downloads/drivers.html">GPU Drivers</a></li>
-                    <li><a href="./downloads/programs.html">Programs</a></li>
+                    <li><a href="downloads/windows.html">Windows ISO</a></li>
+                    <li><a href="downloads/drivers.html">GPU Drivers</a></li>
+                    <li><a href="downloads/programs.html">Programs</a></li>
                 </ul>
             </li>
             <li><a href="#">Guides</a>
@@ -21,7 +21,7 @@ header.innerHTML = `
                     <li><a href="guides/random.html">Random</a></li>
                 </ul>
             </li>
-            <li><a href="/cdkeys.html">Buy CDKeys</a></li>
+            <li><a href="cdkeys.html">Buy CDKeys</a></li>
         </ul>
     </nav>
 </header>
