@@ -1,32 +1,24 @@
-class MyHeader extends HTMLElement {
-    connectedCallBack() {
-        this.innerHTML = `
-        <header>
-            <a href="home.html" class="">
-                <img src="#">
-            </a>
-            <nav>
-                <ul>
-                    <li><a href="home.html">Home</a></li>
-                    <li><a href="2.html">Downloads</a></li>
-                    <li><a href="3.html">Guides</a></li>
-                </ul>
-            </nav>
-        </header>
-    `
-    }
-}
+// This is a Header section //
 
-customElements.define('my-header', MyHeader)
+header.innerHTML = `
+    <header>
+        <a href="home.html" class="">
+            <img src="#">
+        </a>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="downloads.html">Downloads</a></li>
+                <li><a href="guides.html">Guides</a></li>
+            </ul>
+        </nav>
+    </header>
+`;
 
-class MyFooter extends HTMLElement {
-    connectedCallBack() {
-        this.innerHTML = `
-        <footer>
-        &copy; 2022 | Ramnuda
-        </footer>
-    `
-    }
-}
+// This a a Footer section //
 
-customElements.define('my-footer', MyFooter)
+footer.innerHTML = `
+    <footer>
+    &copy; 2022 | Ramnuda
+    </footer>
+`;
