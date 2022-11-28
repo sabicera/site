@@ -6,14 +6,14 @@ header.innerHTML = `
         <a href="/index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
         <a href="" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
         <ul class="menu">
-            <li><a href="">Downloads</a>
+            <li><a href="#">Downloads</a>
                 <ul class="submenu">
                     <li><a href="/downloads/windows.html">Windows ISO</a></li>
                     <li><a href="/downloads/drivers.html">GPU Drivers</a></li>
                     <li><a href="/downloads/programs.html">Programs</a></li>
                 </ul>
             </li>
-            <li><a href="">Guides</a>
+            <li><a href="#">Guides</a>
                 <ul class="submenu">
                     <li><a href="/guides/psuefficiency.html">PSU Efficiency</a></li>
                     <li><a href="/guides/win-install.html">Windows setup</a></li>
