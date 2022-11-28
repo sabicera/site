@@ -113,6 +113,7 @@ nav li a:hover {
     width: 180px;
     left: 0;
     display: none;
+    z-index: 100;
 }
 
 .submenu2 {
