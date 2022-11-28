@@ -4,7 +4,7 @@ header.innerHTML = `
 <header>
     <nav>
         <a href="index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
-        <a href="" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
+        <a href="#" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
         <ul class="menu">
             <li><a href="#">Downloads</a>
                 <ul class="submenu">
