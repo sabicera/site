@@ -2,28 +2,46 @@
 
 header.innerHTML = `
 <header>
-    <nav>
-        <a href="index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
-        <a href="#" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
-        <ul class="menu">
-            <li><a href="#">Downloads</a>
-                <ul class="submenu">
-                    <li><a href="downloads/windows.html">Windows ISO</a></li>
-                    <li><a href="downloads/drivers.html">GPU Drivers</a></li>
-                    <li><a href="downloads/programs.html">Programs</a></li>
-                </ul>
-            </li>
-            <li><a href="#">Guides</a>
-                <ul class="submenu">
-                    <li><a href="guides/psuefficiency.html">PSU Efficiency</a></li>
-                    <li><a href="guides/win-install.html">Windows setup</a></li>
-                    <li><a href="guides/biosupdate.html">Bios Update</a></li>
-                    <li><a href="guides/random.html">Random</a></li>
-                </ul>
-            </li>
-            <li><a href="cdkeys.html">Buy CDKeys</a></li>
-        </ul>
-    </nav>
+<nav>
+    <a href="index.html"><h1 class="logo">Ramnuda&copy;</h1></a>
+    <a href="#" title="menu" class="toggle-button"><span class="bar"></span><span class="bar"></span><span class="bar"></span></a>
+    <ul class="menu">
+        <li><a href="#">Downloads</a>
+            <ul class="submenu">
+                <li><a href="downloads/windows.html">Windows ISO</a></li>
+                <li><a href="downloads/drivers.html">GPU Drivers</a></li>
+                <li><a href="downloads/programs.html">Programs</a></li>
+            </ul>
+        </li>
+        <li><a href="#">Guides</a>
+            <ul class="submenu">
+                <li><a href="guides/commands.html">Commands</a>
+                    <li><a href="#">How to</a>
+                        <ul class="submenu2">
+                            <li><a href="guides/howto/win-install.html">Windows setup</a></li>
+                            <li><a href="guides/howto/bios-update.html">Bios Update</a></li>
+                        </ul>
+                    </li>
+                </li>
+            </ul>
+        </li>
+        <li><a href="#">Did you Know</a>
+            <ul class="submenu">
+                <li><a href="didyouknow/usbversions.html">USB Versions</a></li>
+                <li><a href="didyouknow/hdmiversions.html">HDMI Versions</a></li>
+                <li><a href="didyouknow/pcieversions.html">PCIe Versions</a></li>
+                <li><a href="didyouknow/psucalc.html">PSU Efficiency</a></li>
+                <li><a href="didyouknow/storage.html">Storage Interfaces</a></li>
+                <li><a href="didyouknow/wane.html">WAN Standards</a></li>
+                <li><a href="didyouknow/bluetooth.html">Bluetooth Interface</a></li>
+                <li><a href="didyouknow/video.html">Digital Video Rates</a></li>
+                <li><a href="didyouknow/ethernet.html">Ethernet Cables Speeds</a></li>
+            </ul>
+        </li>
+        <li><a href="cdkeys.html">Buy CDKeys</a></li>
+        <li><a href="https://www.buymeacoffee.com/sabicera">Buy me a beer</a></li>
+    </ul>
+</nav>
 </header>
 `;
 
