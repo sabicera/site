@@ -33,5 +33,5 @@ footer.innerHTML = `
 <footer>
     <h1 class="footer">Ramnuda &copy; 2022  |  All rights reserved</h1>
 </footer>
-<a href="" title="Go up" class="to-top"><i class="fa-solid fa-chevron-up"></i></a>
+<a href="#" title="Go up" class="to-top"><i class="fa-solid fa-chevron-up"></i></a>
 `;
