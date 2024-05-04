@@ -45,7 +45,7 @@ header.innerHTML = `
 </header>
 `;
 
-// This a a Footer section //
+// This a Footer section //
 
 footer.innerHTML = `
 <footer>
