@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
+    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
@@ -13,31 +15,6 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
 </head>
-<style>
-    #map { height: 100vh; }
-    #search-container {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        background: white;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-    #search-box {
-        border-radius: 10px;
-        padding: 5px;
-        width: 250px;
-    }
-    #search-button {
-        border-radius: 10px;
-        padding: 5px 10px;
-        margin-left: 5px;
-        cursor: pointer;
-    }
-</style>
 <body>
     <div id="map"></div>
     <div id="search-container">
@@ -46,7 +23,7 @@
     </div>
 
     <script>
-        var map = L.map('map').setView([8.982893638782873, -79.52887261889941], 9);
+        var map = L.map('map').setView([20, 0], 2); // Set initial view to show the entire world
 
         // Add a Carto tile layer to the map with English labels
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
@@ -54,53 +31,102 @@
             maxZoom: 18
         }).addTo(map);
 
-        var marker = L.marker([8.982893638782873, -79.52887261889941]).addTo(map);
-        marker.bindPopup("<b>3 Guards on Standby</b><br>10 to EMB<b>4 to Fly</b><b>2 at hospital</b>").openPopup();
+        var markers = [];
 
-        var athens = L.marker([37.9838, 23.7275]).addTo(map)
-        .bindPopup('Athens, Greece');
+    // Function to create a marker with mouseover and click events
+    function createMarker(lat, lon, popupContent, phoneNumber) {
+        var marker = L.marker([lat, lon]).addTo(map);
+        var whatsappUrl = `https://wa.me/${phoneNumber}`;
+        
+        // Replace new lines with HTML line breaks for display
+        var formattedPopupContent = popupContent
+            .replace(/\n/g, '<br>');  // Replace new lines with <br> for HTML
+        
+        // Escape single quotes for JavaScript string handling
+        var escapedPopupContent = popupContent.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        
+        var updatedPopupContent = `
+            <div>
+                ${formattedPopupContent}
+                <br><b>Contact:</b> <a href="${whatsappUrl}" target="_blank">${phoneNumber}</a>
+                <br><button onclick="copyToClipboard('${escapedPopupContent}')">
+                    <img src="../icons/copy.png" alt="Copy" style="width:16px;height:16px;"/>
+                </button>
+            </div>
+        `;
+        
+        marker.bindPopup(updatedPopupContent);
 
-        var johannesburg = L.marker([-26.205386722281816, 28.026974908534832]).addTo(map)
-        .bindPopup('Johannesburg, South Africa');
+        marker.on('mouseover', function() {
+            marker.openPopup();
+        });
 
-        // Add polylines connecting Panama to Athens and Johannesburg
-        var latlngs1 = [
-            [37.9838, 23.7275], // Athens
-            [8.982893638782873, -79.52887261889941]  // Panama
-        ];
-        var latlngs2 = [
-            [8.982893638782873, -79.52887261889941],  // Panama
-            [-26.205386722281816, 28.026974908534832] // Johannesburg
-        ];
-        var polyline1 = L.polyline(latlngs1, {color: 'lightgreen'}).addTo(map);
-        var polyline2 = L.polyline(latlngs2, {color: 'lightblue'}).addTo(map);
-
-        // Fit the map view to show both polylines
-        var allLatLngs = latlngs1.concat(latlngs2);
-        var bounds = L.latLngBounds(allLatLngs);
-        map.fitBounds(bounds);
-
-        document.getElementById('search-button').addEventListener('click', function() {
-            var query = document.getElementById('search-box').value;
-            if (query) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        var location = data[0];
-                        map.setView([location.lat, location.lon], 10);
-                        L.marker([location.lat, location.lon]).addTo(map)
-                            .bindPopup(location.display_name)
-                            .openPopup();
-                    } else {
-                        alert('Location not found');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+        marker.on('mouseout', function() {
+            if (!marker.isPopupOpen()) {
+                marker.closePopup();
             }
         });
+
+        marker.on('click', function() {
+            marker.openPopup();
+            marker.off('mouseout');
+        });
+
+        return marker;
+    }
+
+        // Fetch agents data from JSON file and create markers
+        fetch('agents.json')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(agent => {
+                    var marker = createMarker(agent.lat, agent.lon, `<b>${agent.name}</b><br>${agent.details}`, agent.phone);
+                    markers.push(marker);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching agents data:', error);
+            });
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            var query = document.getElementById('search-box').value.toLowerCase();
+            var found = false;
+
+            markers.forEach(function(marker) {
+                var popupContent = marker.getPopup().getContent().toLowerCase();
+                if (popupContent.includes(query)) {
+                    map.setView(marker.getLatLng(), 10);
+                    marker.openPopup();
+                    found = true;
+                }
+            });
+
+            if (!found) {
+                alert('Location not found');
+            }
+        });
+
+    // Function to copy HTML content as plain text to clipboard
+    function copyToClipboard(html) {
+        // Create a temporary div element to parse HTML
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+
+        // Convert HTML to plain text with line breaks
+        var text = tempDiv.innerText || tempDiv.textContent || "";
+
+        // Create a temporary textarea element
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+
+        // Select the text and copy it to the clipboard
+        textarea.select();
+        document.execCommand('copy');
+
+        // Clean up: remove the temporary textarea
+        document.body.removeChild(textarea);
+    }
     </script>
 </body>
 </html>
