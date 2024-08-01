@@ -1,0 +1,30 @@
+[
+    {
+        "name": "MSC PANAMA",
+        "details": "MSC Mediterranean Shipping Co. (Panama) S.A.<br>PH Time Square, 33rd Floor<br>Costa Del Sol Avenue, Costa Del Este, Juan Diaz<br>PO Box: 0834-01844<br>PA - PANAMA",
+        "lat": 8.982893638782873,
+        "lon": -79.52887261889941,
+        "phone": "50712345678"
+    },
+    {
+        "name": "MSC NEW YORK",
+        "details": "Mediterranean Shipping Company (USA) Inc.<br>420, 5th Avenue<br>(At 37th Street) - 4th Floor<br>US - 10018-2702 NEW YORK",
+        "lat": 40.7527,
+        "lon": -73.9813,
+        "phone": "11234567890"
+    },
+    {
+        "name": "MSC CHARLESTON",
+        "details": "Mediterranean Shipping Company (USA) Inc.<br>700 Watermark Blvd<br>US - 29464 CHARLESTON",
+        "lat": 32.8025,
+        "lon": -79.9529,
+        "phone": "18431234567"
+    },
+    {
+        "name": "MSC BALTIMORE",
+        "details": "Mediterranean Shipping Company (USA) Inc.<br>The World Trade Center - Suite 1820<br>401 E. Pratt Street<br>US - 21202 BALTIMORE",
+        "lat": 39.2854,
+        "lon": -76.6132,
+        "phone": "14101234567"
+    }
+]
