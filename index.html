@@ -2,82 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Custom & Clean Windows ISO">
-    <meta name="keywords" content="WINDOWS ISO, LATEST, CUSTOM, OFFICIAL, DOWNLOADS, CLEAN ISO">
-    <title>Welcome Page</title>
-    <script defer src="main.js"></script>
-    <script src="java/script.js" defer></script>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://kit.fontawesome.com/fba8dc9637.js" crossorigin="anonymous"></script>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E94XQ4NSBJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-E94XQ4NSBJ');
-    </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2884944032532595"
-    crossorigin="anonymous"></script>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <title>Homepage</title>
+    <link rel="stylesheet" href="../map/leaflet/leaflet.css" />
+    <script src="../map/leaflet/leaflet.js"></script>
+    <style>
+        /* Basic styles for the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-<!-- Navbar -->
-<div id="header"></div>
-<!-- Main -->
-        <main>
-            <h1>The latest Windows 10 or 11 Custom ISO is available <a href="https://www.ramnuda.com/downloads/windows-iso">here!</a></h1>
-            <h2>No additional software/programs or cracks/activators, are included in the ISO.</h2>
-            <!-- Youtube Video -->
-            <nav class="youtube">
-                <iframe class="responsive-iframe" title="Windows 11 Pro ISO installation" src="https://www.youtube.com/embed/476gSQiMoj4"></iframe>
-            </nav>
-            <table>
-                <caption><h2>Latest Windows® ISO</h2></caption>
-                <tr>
-                    <td><a href="https://tinyurl.com/mryufxmm" title="Download from Mega Upload" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-cloud-arrow-up"></i></a></td>
-                    <td>Windows® 11</td>
-                    <td>22H2</td>
-                    <td>(22621.755) 64bit only</td>
-                </tr>
-            </table>
-            <p>Only necessary tweaks were made, which are:</p>
-            <p>Latest Windows Updates</p>
-            <p>Unattended setup:</p>
-            <p>Skip local account creation</p>
-            <p>Setup User Account name as "User"</p>
-            <p>Skip online account creation (Microsoft Account)</p>
-            <p>Skip network and wifi setup</p>
-            <p>Default network set as Home</p>
-            <p>Skip 'Get going fast' (Privacy Options)</p>
-            <p>Skip Windows Welcome Screen</p>
-            <p>Skip Welcome Center</p>
-            <p>Hibernation is set to OFF</p>
-            <p>Account password set to not expiring</p>
-            <p>Desktop icons: Computer & User Files</p>
-            <p>Taskbar: Search set to Icon</p>
-            <p>Privacy & Telemetry:</p>
-            <p>All telemetry and tracking is set to Disabled</p>
-            <p>No Windows 11 setup requirements</p>
-            <h3>This project is not affiliated with Microsoft Corporation. Windows is a registered trademark of Microsoft Corporation.</h3>
-    <!-- Buy me a coffee -->
-    <a href="https://tinyurl.com/54ef33rm" class="buymeacoffee" title="Buy me a Beer" target="_blank" rel="noropener noreferrer"><img src="images/bmc-full-logo.svg" alt=""></a>
-</main>
-<!-- ADS -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2884944032532595"
-crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-    style="display:block"
-    data-ad-client="ca-pub-2884944032532595"
-    data-ad-slot="2084684463"
-    data-ad-format="auto"
-    data-full-width-responsive="true"></ins>
-<script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-<!-- Footer -->
-<div id="footer"></div>
-</body> 
+    <header>
+        <h1>Welcome to My Homepage</h1>
+    </header>
+    <div class="container">
+        <p>This is a simple homepage with a Leaflet map included.</p>
+        <div id="map"></div>
+    </div>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([20, 0], 2); // A view that makes both locations visible
+
+        // Add a tile layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add a marker for Athens
+        var athens = L.marker([37.9838, 23.7275]).addTo(map)
+            .bindPopup('Athens, Greece');
+
+        // Add a marker for Cristobal in Panama
+        var cristobal = L.marker([9.3598, -79.9014]).addTo(map)
+            .bindPopup('Cristobal, Panama');
+
+        // Add a polyline connecting Athens and Cristobal
+        var latlngs = [
+            [37.9838, 23.7275], // Athens
+            [9.3598, -79.9014]  // Cristobal
+        ];
+        var polyline = L.polyline(latlngs, {color: 'blue'}).addTo(map);
+
+        // Fit the map view to the polyline
+        map.fitBounds(polyline.getBounds());
+    </script>
+</body>
 </html>
