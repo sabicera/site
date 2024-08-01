@@ -26,5 +26,13 @@
         "lat": 39.2854,
         "lon": -76.6132,
         "phone": "14101234567"
+    },
+    {
+        "name": "MSC FREEPORT",
+        "details": "Mediterranean Shipping Company (USA) Inc.",
+        "lat": 26.530897158469777,
+        "lon": -78.76734100706555,
+        "phone": "14101234567"
     }
+
 ]
