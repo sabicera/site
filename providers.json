@@ -1,0 +1,16 @@
+[
+    {
+        "name": "K-9 Provider",
+        "details": "K-9",
+        "lat": 8.958985005730263,
+        "lon": -79.57564995151236,
+        "phone": "123456789"
+    },
+    {
+        "name": "Colon Divers",
+        "details": "Provider 2 Details<br>Address Line 1<br>Address Line 2<br>City, Country<br>Phone: +987654321",
+        "lat": 9.36124826378863,
+        "lon": -79.89983616210226,
+        "phone": "987654321"
+    }
+]
