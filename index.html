@@ -1,31 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map with Popups</title>
-
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin=""/>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin=""></script>
-</head>
-<body>
-<div id="map"></div>
-<div id="search-container">
-    <input type="text" id="search-box" placeholder="Enter city, port, airport, or country">
-    <button id="search-button">Search</button>
-</div>
-<div id="control-panel">
-    <label><input type="checkbox" id="toggle-ports" checked> Ports</label>
-    <label><input type="checkbox" id="toggle-agents" checked> MSC Agents</label>
-    <label><input type="checkbox" id="toggle-providers" checked> Inspection Providers</label>
-</div>
-
-<script src="script.js"></script>
-</body>
+    <title>Cyprus Tax Calculator | Calculate Your Yearly and Monthly Taxes</title>
+    <meta name="description" content="Use our Cyprus Tax Calculator to easily estimate your yearly and monthly taxes. Input your gross or net salary to see how much tax you owe.">
+    <meta name="keywords" content="Cyprus tax calculator, Cyprus salary calculator, calculate tax in Cyprus, tax brackets Cyprus, income tax Cyprus">
+    <link rel="canonical" href="https://www.yourdomain.com/cyprus-tax-calculator">
+    <link rel="stylesheet" href="css/styles.css">
+    <script defer src="/java/maths.js"></script>
+    <script defer src="/java/translation.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="/java/maths.js"></script>
+    <script src="/java/translation.js"></script>
+    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="sabicera" data-color="#999" data-emoji="🍺"  data-font="Poppins" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="language-switcher">
+        <img src="https://flagcdn.com/w320/gb.png" alt="English" onclick="changeLanguage('en')">
+        <img src="https://flagcdn.com/w320/gr.png" alt="Greek" onclick="changeLanguage('gr')">
+        <img src="https://flagcdn.com/w320/ru.png" alt="Russian" onclick="changeLanguage('ru')">
+    </div>
+    <h1>Cyprus Tax Calculator</h1>
+    <div class="form">
+      <div class="user_inputs">
+        <label for="grossYearlySalary" id="trgrossYearlySalary">Yearly Gross Salary:</label>
+        <input type="text" id="grossYearlySalary">
+      </div>
+      <div class="user_inputs">
+        <label for="netYearlySalary" id="trnetYearlySalary">Yearly Net Salary:</label>
+        <input type="text" id="netYearlySalary">
+      </div>
+      <br>
+      <div class="user_inputs">
+        <label for="grossMonthlySalary" id="trgrossMonthlySalary">Monthly Gross:</label>
+        <input type="text" id="grossMonthlySalary">
+      </div>
+      <div class="user_inputs">
+        <label for="netMonthlySalary" id="trnetMonthlySalary">Monthly Net:</label>
+        <input type="text" id="netMonthlySalary">
+      </div>
+    </div>
+    <div class="container">
+      <table id="mainTable">
+        <caption id="mainTableCaption">Title</caption>
+        <tr>
+          <th colspan="1"></th>
+          <th colspan="2" id="yearlyHeader">Yearly</th>
+          <th colspan="2" id="monthlyHeader">Monthly</th>
+        </tr>
+        <tr>
+          <th colspan="1" id="grossHeader">Gross</th>
+          <td id="gross" colspan="2">€0</td>
+          <td id="monthlygross" colspan="2">€0</td>
+        </tr>
+        <tr>
+          <th colspan="1" id="taxHeader">Tax</th>
+          <td id="tax" colspan="2">€0</td>
+          <td id="monthlytax" colspan="2">€0</td>
+        </tr>
+        <tr>
+          <th id="socialHeader">Social</th>
+          <td id="social" colspan="2">€0</td>
+          <td id="monthlysocial" colspan="2">€0</td>
+        </tr>
+        <tr>
+          <th id="gesiHeader">GESI</th>
+          <td id="gesi" colspan="2">€0</td>
+          <td id="monthlygesi" colspan="2">€0</td>
+        </tr>
+        <tr>
+          <th id="yearlyDeductionsHeader">Yearly Deductions</th>
+          <td id="deductionsYear" colspan="2">€0</td>
+          <td id="deductionsMonth" colspan="2">€0</td>
+        </tr>
+        <tr>
+          <th colspan="1" id="deductedPercentageHeader">Deducted Percentage</th>
+          <td id="deductionsYearPercentage" colspan="4">0%</td>
+        </tr>
+        <tr>
+          <th id="netHeader">Net</th>
+          <td id="netYear" colspan="2">€0</td>
+          <td id="netMonth" colspan="2">€0</td>
+        </tr>
+      </table>
+      <br>
+      <br>
+      <table id="bracketTable">
+        <caption id="bracketTableCaption">Tax Breakdown</caption>
+        <tr>
+          <th rowspan="1" colspan="2" id="taxBracketHeader">Tax Bracket</th>
+          <th rowspan="2" colspan="1" id="rateHeader">Rate</th>
+          <th rowspan="2" colspan="1" id="taxDeductedHeader">Tax Deducted</th>
+        </tr>
+        <tr>
+          <td colspan="1" id="fromHeader">From</td>
+          <td colspan="1" id="untilHeader">Until</td>
+        </tr>
+        <tr>
+          <td>€0</td>
+          <td>€19,500</td>
+          <td>0%</td>
+          <td id="tax0"></td>
+        </tr>
+        <tr>
+          <td>€19,501</td>
+          <td>€28,000</td>
+          <td>20%</td>
+          <td id="tax20"></td>
+        </tr>
+        <tr>
+          <td>€28,001</td>
+          <td>€36,300</td>
+          <td>25%</td>
+          <td id="tax25"></td>
+        </tr>
+        <tr>
+          <td>€36,301</td>
+          <td>€60,000</td>
+          <td>30%</td>
+          <td id="tax30"></td>
+        </tr>
+        <tr>
+          <td>€60,001</td>
+          <td>∞</td>
+          <td>35%</td>
+          <td id="tax35"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
 </html>
