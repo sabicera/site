@@ -1,45 +1,100 @@
-#map {
-    height: 100vh;
-}
+body {
+    background-image: url('/images/Cyprus.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: top;
+    font-family: "Google Sans", Roboto, Arial, sans-serif;;
+    margin: 20px;
+    padding: 0;
+    background-color: rgb(241, 241, 241);
+  }
 
-#search-container {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
+  h1 {
+    text-align: center;
+  }
 
-#search-box {
-    border-radius: 5px;
-    padding: 5px;
-    width: 250px;
-}
+  .form {
+    margin-bottom: 20px;
+  }
 
-#search-button {
-    align-self: center;
-    border-radius: 5px;
-    padding: 5px 10px;
-    margin-left: 5px;
-    cursor: pointer;
-}
+  .user_inputs {
+    margin-bottom: 10px;
+  }
 
-#control-panel {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 1000;
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-#control-panel label {
+  label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  input[type="text"] {
+    background-color: rgb(181 190 223 / 50%);
+    font-weight: bold;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  .container {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: center;
+    border: 2px solid #dddddda1;
+    background-color: #f4f4f4d2;
+    font-weight: bold;
+
+  }
+
+  th {
+    background-color: #f4f4f4d2;
+  }
+
+  caption {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: -2px;
+    text-align: center;
+    background-color: #f4f4f4d2;
+  }
+
+  @media screen and (max-width: 600px) {
+    table, th, td {
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+    }
+  }
+  
+/* Top-right corner: Language Switcher */
+.language-switcher {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.language-switcher img {
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
