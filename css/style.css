@@ -1,46 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Zain:wght@400;700;900&display=swap');
+
 body {
-  background-image: url('/images/Cyprus.png');
+  background-image: url('/images/Cyprus.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;;
+  font-family: "Ubuntu", sans-serif;
   background-color: rgb(241, 241, 241);
-  max-width: 1000px;
-  margin: auto;
-}
-
-
-h1 {
-  text-align: center;
-}
-
-.form {
-  margin-bottom: 20px;
-}
-
-.user_inputs {
-  margin-bottom: 10px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input[type="text"] {
-  background-color: rgb(181 190 223 / 50%);
-  font-weight: bold;
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-  overflow-x: auto;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 900;
+}
+
+.calculator {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group2 {
+  display: flex;
+  flex-direction: column;
+
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-weight: 700;
+  text-align: center;
+}
+
+input[type="text"] {
+  background-color: rgba(181, 190, 223, 0.5);
+  font-weight: bold;
+  width: 80%;
+  padding: 10px;
+  align-self: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 16px;
 }
 
 table {
@@ -55,44 +72,29 @@ table {
 th, td {
   padding: 10px;
   text-align: center;
-  border: 2px solid #dddddda1;
-  background-color: #f4f4f4d2;
+  border: 2px solid rgba(221, 221, 221, 0.63);
+  background-color: rgba(244, 244, 244, 0.82);
   font-weight: bold;
-
 }
 
 th {
-  background-color: #f4f4f4d2;
+  background-color: rgba(244, 244, 244, 0.82);
 }
 
-caption {
-  font-size: 25px;
-  font-weight: bold;
-  margin-bottom: -2px;
-  text-align: center;
-  background-color: #f4f4f4d2;
+.bmc {
+  display: inline-block;
+  margin-bottom: 20px;
 }
 
-@media screen and (max-width: 600px) {
-  table, th, td {
-    font-size: 14px;
-  }
-
-  input[type="text"] {
-    padding: 8px;
-  }
-}
-  
-/* Top-right corner: Language Switcher */
 .language-switcher {
-    position: relative;
-    display: flex;
-    gap: 5px;
-    justify-content: end;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .language-switcher img {
-  align-items: center;
   width: 30px;
   height: 20px;
   cursor: pointer;
@@ -100,10 +102,32 @@ caption {
   border-radius: 5px;
 }
 
-.bmc-btn-container
-{
-  position: relative;
-  top: 10px;
-  display: flex;
-  justify-content: start;
+@media screen and (min-width: 768px) {
+  .calculator {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .language-switcher {
+    justify-content: flex-end;
+    justify-content: center;
+  }
+
+  input[type="text"] {
+    font-size: 16px;
+    width: 100%;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .calculator {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .language-switcher {
+    justify-content: flex-end;
+  }
+
+  input[type="text"] {
+    font-size: 16px;
+  }
 }
