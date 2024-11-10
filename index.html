@@ -1,135 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyprus Tax Calculator | Calculate Yearly and Monthly Taxes</title>
     <meta name="description" content="Use Cyprus Tax Calculator for your yearly and monthly taxes.">
     <meta name="keywords" content="Cyprus tax calculator, Cyprus salary calculator, calculate tax in Cyprus, income tax Cyprus">
-    <link rel="canonical" href="https://www.yourdomain.com/cyprus-tax-calculator">
+    <link rel="canonical" href="https://sabicera.github.io/site/">
     <link rel="stylesheet" href="css/styles.css">
-    <script defer src="/java/maths.js"></script>
-    <script defer src="/java/translation.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="/java/maths.js"></script>
-    <script src="/java/translation.js"></script>
-    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="sabicera" data-color="#999" data-emoji="🍺"  data-font="Poppins" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+    <link rel="icon" type="image/icon" href="images/euro.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  </head>
-  <body>
-    <div class="language-switcher">
-        <img src="https://flagcdn.com/w320/gb.png" alt="English" onclick="changeLanguage('en')">
-        <img src="https://flagcdn.com/w320/gr.png" alt="Greek" onclick="changeLanguage('gr')">
-        <img src="https://flagcdn.com/w320/ru.png" alt="Russian" onclick="changeLanguage('ru')">
-    </div>
-    <h1>Cyprus Tax Calculator</h1>
-    <div class="form">
-      <div class="user_inputs">
-        <label for="grossYearlySalary" id="trgrossYearlySalary">Yearly Gross Salary:</label>
-        <input type="text" id="grossYearlySalary">
-      </div>
-      <div class="user_inputs">
-        <label for="netYearlySalary" id="trnetYearlySalary">Yearly Net Salary:</label>
-        <input type="text" id="netYearlySalary">
-      </div>
-      <br>
-      <div class="user_inputs">
-        <label for="grossMonthlySalary" id="trgrossMonthlySalary">Monthly Gross:</label>
-        <input type="text" id="grossMonthlySalary">
-      </div>
-      <div class="user_inputs">
-        <label for="netMonthlySalary" id="trnetMonthlySalary">Monthly Net:</label>
-        <input type="text" id="netMonthlySalary">
-      </div>
-    </div>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKY9LS0HTF"></script>
+    <script src="java/maths.js"></script>
+    <script src="java/translation1.js"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-BKY9LS0HTF');
+    </script>
+</head>
+<body>
     <div class="container">
-      <table id="mainTable">
-        <caption id="mainTableCaption">Title</caption>
-        <tr>
-          <th colspan="1"></th>
-          <th colspan="2" id="yearlyHeader">Yearly</th>
-          <th colspan="2" id="monthlyHeader">Monthly</th>
-        </tr>
-        <tr>
-          <th colspan="1" id="grossHeader">Gross</th>
-          <td id="gross" colspan="2">€0</td>
-          <td id="monthlygross" colspan="2">€0</td>
-        </tr>
-        <tr>
-          <th colspan="1" id="taxHeader">Tax</th>
-          <td id="tax" colspan="2">€0</td>
-          <td id="monthlytax" colspan="2">€0</td>
-        </tr>
-        <tr>
-          <th id="socialHeader">Social</th>
-          <td id="social" colspan="2">€0</td>
-          <td id="monthlysocial" colspan="2">€0</td>
-        </tr>
-        <tr>
-          <th id="gesiHeader">GESI</th>
-          <td id="gesi" colspan="2">€0</td>
-          <td id="monthlygesi" colspan="2">€0</td>
-        </tr>
-        <tr>
-          <th id="yearlyDeductionsHeader">Yearly Deductions</th>
-          <td id="deductionsYear" colspan="2">€0</td>
-          <td id="deductionsMonth" colspan="2">€0</td>
-        </tr>
-        <tr>
-          <th colspan="1" id="deductedPercentageHeader">Deducted Percentage</th>
-          <td id="deductionsYearPercentage" colspan="4">0%</td>
-        </tr>
-        <tr>
-          <th id="netHeader">Net</th>
-          <td id="netYear" colspan="2">€0</td>
-          <td id="netMonth" colspan="2">€0</td>
-        </tr>
-      </table>
-      <br>
-      <br>
-      <table id="bracketTable">
-        <caption id="bracketTableCaption">Tax Breakdown</caption>
-        <tr>
-          <th rowspan="1" colspan="2" id="taxBracketHeader">Tax Bracket</th>
-          <th rowspan="2" colspan="1" id="rateHeader">Rate</th>
-          <th rowspan="2" colspan="1" id="taxDeductedHeader">Tax Deducted</th>
-        </tr>
-        <tr>
-          <td colspan="1" id="fromHeader">From</td>
-          <td colspan="1" id="untilHeader">Until</td>
-        </tr>
-        <tr>
-          <td>€0</td>
-          <td>€19,500</td>
-          <td>0%</td>
-          <td id="tax0"></td>
-        </tr>
-        <tr>
-          <td>€19,501</td>
-          <td>€28,000</td>
-          <td>20%</td>
-          <td id="tax20"></td>
-        </tr>
-        <tr>
-          <td>€28,001</td>
-          <td>€36,300</td>
-          <td>25%</td>
-          <td id="tax25"></td>
-        </tr>
-        <tr>
-          <td>€36,301</td>
-          <td>€60,000</td>
-          <td>30%</td>
-          <td id="tax30"></td>
-        </tr>
-        <tr>
-          <td>€60,001</td>
-          <td>∞</td>
-          <td>35%</td>
-          <td id="tax35"></td>
-        </tr>
-      </table>
+        <a href="https://www.buymeacoffee.com/sabicera" class="bmc" alt="Buy me a Coffee">
+            <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=sabicera&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" title="Buy me a Coffee"></a>
+        <div class="language-switcher">
+            <img src="https://flagcdn.com/w320/gr.png" alt="Greek" onclick="changeLanguage('gr')" title="Ελληνικά">
+            <img src="https://flagcdn.com/w320/ru.png" alt="Russian" onclick="changeLanguage('ru')" title="Русский">
+            <img src="https://flagcdn.com/w320/ua.png" alt="Ukrainian" onclick="changeLanguage('ua')" title="Український">
+            <img src="https://flagcdn.com/w320/gb.png" alt="English" onclick="changeLanguage('en')" title="English">
+            <img src="https://flagcdn.com/w320/ro.png" alt="Romanian" onclick="changeLanguage('ro')" title="Română">
+            <img src="https://flagcdn.com/w320/bg.png" alt="Bulgarian" onclick="changeLanguage('bg')" title="български">
+            <img src="https://flagcdn.com/w320/ph.png" alt="Filipino" onclick="changeLanguage('ph')" title="Filipino">
+            <img src="https://flagcdn.com/w320/in.png" alt="Hindu" onclick="changeLanguage('hi')" title="हिन्दू">
+        </div>
+        <h1>Cyprus Tax Calculator</h1>
+        <div class="calculator">
+            <div class="input-group">
+                <label for="grossYearlySalary" id="trgrossYearlySalary">Annual Gross:</label>
+                <input type="text" id="grossYearlySalary" value="0">
+            </div>
+            <div class="input-group">
+                <label for="netYearlySalary" id="trnetYearlySalary">Annual Net:</label>
+                <input type="text" id="netYearlySalary" value="0">
+            </div>
+            <div class="input-group">
+                <label for="grossMonthlySalary" id="trgrossMonthlySalary">Monthly Gross:</label>
+                <input type="text" id="grossMonthlySalary" value="0">
+            </div>
+            <div class="input-group">
+                <label for="netMonthlySalary" id="trnetMonthlySalary">Monthly Net:</label>
+                <input type="text" id="netMonthlySalary" value="0">
+            </div>
+            <div class="input-group2">
+                <label for="providentFundPercentage" id="trProvidentFundPercentage">Provident Fund (%):</label>
+                <input type="text" id="providentFundPercentage" min="0" max="10" step="0.1" value="0">
+            </div>
+        </div>
+        <table id="mainTable">
+            <tr>
+                <td></td>
+                <td colspan="2" id="yearlyHeader">Annually</td>
+                <td colspan="2" id="monthlyHeader">Monthly</td>
+            </tr>
+            <tr>
+                <td id="grossHeader">Gross</td>
+                <td id="gross" colspan="2">€0</td>
+                <td id="monthlygross" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="taxHeader">Tax</td>
+                <td id="tax" colspan="2">€0</td>
+                <td id="monthlytax" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="socialHeader">Social</td>
+                <td id="social" colspan="2">€0</td>
+                <td id="monthlysocial" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="gesiHeader">GESI</td>
+                <td id="gesi" colspan="2">€0</td>
+                <td id="monthlygesi" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="yearlyDeductionsHeader">Deductions</td>
+                <td id="deductionsYear" colspan="2">€0</td>
+                <td id="deductionsMonth" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="providentFundHeader">Provident Fund</td>
+                <td id="providentFund" colspan="2">€0</td>
+                <td id="monthlyProvidentFund" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="deductedPercentageHeader">Deducted Percentage</td>
+                <td id="deductionsYearPercentage" colspan="4">0%</td>
+            </tr>
+            <tr>
+                <td id="netHeader">Net</td>
+                <td id="netYear" colspan="2">€0</td>
+                <td id="netMonth" colspan="2">€0</td>
+            </tr>
+            <tr>
+                <td id="Accumulated Net + Fund">Accumulated Net + Fund</td>
+                <td id="AccumulatedYear" colspan="2">€0</td>
+                <td id="AccumulatedMonth" colspan="2">€0</td>
+            </tr>
+        </table>
+        <table id="bracketTable">
+            <tr>
+                <th rowspan="1" colspan="2" id="taxBracketHeader">Tax Bracket</th>
+                <th rowspan="2" colspan="1" id="rateHeader">Rate</th>
+                <th rowspan="2" colspan="1" id="taxDeductedHeader">Tax Deducted</th>
+            </tr>
+            <tr>
+                <td colspan="1" id="fromHeader">From</td>
+                <td colspan="1" id="untilHeader">Until</td>
+            </tr>
+            <tr>
+                <td>€0</td>
+                <td>€19,500</td>
+                <td>0%</td>
+                <td id="tax0"></td>
+            </tr>
+            <tr>
+                <td>€19,501</td>
+                <td>€28,000</td>
+                <td>20%</td>
+                <td id="tax20"></td>
+            </tr>
+            <tr>
+                <td>€28,001</td>
+                <td>€36,300</td>
+                <td>25%</td>
+                <td id="tax25"></td>
+            </tr>
+            <tr>
+                <td>€36,301</td>
+                <td>€60,000</td>
+                <td>30%</td>
+                <td id="tax30"></td>
+            </tr>
+            <tr>
+                <td>€60,001</td>
+                <td>∞</td>
+                <td>35%</td>
+                <td id="tax35"></td>
+            </tr>
+        </table>
     </div>
-  </body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'8bd9d888d832444a',t:'MTcyNTQwOTU2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
