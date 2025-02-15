@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const yearlyNetInput = document.getElementById('netYearlySalary');
     const monthlyNetInput = document.getElementById('netMonthlySalary');
     const providentFundPercentageInput = document.getElementById('providentFundPercentage');
+    const thirteenthSalaryCheckbox = document.getElementById('thirteenthSalary');
 
     // Set max length for inputs
     [yearlySalaryInput, monthlySalaryInput, yearlyNetInput, monthlyNetInput].forEach(input => {
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     yearlySalaryInput.addEventListener('input', function () {
         const grossYearly = parseFloat(removeCommas(yearlySalaryInput.value));
         if (!isNaN(grossYearly)) {
+            // Monthly salary is always based on 12 months
             monthlySalaryInput.value = formatNumber((grossYearly / 12).toFixed(2));
             calculateNetFromGross(grossYearly);
         }
@@ -25,7 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
     monthlySalaryInput.addEventListener('input', function () {
         const grossMonthly = parseFloat(removeCommas(monthlySalaryInput.value));
         if (!isNaN(grossMonthly)) {
-            const grossYearly = grossMonthly * 12;
+            // Calculate yearly based on whether 13th month is included
+            const yearMultiplier = thirteenthSalaryCheckbox.checked ? 13 : 12;
+            const grossYearly = grossMonthly * yearMultiplier;
             yearlySalaryInput.value = formatNumber(grossYearly.toFixed(2));
             calculateNetFromGross(grossYearly);
         }
@@ -34,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
     yearlyNetInput.addEventListener('input', function () {
         const netYearly = parseFloat(removeCommas(yearlyNetInput.value));
         if (!isNaN(netYearly)) {
+            // Monthly net is always based on 12 months
             monthlyNetInput.value = formatNumber((netYearly / 12).toFixed(2));
             calculateGrossFromNet(netYearly);
         }
@@ -42,9 +47,22 @@ document.addEventListener('DOMContentLoaded', function () {
     monthlyNetInput.addEventListener('input', function () {
         const netMonthly = parseFloat(removeCommas(monthlyNetInput.value));
         if (!isNaN(netMonthly)) {
-            const netYearly = netMonthly * 12;
+            // Calculate yearly based on whether 13th month is included
+            const yearMultiplier = thirteenthSalaryCheckbox.checked ? 13 : 12;
+            const netYearly = netMonthly * yearMultiplier;
             yearlyNetInput.value = formatNumber(netYearly.toFixed(2));
             calculateGrossFromNet(netYearly);
+        }
+    });
+
+    thirteenthSalaryCheckbox.addEventListener('change', function() {
+        const monthlyGross = parseFloat(removeCommas(monthlySalaryInput.value));
+        if (!isNaN(monthlyGross)) {
+            // Recalculate yearly amount with or without 13th month
+            const yearMultiplier = this.checked ? 13 : 12;
+            const grossYearly = monthlyGross * yearMultiplier;
+            yearlySalaryInput.value = formatNumber(grossYearly.toFixed(2));
+            calculateNetFromGross(grossYearly);
         }
     });
 
