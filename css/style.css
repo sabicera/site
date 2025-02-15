@@ -40,6 +40,12 @@ h1 {
 
 }
 
+input[type="checkbox" i] {
+  display: inline-block;
+  height: 34px;
+  position: relative;
+}
+
 label {
   font-weight: bold;
   margin-bottom: 5px;
