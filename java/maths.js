@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
     yearlyNetInput.addEventListener('input', function () {
         const netYearly = parseFloat(removeCommas(yearlyNetInput.value));
         if (!isNaN(netYearly)) {
-            // Monthly net is always based on 12 months
             monthlyNetInput.value = formatNumber((netYearly / 12).toFixed(2));
             calculateGrossFromNet(netYearly);
         }
@@ -47,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
     monthlyNetInput.addEventListener('input', function () {
         const netMonthly = parseFloat(removeCommas(monthlyNetInput.value));
         if (!isNaN(netMonthly)) {
-            // Calculate yearly based on whether 13th month is included
             const yearMultiplier = thirteenthSalaryCheckbox.checked ? 13 : 12;
             const netYearly = netMonthly * yearMultiplier;
             yearlyNetInput.value = formatNumber(netYearly.toFixed(2));
@@ -58,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
     thirteenthSalaryCheckbox.addEventListener('change', function() {
         const monthlyGross = parseFloat(removeCommas(monthlySalaryInput.value));
         if (!isNaN(monthlyGross)) {
-            // Recalculate yearly amount with or without 13th month
             const yearMultiplier = this.checked ? 13 : 12;
             const grossYearly = monthlyGross * yearMultiplier;
             yearlySalaryInput.value = formatNumber(grossYearly.toFixed(2));
@@ -76,26 +73,30 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function calculateNetFromGross(grossSalary) {
+    const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
+    const monthlyGross = grossSalary / (is13thMonthEnabled ? 13 : 12);
+    
+    // Calculate taxable amount (excluding 13th month if enabled)
+    const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossSalary;
+    
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
     const providentFund = grossSalary * providentFundRate;
 
-    const { tax, social, gesi, brackets } = calculateDeductions(grossSalary - providentFund);
+    const { tax, social, gesi, brackets } = calculateDeductions(taxableAmount - providentFund);
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
     const netMonth = netYear / 12;
 
-    // Update net salary inputs
     document.getElementById('netYearlySalary').value = formatNumber(netYear.toFixed(2));
     document.getElementById('netMonthlySalary').value = formatNumber(netMonth.toFixed(2));
 
-    // Update tables
     updateMainTable(grossSalary, tax, social, gesi, providentFund, netYear, totalDeductions);
     updateBracketTable(brackets);
 }
 
 function calculateGrossFromNet(netSalary) {
     let low = netSalary;
-    let high = netSalary * 2; // A reasonable upper bound
+    let high = netSalary * 2;
     let estimatedGross;
 
     while (high - low > 0.01) {
@@ -111,24 +112,28 @@ function calculateGrossFromNet(netSalary) {
     const grossYear = estimatedGross;
     const grossMonth = grossYear / 12;
 
-    // Update gross salary inputs
     document.getElementById('grossYearlySalary').value = formatNumber(grossYear.toFixed(2));
     document.getElementById('grossMonthlySalary').value = formatNumber(grossMonth.toFixed(2));
 
-    // Recalculate the exact deductions for the final gross
-    const { tax, social, gesi, providentFund, brackets } = calculateDeductions(grossYear);
+    const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
+    const taxableAmount = is13thMonthEnabled ? (grossMonth * 12) : grossYear;
+    
+    const { tax, social, gesi, providentFund, brackets } = calculateDeductions(taxableAmount);
     const totalDeductions = tax + social + gesi + providentFund;
 
-    // Update tables
     updateMainTable(grossYear, tax, social, gesi, providentFund, netSalary, totalDeductions);
     updateBracketTable(brackets);
 }
 
 function calculateNetFromGrossInternal(grossSalary) {
+    const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
+    const monthlyGross = grossSalary / (is13thMonthEnabled ? 13 : 12);
+    const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossSalary;
+
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
     const providentFund = grossSalary * providentFundRate;
 
-    const { tax, social, gesi } = calculateDeductions(grossSalary - providentFund);
+    const { tax, social, gesi } = calculateDeductions(taxableAmount - providentFund);
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
 
