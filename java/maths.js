@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
     yearlyNetInput.addEventListener('input', function () {
         const netYearly = parseFloat(removeCommas(yearlyNetInput.value));
         if (!isNaN(netYearly)) {
+            // Monthly net is always based on 12 months
             monthlyNetInput.value = formatNumber((netYearly / 12).toFixed(2));
             calculateGrossFromNet(netYearly);
         }
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
     monthlyNetInput.addEventListener('input', function () {
         const netMonthly = parseFloat(removeCommas(monthlyNetInput.value));
         if (!isNaN(netMonthly)) {
+            // Calculate yearly based on whether 13th month is included
             const yearMultiplier = thirteenthSalaryCheckbox.checked ? 13 : 12;
             const netYearly = netMonthly * yearMultiplier;
             yearlyNetInput.value = formatNumber(netYearly.toFixed(2));
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
     thirteenthSalaryCheckbox.addEventListener('change', function() {
         const monthlyGross = parseFloat(removeCommas(monthlySalaryInput.value));
         if (!isNaN(monthlyGross)) {
+            // Recalculate yearly amount with or without 13th month
             const yearMultiplier = this.checked ? 13 : 12;
             const grossYearly = monthlyGross * yearMultiplier;
             yearlySalaryInput.value = formatNumber(grossYearly.toFixed(2));
@@ -76,13 +79,16 @@ function calculateNetFromGross(grossSalary) {
     const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
     const monthlyGross = grossSalary / (is13thMonthEnabled ? 13 : 12);
     
-    // Calculate taxable amount (excluding 13th month if enabled)
+    // Calculate taxable amount (excluding 13th month for tax only)
     const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossSalary;
     
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
     const providentFund = grossSalary * providentFundRate;
 
-    const { tax, social, gesi, brackets } = calculateDeductions(taxableAmount - providentFund);
+    // Calculate tax on reduced amount, but social and GESI on full amount
+    const { tax, brackets } = calculateTax(taxableAmount - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
+    
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
     const netMonth = netYear / 12;
@@ -116,9 +122,15 @@ function calculateGrossFromNet(netSalary) {
     document.getElementById('grossMonthlySalary').value = formatNumber(grossMonth.toFixed(2));
 
     const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
-    const taxableAmount = is13thMonthEnabled ? (grossMonth * 12) : grossYear;
+    const monthlyGross = grossYear / (is13thMonthEnabled ? 13 : 12);
+    const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossYear;
     
-    const { tax, social, gesi, providentFund, brackets } = calculateDeductions(taxableAmount);
+    const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
+    const providentFund = grossYear * providentFundRate;
+
+    const { tax, brackets } = calculateTax(taxableAmount - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(grossYear - providentFund);
+    
     const totalDeductions = tax + social + gesi + providentFund;
 
     updateMainTable(grossYear, tax, social, gesi, providentFund, netSalary, totalDeductions);
@@ -133,14 +145,16 @@ function calculateNetFromGrossInternal(grossSalary) {
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
     const providentFund = grossSalary * providentFundRate;
 
-    const { tax, social, gesi } = calculateDeductions(taxableAmount - providentFund);
+    const { tax } = calculateTax(taxableAmount - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
+    
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
 
     return { netYear };
 }
 
-function calculateDeductions(grossSalary) {
+function calculateTax(taxableAmount) {
     let tax = 0;
     const brackets = {
         tax0: 0,
@@ -150,50 +164,51 @@ function calculateDeductions(grossSalary) {
         tax35: 0,
     };
 
-    if (grossSalary > 60000) {
-        brackets.tax35 = (grossSalary - 60000) * 0.35;
+    if (taxableAmount > 60000) {
+        brackets.tax35 = (taxableAmount - 60000) * 0.35;
         brackets.tax30 = (60000 - 36300) * 0.30;
         brackets.tax25 = (36300 - 28000) * 0.25;
         brackets.tax20 = (28000 - 19500) * 0.20;
-        brackets.tax0 = 19500 * 0; // No tax for first 19500
-    } else if (grossSalary > 36300) {
-        brackets.tax30 = (grossSalary - 36300) * 0.30;
+        brackets.tax0 = 19500 * 0;
+    } else if (taxableAmount > 36300) {
+        brackets.tax30 = (taxableAmount - 36300) * 0.30;
         brackets.tax25 = (36300 - 28000) * 0.25;
         brackets.tax20 = (28000 - 19500) * 0.20;
         brackets.tax0 = 19500 * 0;
-    } else if (grossSalary > 28000) {
-        brackets.tax25 = (grossSalary - 28000) * 0.25;
+    } else if (taxableAmount > 28000) {
+        brackets.tax25 = (taxableAmount - 28000) * 0.25;
         brackets.tax20 = (28000 - 19500) * 0.20;
         brackets.tax0 = 19500 * 0;
-    } else if (grossSalary > 19500) {
-        brackets.tax20 = (grossSalary - 19500) * 0.20;
+    } else if (taxableAmount > 19500) {
+        brackets.tax20 = (taxableAmount - 19500) * 0.20;
         brackets.tax0 = 19500 * 0;
     } else {
-        brackets.tax0 = grossSalary * 0;
+        brackets.tax0 = taxableAmount * 0;
     }
 
     tax = brackets.tax35 + brackets.tax30 + brackets.tax25 + brackets.tax20 + brackets.tax0;
 
+    return {
+        tax,
+        brackets
+    };
+}
+
+function calculateSocialAndGesi(amount) {
     // Apply the social deduction with a maximum of 62,868
-    let social = grossSalary * 0.088;
+    let social = amount * 0.088;
     if (social > 62868) {
         social = 62868;
     }
 
-    let gesi = grossSalary * 0.0265;
+    let gesi = amount * 0.0265;
     if (gesi > 180000) {
         gesi = 180000;
     }
 
-    const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
-    const providentFund = grossSalary * providentFundRate;
-
     return {
-        tax,
         social,
-        gesi,
-        providentFund,
-        brackets
+        gesi
     };
 }
 
