@@ -1,4 +1,3 @@
-// Function to parse the alternative format
 function parseAlternativeFormat(text) {
     const parsedFlights = [];
     const lines = text.split('\n');
