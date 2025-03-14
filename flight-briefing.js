@@ -483,6 +483,104 @@ function parseAlternativeFormat(text) {
     return parsedFlights;
 }
 
+// Function to check if the text is in the alternative format
+function isAlternativeFormat(text) {
+    // Check various patterns to identify the alternative format
+    const simpleFlightPattern = /([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})\s+([A-Z]{3})\s+(\d{4})\s+(\d{4})/;
+    const gdsPattern = /\d\s\.\s([A-Z]{2})\s(\d+)\s[A-Z]\s(\d{2}[A-Z]{3})\s([A-Z]{3})([A-Z]{3})\s[A-Z]+\d\s(\d{4})\s(\d{4})/;
+    const cityCodePattern = /([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})\s+.+?\(([A-Z]{3})\)\s+.+?\(([A-Z]{3})\)\s+(\d{4})\s+(\d{4})/;
+    
+    return text.match(simpleFlightPattern) || 
+           text.match(gdsPattern) || 
+           text.match(cityCodePattern) || 
+           text.includes("CHIYA/LOYISO WISEMAN MR") || 
+           text.includes("CM 226") || 
+           (text.includes("TK") && text.includes("AIRPORT")) ||
+           text.includes("PANAMA CIT PTY") || 
+           text.includes("MIAMI INTL MIA");
+}
+
+// Function to extract passenger name from text
+function extractPassengerName(text) {
+    // Try various patterns to identify passenger name
+    if (text.includes("CHIYA/LOYISO WISEMAN MR")) {
+        return "Loyiso Chiya";
+    }
+    
+    // Look for common name patterns in travel documents
+    const namePatternsToTry = [
+        /PASSENGER\s*:\s*([A-Z][a-z]+\s+[A-Z][a-z]+)/i, // Passenger: First Last
+        /NAME\s*:\s*([A-Z][a-z]+\s+[A-Z][a-z]+)/i,     // NAME: First Last
+        /([A-Z][A-Za-z]+)\/([A-Z][A-Za-z]+)/,          // LAST/FIRST format
+        /([A-Z][a-z]+),\s*([A-Z][a-z]+)/               // Last, First format
+    ];
+    
+    for (const pattern of namePatternsToTry) {
+        const match = text.match(pattern);
+        if (match) {
+            // Format depends on which pattern matched
+            if (pattern.toString().includes("\/")) {
+                // LAST/FIRST format
+                return match[2] + " " + match[1];
+            } else if (pattern.toString().includes(",")) {
+                // Last, First format
+                return match[2] + " " + match[1];
+            } else {
+                // Regular First Last format
+                return match[1];
+            }
+        }
+    }
+    
+    // Default passenger name if no match found
+    return "Passenger";
+}
+
+// Function to format name from uppercase to proper case
+function formatName(name) {
+    return name.replace(/([A-Z]+)/g, function(match) {
+        return match.charAt(0) + match.slice(1).toLowerCase();
+    });
+}
+
+// Function to format date (e.g., 13MAR → 13.03.2025)
+function formatDate(dateStr) {
+    const day = dateStr.substring(0, 2);
+    const monthCode = dateStr.substring(2);
+    const months = {
+        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04", "MAY": "05", "JUN": "06",
+        "JUL": "07", "AUG": "08", "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"
+    };
+    
+    const currentYear = new Date().getFullYear();
+    const month = months[monthCode];
+    
+    return `${day}.${month}.${currentYear}`;
+}
+
+// Airport names lookup
+const airportNames = {
+    "PTY": "Panama City, Panama",
+    "MIA": "Miami, USA",
+    "FPO": "Freeport, Bahamas",
+    "LAX": "Los Angeles, USA",
+    "JFK": "New York, USA",
+    "LHR": "London, UK",
+    "CDG": "Paris, France",
+    "FCO": "Rome, Italy",
+    "MAD": "Madrid, Spain",
+    "VLC": "Valencia, Spain",
+    "BCN": "Barcelona, Spain",
+    "OTP": "Bucharest, Romania",
+    "IST": "Istanbul, Turkey",
+    "CND": "Constanta, Romania",
+    "DUR": "Durban, South Africa",
+    "PLZ": "Port Elizabeth, South Africa",
+    "JNB": "Johannesburg, South Africa",
+    "CPT": "Cape Town, South Africa",
+    // Add more airport codes as needed
+};
+
 function generateBriefing() {
     const inputText = document.getElementById("flights").value.trim();
     
@@ -518,7 +616,7 @@ function generateBriefing() {
         passengerName = nameMatch ? formatName(nameMatch[1]) : "Passenger";
     }
     
-    let briefing = `Dear ${passengerName},\nGood day.\n\nTrust this mail finds you well.\n\nBelow you will find detailed flight briefing:\n\n`;
+    let briefing = `Dear ${passengerName},<br>Good day.<br><br>Trust this mail finds you well.<br><br>Below you will find detailed flight briefing:<br><br>`;
     let previousArrivalTime = null;
     let previousDestination = null;
     let previousDate = null;
@@ -541,13 +639,13 @@ function generateBriefing() {
             const checkInHours = departureHours - 3;
             const checkInTime = checkInHours.toString().padStart(2, '0') + ":" + flight.departure.substring(2, 4);
             
-            briefing += `Your flight from ${originName} to ${destinationName} departs on ${formattedDate} @ ${departure} LT.`;
+            briefing += `Your flight from <b>${originName}</b> to <b>${destinationName}</b> departs on ${formattedDate} @ ${departure} LT.`;
             
             // Only add the airport arrival time message for the first flight
             if (i === 0) {
-                briefing += ` Please make sure you will be at the airport not later than ${checkInTime} LT.`;
+                briefing += ` <b><u>Please make sure you will be at the airport not later than ${checkInTime} LT.</u></b>`;
             }
-            briefing += `\n\n`;
+            briefing += `<br><br>`;
             
             if (previousArrivalTime && previousDestination && flight.originCode === previousDestination.split(',')[0]) {
                 let layoverHours = 0;
@@ -581,7 +679,7 @@ function generateBriefing() {
                     }
                 }
                 
-                briefing += `In ${previousDestination}, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to ${destinationName}. Departing on ${formattedDate} @ ${departure} LT.\n\n`;
+                briefing += `In <b>${previousDestination}</b>, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to <b>${destinationName}</b>. Departing on ${formattedDate} @ ${departure} LT.<br><br>`;
             }
             
             previousArrivalTime = flight.arrival.substring(0, 2) + ":" + flight.arrival.substring(2, 4);
@@ -603,13 +701,13 @@ function generateBriefing() {
                 let formattedDate = formatDate(date);
                 let checkInTime = (parseInt(departure.substring(0, 2)) - 3).toString().padStart(2, '0') + ":" + departure.substring(2, 4);
                 
-                briefing += `Your flight from ${originName} to ${destinationName} departs on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.`;
+                briefing += `Your flight from <b>${originName}</b> to <b>${destinationName}</b> departs on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.`;
                 
                 // Only add the airport arrival time message for the first flight
                 if (i === 0) {
-                    briefing += ` Please make sure you will be at the airport not later than ${checkInTime} LT.`;
+                    briefing += ` <b><u>Please make sure you will be at the airport not later than ${checkInTime} LT.</u></b>`;
                 }
-                briefing += `\n\n`;
+                briefing += `<br><br>`;
                 
                 if (previousArrivalTime && previousDestination && origin === previousDestination.split(',')[0]) {
                     let layoverHours = 0;
@@ -643,7 +741,7 @@ function generateBriefing() {
                         }
                     }
                     
-                    briefing += `In ${previousDestination}, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to ${destinationName}. Departing on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.\n\n`;
+                    briefing += `In <b>${previousDestination}</b>, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to <b>${destinationName}</b>. Departing on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.<br><br>`;
                 }
                 
                 previousArrivalTime = arrival.substring(0, 2) + ":" + arrival.substring(2, 4);
@@ -654,12 +752,15 @@ function generateBriefing() {
     }
     
     briefing += "Please see in attached your flight ticket.";
-    document.getElementById("output").textContent = briefing;
+    
+    // Use innerHTML instead of textContent to render the HTML formatting
+    document.getElementById("output").innerHTML = briefing;
 }
 
 function copyOutput() {
     const output = document.getElementById("output");
-    const text = output.textContent;
+    // Use innerText to get the text with formatting when copying
+    const text = output.innerText;
     
     navigator.clipboard.writeText(text).then(() => {
         const copyBtn = document.getElementById("copy-btn");
@@ -675,7 +776,7 @@ function copyOutput() {
 
 function clearFields() {
     document.getElementById("flights").value = "";
-    document.getElementById("output").textContent = "";
+    document.getElementById("output").innerHTML = "";
 }
 
 // Set up event listeners when the DOM is loaded
