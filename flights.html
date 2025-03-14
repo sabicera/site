@@ -172,33 +172,23 @@
             <div class="logo">FB</div>
             <h1>Flight Briefing Generator</h1>
         </header>
-        
         <div class="form-group">
             <label for="flights">Enter Flight Details (one per line):</label>
             <textarea id="flights" placeholder="e.g., 4Z  757 K  18MAR JNBUTT HK1  1225   1345"></textarea>
             <button class="clear-btn" id="clear-btn">Clear</button>
         </div>
-        
         <button id="generate-btn">Generate Briefing</button>
-        
         <div class="output-container">
             <h2>Generated Flight Briefing</h2>
             <div id="output" class="output-box"></div>
             <button class="copy-btn" id="copy-btn">Copy to Clipboard</button>
         </div>
     </div>
-    
     <footer>
         © 2025 Flight Briefing Generator | All airports & flight information updated regularly
     </footer>
-
-    <!-- Import the airport data -->
     <script src="airport-data.js"></script>
-
-    <!-- Import the airport data -->
     <script src="passengers.js"></script>
-    
-    <!-- Import the main script -->
     <script src="flight-briefing.js"></script>
 </body>
 </html>
