@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Briefing Generator</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --light: #ecf0f1;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--secondary);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            background-color: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        h1 {
+            color: var(--secondary);
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        h2 {
+            color: var(--secondary);
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: vertical;
+            min-height: 120px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .output-container {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+        
+        .output-box {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 20px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            background-color: var(--secondary);
+            font-size: 14px;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #34495e;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .examples {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">FB</div>
+            <h1>Flight Briefing Generator</h1>
+        </header>
+        
+        <div class="form-group">
+            <label for="flights">Enter Flight Details (one per line):</label>
+            <textarea id="flights" placeholder="e.g., 4Z  757 K  18MAR JNBUTT HK1  1225   1345"></textarea>
+            <div class="examples">
+                Format 1: [Airline] [Flight#] [Class] [Date] [Origin][Destination] [Status] [DepartureTime] [ArrivalTime]<br>
+                Format 2: You can also paste flight details from your airline confirmation email (with Flight Date, Org, Dest, Dep, Arr columns)
+            </div>
+            <button class="clear-btn" id="clear-btn">Clear</button>
+        </div>
+        
+        <button id="generate-btn">Generate Briefing</button>
+        
+        <div class="output-container">
+            <h2>Generated Flight Briefing</h2>
+            <div id="output" class="output-box"></div>
+            <button class="copy-btn" id="copy-btn">Copy to Clipboard</button>
+        </div>
+    </div>
+    
+    <footer>
+        © 2025 Flight Briefing Generator | All airports & flight information updated regularly
+    </footer>
+
+    <!-- Import the airport data -->
+    <script src="airport-data.js"></script>
+
+    <!-- Import the airport data -->
+    <script src="passengers.js"></script>
+    
+    <!-- Import the main script -->
+    <script src="flight-briefing.js"></script>
+</body>
+</html>
