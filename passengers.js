@@ -119,11 +119,19 @@ function extractPassengerName(text) {
         return nameMatch[1].trim();
     }
     
-    // Simple format: VIGUS/AARON CHRISTOPHER MR
+    // Simple format with title: VIGUS/AARON CHRISTOPHER MR
     const standardNameMatch = text.match(/([A-Z]+)\/([A-Z\s]+)\s+(MR|MS|MRS)/i);
     if (standardNameMatch) {
         const lastName = standardNameMatch[1];
         const firstName = standardNameMatch[2];
+        return formatName(firstName.trim()) + " " + formatName(lastName.trim());
+    }
+    
+    // Simple format WITHOUT title: GOSH/THOMAS SAMAUL ROBERT
+    const nameWithoutTitleMatch = text.match(/([A-Z]+)\/([A-Z\s]+)$/);
+    if (nameWithoutTitleMatch) {
+        const lastName = nameWithoutTitleMatch[1];
+        const firstName = nameWithoutTitleMatch[2];
         return formatName(firstName.trim()) + " " + formatName(lastName.trim());
     }
     
