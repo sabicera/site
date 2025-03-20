@@ -417,7 +417,7 @@ function getAirportNames() {
         "SIN": "Singapore",
         "CPT": "Cape Town",
         "JNB": "Johannesburg",
-        "GRU": "São Paulo",
+        "GRU": "Sao Paulo",
         "MEX": "Mexico City",
         "YYZ": "Toronto",
         "AMS": "Amsterdam",
@@ -454,7 +454,18 @@ function calculateLayover(prevArrival, nextDeparture, prevDate, nextDate) {
             layoverMinutes += 60;
         }
     } else {
-        // Overnight connection
+        // Overnight connection or multi-day connection
+        // Convert dates to Date objects for calculating days between
+        const [day1, month1, year1] = prevDate.split('.');
+        const [day2, month2, year2] = nextDate.split('.');
+        
+        const date1 = new Date(year1, parseInt(month1) - 1, parseInt(day1));
+        const date2 = new Date(year2, parseInt(month2) - 1, parseInt(day2));
+        
+        // Calculate days difference
+        const daysDiff = Math.floor((date2 - date1) / (24 * 60 * 60 * 1000));
+        
+        // Calculate total hours and minutes
         let hoursRemaining = 24 - prevHours;
         let minutesOvernight = 0;
         
@@ -463,13 +474,20 @@ function calculateLayover(prevArrival, nextDeparture, prevDate, nextDate) {
             minutesOvernight = 60 - prevMinutes;
         }
         
-        layoverHours = hoursRemaining + nextHours;
+        // Add 24 hours for each full day in between
+        layoverHours = hoursRemaining + nextHours + (24 * (daysDiff - 1));
         layoverMinutes = minutesOvernight + nextMinutes;
         
         if (layoverMinutes >= 60) {
             layoverHours += 1;
             layoverMinutes -= 60;
         }
+    }
+    
+    // Ensure we don't have negative layover times
+    if (layoverHours < 0) {
+        layoverHours = 0;
+        layoverMinutes = 0;
     }
     
     return { hours: layoverHours, minutes: layoverMinutes };
@@ -536,6 +554,7 @@ function generateBriefing() {
     let briefing = `Dear ${passengerName},\nGood day.\n\nTrust this mail finds you well.\n\nBelow you will find detailed flight briefing:\n\n`;
     let previousArrivalTime = null;
     let previousDestination = null;
+    let previousDestinationName = null;
     let previousDate = null;
     
     // Process all flights
@@ -582,6 +601,7 @@ function generateBriefing() {
         const arrival = flight.arrival.substring(0, 2) + ":" + flight.arrival.substring(2, 4);
         previousArrivalTime = arrival;
         previousDestination = flight.destinationCode;
+        previousDestinationName = destinationName;
         previousDate = formattedDate;
     }
     
