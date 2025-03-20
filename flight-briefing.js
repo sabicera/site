@@ -97,7 +97,7 @@ function parseAlternativeFormat(text) {
     }
     
     // Check if this is the Turkish Airlines format like "TK1066 07MAR CND CONSTANTA IST ISTANBUL AIRPORT 1010 1230"
-    const turkishPattern = /\b(TK\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})\s+[A-Z\s]+\s+([A-Z]{3})\s+[A-Z\s]+\s+(\d{4})\s+(\d{4})/;
+    const turkishPattern = /\b([A-Z]{2}\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})\s+[A-Z\s]+\s+([A-Z]{3})\s+[A-Z\s]+\s+(\d{4})\s+(\d{4})/;
     if (text.match(turkishPattern)) {
         console.log("Detected Turkish Airlines format");
         
@@ -158,38 +158,35 @@ function parseAlternativeFormat(text) {
         }
     }
     
-    // Check if this is the format from the airline confirmation email (without brackets)
-    if (text.includes("CHIYA/LOYISO WISEMAN MR") || 
-        text.includes("CM 226") || 
-        text.includes("PANAMA CIT PTY") || 
-        text.includes("MIAMI INTL MIA")) {
-        
+    // Check for airline confirmation email format - using regex instead of hardcoded values
+    const airlineConfirmPattern = /\b([A-Z]{2})\s+(\d+)\b[\s\S]*?\b([A-Z]{3})\b[\s\S]*?\b([A-Z]{3})\b[\s\S]*?\b(\d{4})\b[\s\S]*?\b(\d{4})\b/;
+    if (text.match(airlineConfirmPattern)) {
         console.log("Detected airline confirmation format");
         
-        // For this specific format, we'll hardcode the flight info based on the example
-        if (text.includes("PANAMA CIT PTY") && text.includes("MIAMI INTL MIA") && text.includes("FREEPORT FPO")) {
-            // Flight 1: Panama to Miami
-            parsedFlights.push({
-                airline: "CM",
-                flightNumber: "226",
-                date: "13MAR",
-                originCode: "PTY",
-                destinationCode: "MIA",
-                departure: "0801",
-                arrival: "1208"
-            });
+        // Look for flight segments
+        const segmentRegex = /\b([A-Z]{2})\s+(\d+)\b[\s\S]*?\b([A-Z]{3})\b[\s\S]*?\b([A-Z]{3})\b[\s\S]*?\b(\d{4})\b[\s\S]*?\b(\d{4})\b/g;
+        let match;
+        
+        // Find date in the format DDMMM (like 13MAR)
+        const dateRegex = /\b(\d{2}[A-Z]{3})\b/;
+        const dateMatch = text.match(dateRegex);
+        const date = dateMatch ? dateMatch[1] : '';
+        
+        while ((match = segmentRegex.exec(text)) !== null) {
+            const [_, airline, flightNumber, originCode, destCode, departure, arrival] = match;
             
-            // Flight 2: Miami to Freeport
             parsedFlights.push({
-                airline: "AA",
-                flightNumber: "3433",
-                date: "13MAR",
-                originCode: "MIA",
-                destinationCode: "FPO",
-                departure: "1615",
-                arrival: "1705"
+                airline: airline,
+                flightNumber: flightNumber,
+                date: date,
+                originCode: originCode,
+                destinationCode: destCode,
+                departure: departure,
+                arrival: arrival
             });
-            
+        }
+        
+        if (parsedFlights.length > 0) {
             return parsedFlights;
         }
     }
@@ -229,8 +226,6 @@ function parseAlternativeFormat(text) {
             }
         }
         
-        // Try to match flight information with different patterns
-        
         // Pattern for joined airport codes like VLCMAD
         const joinedAirportPattern = /([A-Z]{2})\s+(\d+)\s+[A-Z]\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})([A-Z]{3})\s+[A-Z]+\d\s+(\d{4})\s+(\d{4})/;
         const joinedMatch = line.match(joinedAirportPattern);
@@ -249,179 +244,6 @@ function parseAlternativeFormat(text) {
             });
             
             continue;
-        }
-        
-        // Check for lines that contain flight information (CM/AA specific format)
-        if ((line.includes("CM ") || line.includes("AA")) && 
-            (line.includes("PTY") || line.includes("MIA") || line.includes("FPO"))) {
-            
-            // Try to extract flight details based on known patterns
-            
-            // First look for airline codes
-            let airline = "";
-            if (line.includes("CM ")) airline = "CM";
-            else if (line.includes("AA")) airline = "AA";
-            
-            // Look for flight number
-            let flightNumber = "";
-            if (airline === "CM" && line.includes("226")) flightNumber = "226";
-            else if (airline === "AA" && line.includes("3433")) flightNumber = "3433";
-            
-            // Look for date
-            let date = "";
-            if (line.includes("13MAR")) date = "13MAR";
-            
-            // Look for airport codes
-            let originCode = "";
-            let destinationCode = "";
-            if (line.includes("PTY") && line.includes("MIA")) {
-                originCode = "PTY";
-                destinationCode = "MIA";
-            } else if (line.includes("MIA") && line.includes("FPO")) {
-                originCode = "MIA";
-                destinationCode = "FPO";
-            }
-            
-            // Look for times
-            let departure = "";
-            let arrival = "";
-            
-            // For CM 226 flight
-            if (airline === "CM" && flightNumber === "226") {
-                departure = "0801";
-                arrival = "1208";
-            }
-            // For AA 3433 flight
-            else if (airline === "AA" && flightNumber === "3433") {
-                departure = "1615";
-                arrival = "1705";
-            }
-            
-            // Only add if we have all the essential information
-            if (airline && date && originCode && destinationCode && departure && arrival) {
-                parsedFlights.push({
-                    airline,
-                    flightNumber,
-                    date,
-                    originCode,
-                    destinationCode,
-                    departure,
-                    arrival
-                });
-            }
-        }
-    }
-    
-    // If we couldn't extract flights with the special logic, try the original approach
-    if (parsedFlights.length === 0) {
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Check for airline code at the beginning of the line
-            if (/^[A-Z]{2}/.test(line)) {
-                // Try various patterns for different formats
-                
-                // Pattern 1: Airline code followed by flight number, date, and airport codes
-                // Example: CM0360 23FEB PANAMA CITY (PTY) LOS ANGELES (LAX) 0721 1130
-                const pattern1 = /^([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})/;
-                if (pattern1.test(line)) {
-                    // Check for airport codes in parentheses
-                    const airportPattern = /\(([A-Z]{3})\)/g;
-                    const airports = [...line.matchAll(airportPattern)].map(match => match[1]);
-                    
-                    // Check for time pattern (four digits)
-                    const timePattern = /\b(\d{4})\b/g;
-                    const times = [...line.matchAll(timePattern)].map(match => match[1]);
-                    
-                    if (airports.length >= 2 && times.length >= 2) {
-                        const match = line.match(pattern1);
-                        const [_, airline, flightNumber, date] = match;
-                        
-                        parsedFlights.push({
-                            airline,
-                            flightNumber,
-                            date,
-                            originCode: airports[0],
-                            destinationCode: airports[1],
-                            departure: times[0],
-                            arrival: times[1]
-                        });
-                        
-                        continue;
-                    }
-                }
-                
-                // Pattern 2: Simple airline code + number + date + airport codes
-                // Example: AZ7507 09MAR OTP FCO 1130 1240
-                const pattern2 = /^([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})\s+([A-Z]{3})\s+(\d{4})\s+(\d{4})/;
-                const match2 = line.match(pattern2);
-                if (match2) {
-                    const [_, airline, flightNumber, date, originCode, destCode, departure, arrival] = match2;
-                    
-                    parsedFlights.push({
-                        airline,
-                        flightNumber,
-                        date,
-                        originCode,
-                        destinationCode: destCode,
-                        departure,
-                        arrival
-                    });
-                    
-                    continue;
-                }
-                
-                // Pattern 3: Airline code + space + number
-                // Example: TK 904 19MAR PTY ...
-                const pattern3 = /^([A-Z]{2})\s+(\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})/;
-                const match3 = line.match(pattern3);
-                if (match3) {
-                    // Look for airport codes and times
-                    const airportPattern = /\b([A-Z]{3})\b/g;
-                    const airports = [...line.matchAll(airportPattern)].map(match => match[0]);
-                    
-                    // Filter out common non-airport three-letter codes
-                    const filteredAirports = airports.filter(code => 
-                        !['MRS', 'MIS', 'THE', 'AND', 'FOR', 'NOT'].includes(code));
-                    
-                    // Check for time pattern (four digits)
-                    const timePattern = /\b(\d{4})\b/g;
-                    const times = [...line.matchAll(timePattern)].map(match => match[0]);
-                    
-                    if (filteredAirports.length >= 2 && times.length >= 1) {
-                        const [_, airline, flightNumber, date, firstAirport] = match3;
-                        
-                        // Get the second airport from the filtered list
-                        let secondAirport;
-                        for (const airport of filteredAirports) {
-                            if (airport !== firstAirport) {
-                                secondAirport = airport;
-                                break;
-                            }
-                        }
-                        
-                        // Handle case where arrival time has +1 (next day)
-                        let arrivalTime = times[1] || "";
-                        if (arrivalTime.includes('+')) {
-                            arrivalTime = arrivalTime.replace('+1', '').replace('+', '');
-                        }
-                        
-                        if (secondAirport) {
-                            parsedFlights.push({
-                                airline,
-                                flightNumber,
-                                date,
-                                originCode: firstAirport,
-                                destinationCode: secondAirport,
-                                departure: times[0],
-                                arrival: arrivalTime || times[times.length - 1]
-                            });
-                        }
-                        
-                        continue;
-                    }
-                }
-            }
         }
     }
     
@@ -483,8 +305,179 @@ function parseAlternativeFormat(text) {
     return parsedFlights;
 }
 
+// Function to check if input is in alternative format
+function isAlternativeFormat(text) {
+    // Check if any of the alternative format patterns match
+    const gdsPattern = /\d\s\.\s[A-Z]{2}\s\d+\s[A-Z]\s\d{2}[A-Z]{3}\s[A-Z]{3}[A-Z]{3}\s[A-Z]+\d\s\d{4}\s\d{4}/;
+    const cityCodePattern = /[A-Z]{2}\d+\s+\d{2}[A-Z]{3}\s+.+?\([A-Z]{3}\)\s+.+?\([A-Z]{3}\)\s+\d{4}\s+\d{4}/;
+    const simpleFlightPattern = /[A-Z]{2}\d+\s+\d{2}[A-Z]{3}\s+[A-Z]{3}\s+[A-Z]{3}\s+\d{4}\s+\d{4}/;
+    const turkishPattern = /\b[A-Z]{2}\d+\s+\d{2}[A-Z]{3}\s+[A-Z]{3}\s+[A-Z\s]+\s+[A-Z]{3}\s+[A-Z\s]+\s+\d{4}\s+\d{4}/;
+    const salinkPattern = /\b[A-Z]{2}\d+\s+\d{2}[A-Z]{3}\s+[A-Z]{3}\s+[A-Z]{3}\s+\d{4}\s+\d{4}/;
+    
+    // Check for airline confirmation email format
+    const confirmationFormat = text.match(/\b[A-Z]{2}\s+\d+\b/) && text.match(/\b[A-Z]{3}\b/) && text.match(/\b\d{4}\b/);
+    
+    return text.match(gdsPattern) || 
+           text.match(cityCodePattern) || 
+           text.match(simpleFlightPattern) || 
+           text.match(turkishPattern) || 
+           text.match(salinkPattern) || 
+           confirmationFormat;
+}
+
+// Extract passenger name from text
+function extractPassengerName(text) {
+    // Try to find passenger name in various formats
+    const namePatterns = [
+        /PASSENGER:\s+([A-Z\s]+)/i,
+        /NAME:\s+([A-Z\s]+)/i,
+        /PASSENGER NAME:\s+([A-Z\s]+)/i,
+        /([A-Z]+)\/([A-Z\s]+)/,
+        /([A-Z]+)\/([A-Z\s]+)\s+MR/,
+        /([A-Z]+)\/([A-Z\s]+)\s+M[RS]/
+    ];
+    
+    for (const pattern of namePatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            if (match[2]) {
+                // Format with surname/firstname
+                return formatName(match[2]) + " " + formatName(match[1]);
+            } else {
+                // Simple name format
+                return formatName(match[1]);
+            }
+        }
+    }
+    
+    // If no name found, try to look for a sequence of uppercase letters that might be a name
+    const uppercaseSequence = text.match(/\b([A-Z]{5,})\b/);
+    if (uppercaseSequence) {
+        return formatName(uppercaseSequence[1]);
+    }
+    
+    // Default to generic passenger
+    return "Passenger";
+}
+
+// Format name properly (JOHN DOE -> John Doe)
+function formatName(name) {
+    return name.trim()
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+// Format date (13MAR -> 13.03.2025)
+function formatDate(dateStr) {
+    const day = dateStr.substring(0, 2);
+    const monthStr = dateStr.substring(2, 5);
+    
+    const months = {
+        "JAN": "01",
+        "FEB": "02",
+        "MAR": "03",
+        "APR": "04",
+        "MAY": "05",
+        "JUN": "06",
+        "JUL": "07",
+        "AUG": "08",
+        "SEP": "09",
+        "OCT": "10",
+        "NOV": "11",
+        "DEC": "12"
+    };
+    
+    const month = months[monthStr];
+    const currentYear = new Date().getFullYear();
+    
+    return `${day}.${month}.${currentYear}`;
+}
+
+// Initialize airport names object
+function getAirportNames() {
+    // Create a basic mapping of airport codes to names
+    // This can be expanded or loaded from an external source
+    return {
+        // Common airports - this is just a starter set
+        "PTY": "Panama City",
+        "MIA": "Miami",
+        "FPO": "Freeport",
+        "JFK": "New York JFK",
+        "LHR": "London Heathrow",
+        "LAX": "Los Angeles",
+        "CDG": "Paris Charles de Gaulle",
+        "FCO": "Rome Fiumicino",
+        "IST": "Istanbul",
+        "DXB": "Dubai",
+        "SYD": "Sydney",
+        "HKG": "Hong Kong",
+        "NRT": "Tokyo Narita",
+        "SIN": "Singapore",
+        "CPT": "Cape Town",
+        "JNB": "Johannesburg",
+        "GRU": "São Paulo",
+        "MEX": "Mexico City",
+        "YYZ": "Toronto",
+        "AMS": "Amsterdam",
+        "FRA": "Frankfurt",
+        "MAD": "Madrid",
+        "BCN": "Barcelona",
+        "VLC": "Valencia",
+        "OTP": "Bucharest",
+        "DUR": "Durban",
+        "PLZ": "Port Elizabeth",
+        "CND": "Constanta",
+        "AKL": "Auckland"
+    };
+}
+
+// Calculate layover time between flights
+function calculateLayover(prevArrival, nextDeparture, prevDate, nextDate) {
+    // Convert times to hours and minutes
+    const prevHours = parseInt(prevArrival.substring(0, 2));
+    const prevMinutes = parseInt(prevArrival.substring(3, 5));
+    const nextHours = parseInt(nextDeparture.substring(0, 2));
+    const nextMinutes = parseInt(nextDeparture.substring(3, 5));
+    
+    let layoverHours = 0;
+    let layoverMinutes = 0;
+    
+    if (prevDate === nextDate) {
+        // Same day connection
+        layoverHours = nextHours - prevHours;
+        layoverMinutes = nextMinutes - prevMinutes;
+        
+        if (layoverMinutes < 0) {
+            layoverHours -= 1;
+            layoverMinutes += 60;
+        }
+    } else {
+        // Overnight connection
+        let hoursRemaining = 24 - prevHours;
+        let minutesOvernight = 0;
+        
+        if (prevMinutes > 0) {
+            hoursRemaining -= 1;
+            minutesOvernight = 60 - prevMinutes;
+        }
+        
+        layoverHours = hoursRemaining + nextHours;
+        layoverMinutes = minutesOvernight + nextMinutes;
+        
+        if (layoverMinutes >= 60) {
+            layoverHours += 1;
+            layoverMinutes -= 60;
+        }
+    }
+    
+    return { hours: layoverHours, minutes: layoverMinutes };
+}
+
 function generateBriefing() {
     const inputText = document.getElementById("flights").value.trim();
+    const airportNames = getAirportNames();
     
     if (inputText === "") {
         alert("Please enter flight details.");
@@ -513,9 +506,31 @@ function generateBriefing() {
         }
     } else {
         // Handle original format
-        flights = inputText.split("\n");
-        const nameMatch = flights[0].match(/\d+([A-Z]+)/);
+        const flightLines = inputText.split("\n").filter(line => line.trim() !== "");
+        flights = [];
+        
+        // Use regex to extract name from the first line if it exists
+        const nameMatch = flightLines[0].match(/\d+([A-Z]+)/);
         passengerName = nameMatch ? formatName(nameMatch[1]) : "Passenger";
+        
+        // Parse each flight line 
+        for (const line of flightLines) {
+            const parts = line.match(/(\w+)\s+(\d+)\s+([A-Z])\s+(\d{2}[A-Z]{3})\s+(\w{3})(\w{3})\s+\w+\s+(\d{4})\s+(?:#?(\d{4}))?/);
+            
+            if (parts) {
+                const [_, airline, flightNumber, bookingClass, date, origin, destination, departure, arrival] = parts;
+                
+                flights.push({
+                    airline: airline,
+                    flightNumber: flightNumber,
+                    date: date,
+                    originCode: origin,
+                    destinationCode: destination,
+                    departure: departure,
+                    arrival: arrival || departure // Default to departure if arrival is missing
+                });
+            }
+        }
     }
     
     let briefing = `Dear ${passengerName},\nGood day.\n\nTrust this mail finds you well.\n\nBelow you will find detailed flight briefing:\n\n`;
@@ -523,134 +538,51 @@ function generateBriefing() {
     let previousDestination = null;
     let previousDate = null;
     
-    if (isAltFormat) {
-        // Process alternative format flights
-        for (let i = 0; i < flights.length; i++) {
-            const flight = flights[i];
-            const originName = airportNames[flight.originCode] || flight.originCode;
-            const destinationName = airportNames[flight.destinationCode] || flight.destinationCode;
-            
-            // Format the date (13MAR → 13.03.2025)
-            const formattedDate = formatDate(flight.date);
-            
-            // Format departure time (0801 → 08:01)
-            const departure = flight.departure.substring(0, 2) + ":" + flight.departure.substring(2, 4);
-            
-            // Calculate check-in time (3 hours before departure)
-            const departureHours = parseInt(flight.departure.substring(0, 2));
-            const checkInHours = departureHours - 3;
-            const checkInTime = checkInHours.toString().padStart(2, '0') + ":" + flight.departure.substring(2, 4);
-            
-            briefing += `Your flight from ${originName} to ${destinationName} departs on ${formattedDate} @ ${departure} LT.`;
-            
-            // Only add the airport arrival time message for the first flight
-            if (i === 0) {
-                briefing += ` Please make sure you will be at the airport not later than ${checkInTime} LT.`;
-            }
-            briefing += `\n\n`;
-            
-            if (previousArrivalTime && previousDestination && flight.originCode === previousDestination.split(',')[0]) {
-                let layoverHours = 0;
-                let layoverMinutes = 0;
-                
-                if (previousDate === formattedDate) {
-                    // Same day connection
-                    layoverHours = departureHours - parseInt(previousArrivalTime.substring(0, 2));
-                    layoverMinutes = parseInt(flight.departure.substring(2, 4)) - parseInt(previousArrivalTime.substring(2, 4));
-                    
-                    if (layoverMinutes < 0) {
-                        layoverHours -= 1;
-                        layoverMinutes += 60;
-                    }
-                } else {
-                    // Overnight connection
-                    let hoursRemaining = 24 - parseInt(previousArrivalTime.substring(0, 2));
-                    let minutesOvernight = 0;
-                    
-                    if (parseInt(previousArrivalTime.substring(2, 4)) > 0) {
-                        hoursRemaining -= 1;
-                        minutesOvernight = 60 - parseInt(previousArrivalTime.substring(2, 4));
-                    }
-                    
-                    layoverHours = hoursRemaining + departureHours;
-                    layoverMinutes = minutesOvernight + parseInt(flight.departure.substring(2, 4));
-                    
-                    if (layoverMinutes >= 60) {
-                        layoverHours += 1;
-                        layoverMinutes -= 60;
-                    }
-                }
-                
-                briefing += `In ${previousDestination}, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to ${destinationName}. Departing on ${formattedDate} @ ${departure} LT.\n\n`;
-            }
-            
-            previousArrivalTime = flight.arrival.substring(0, 2) + ":" + flight.arrival.substring(2, 4);
-            previousDestination = destinationName;
-            previousDate = formattedDate;
+    // Process all flights
+    for (let i = 0; i < flights.length; i++) {
+        const flight = flights[i];
+        const originName = airportNames[flight.originCode] || flight.originCode;
+        const destinationName = airportNames[flight.destinationCode] || flight.destinationCode;
+        
+        // Format the date (13MAR → 13.03.2025)
+        const formattedDate = formatDate(flight.date);
+        
+        // Format departure time (0801 → 08:01)
+        const departure = flight.departure.substring(0, 2) + ":" + flight.departure.substring(2, 4);
+        
+        // Calculate check-in time (3 hours before departure)
+        const departureHours = parseInt(flight.departure.substring(0, 2));
+        const checkInHours = departureHours >= 3 ? departureHours - 3 : departureHours + 21; // Handle wrap around past midnight
+        const checkInTime = checkInHours.toString().padStart(2, '0') + ":" + flight.departure.substring(2, 4);
+        
+        briefing += `Your flight from ${originName} to ${destinationName} departs on ${formattedDate} @ ${departure} LT.`;
+        
+        // Only add the airport arrival time message for the first flight
+        if (i === 0) {
+            briefing += ` Please make sure you will be at the airport not later than ${checkInTime} LT.`;
         }
-    } else {
-        // Process original format flights
-        for (let i = 0; i < flights.length; i++) {
-            const flight = flights[i];
-            const parts = flight.match(/(\w+)\s+(\d+)\s+([A-Z])\s+(\d{2}[A-Z]{3})\s+(\w{3})(\w{3})\s+\w+\s+(\d{4})\s+(?:#?(\d{4}))?/);
+        briefing += `\n\n`;
+        
+        // Calculate and display layover for connecting flights
+        if (previousArrivalTime && previousDestination && flight.originCode === previousDestination) {
+            const prevArrivalFormatted = previousArrivalTime;
+            const nextDepartureFormatted = departure;
             
-            if (parts) {
-                let [_, airline, flightNum, bookingClass, date, origin, destination, departure, arrival] = parts;
-                arrival = arrival || departure; // Handle overnight flights
-                
-                let originName = airportNames[origin] || origin;
-                let destinationName = airportNames[destination] || destination;
-                let formattedDate = formatDate(date);
-                let checkInTime = (parseInt(departure.substring(0, 2)) - 3).toString().padStart(2, '0') + ":" + departure.substring(2, 4);
-                
-                briefing += `Your flight from ${originName} to ${destinationName} departs on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.`;
-                
-                // Only add the airport arrival time message for the first flight
-                if (i === 0) {
-                    briefing += ` Please make sure you will be at the airport not later than ${checkInTime} LT.`;
-                }
-                briefing += `\n\n`;
-                
-                if (previousArrivalTime && previousDestination && origin === previousDestination.split(',')[0]) {
-                    let layoverHours = 0;
-                    let layoverMinutes = 0;
-                    
-                    if (previousDate === formattedDate) {
-                        // Same day connection
-                        layoverHours = parseInt(departure.substring(0, 2)) - parseInt(previousArrivalTime.substring(0, 2));
-                        layoverMinutes = parseInt(departure.substring(2, 4)) - parseInt(previousArrivalTime.substring(2, 4));
-                        
-                        if (layoverMinutes < 0) {
-                            layoverHours -= 1;
-                            layoverMinutes += 60;
-                        }
-                    } else {
-                        // Overnight connection
-                        let hoursRemaining = 24 - parseInt(previousArrivalTime.substring(0, 2));
-                        let minutesOvernight = 0;
-                        
-                        if (parseInt(previousArrivalTime.substring(2, 4)) > 0) {
-                            hoursRemaining -= 1;
-                            minutesOvernight = 60 - parseInt(previousArrivalTime.substring(2, 4));
-                        }
-                        
-                        layoverHours = hoursRemaining + parseInt(departure.substring(0, 2));
-                        layoverMinutes = minutesOvernight + parseInt(departure.substring(2, 4));
-                        
-                        if (layoverMinutes >= 60) {
-                            layoverHours += 1;
-                            layoverMinutes -= 60;
-                        }
-                    }
-                    
-                    briefing += `In ${previousDestination}, you will have a layover of ${layoverHours} hours and ${layoverMinutes} minutes until your next flight to ${destinationName}. Departing on ${formattedDate} @ ${departure.substring(0, 2)}:${departure.substring(2, 4)} LT.\n\n`;
-                }
-                
-                previousArrivalTime = arrival.substring(0, 2) + ":" + arrival.substring(2, 4);
-                previousDestination = destinationName;
-                previousDate = formattedDate;
-            }
+            const layover = calculateLayover(
+                prevArrivalFormatted, 
+                nextDepartureFormatted, 
+                previousDate, 
+                formattedDate
+            );
+            
+            briefing += `In ${originName}, you will have a layover of ${layover.hours} hours and ${layover.minutes} minutes until your next flight to ${destinationName}. Departing on ${formattedDate} @ ${departure} LT.\n\n`;
         }
+        
+        // Format arrival time for next iteration
+        const arrival = flight.arrival.substring(0, 2) + ":" + flight.arrival.substring(2, 4);
+        previousArrivalTime = arrival;
+        previousDestination = flight.destinationCode;
+        previousDate = formattedDate;
     }
     
     briefing += "Please see in attached your flight ticket.";
