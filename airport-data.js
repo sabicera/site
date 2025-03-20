@@ -691,7 +691,7 @@ const airportNames = {
 "BFK": "Colorado, Buffalo Municipal Airport",
 "BFL": "California, Meadows Field Airport",
 "BFM": "Mobile Downtown Airport",
-"BFN": "Orange Free State, Bram Fischer International Airport",
+"BFN": "Bloemfontein Airport",
 "BFO": "Buffalo Range",
 "BFP": "Pennsylvania, Beaver Falls",
 "BFQ": "Bahia Pinas",
