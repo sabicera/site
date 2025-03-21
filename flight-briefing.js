@@ -403,6 +403,38 @@ function getAirportNames() {
     if (window.airportNames) {
         return window.airportNames;
     }
+    
+    // Fallback to a basic mapping if airportNames is not available
+    console.warn("Airport data not loaded from airport-data.js, using fallback data.");
+    return {
+        "PTY": "Panama City",
+        "GYE": "Guayaquil",
+        "IST": "Istanbul",
+        "CND": "Constanta",
+        "DUR": "Durban",
+        "PLZ": "Port Elizabeth",
+        "JNB": "Johannesburg",
+        "CPT": "Cape Town",
+        "ARI": "Arica",
+        "SCL": "Santiago",
+        "CDG": "Paris Charles de Gaulle",
+        "EDI": "Edinburgh",
+        // Add commonly used airports
+        "LHR": "London Heathrow",
+        "FRA": "Frankfurt",
+        "AMS": "Amsterdam",
+        "MAD": "Madrid",
+        "BCN": "Barcelona",
+        "FCO": "Rome",
+        "MUC": "Munich",
+        "JFK": "New York",
+        "LAX": "Los Angeles",
+        "SFO": "San Francisco",
+        "SIN": "Singapore",
+        "BKK": "Bangkok",
+        "SYD": "Sydney"
+    };
+}
 
 // ---------------- MAIN FUNCTIONS -----------------
 
