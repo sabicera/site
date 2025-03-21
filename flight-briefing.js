@@ -403,37 +403,6 @@ function getAirportNames() {
     if (window.airportNames) {
         return window.airportNames;
     }
-    
-    // Fallback to a basic mapping if airportNames is not available
-    console.warn("Airport data not loaded from airport-data.js, using fallback data.");
-    return {
-        "PTY": "Panama City",
-        "GYE": "Guayaquil",
-        "IST": "Istanbul",
-        "CND": "Constanta",
-        "DUR": "Durban",
-        "PLZ": "Port Elizabeth",
-        "JNB": "Johannesburg",
-        "CPT": "Cape Town",
-        "ARI": "Arica",
-        "SCL": "Santiago",
-        "CDG": "Paris Charles de Gaulle",
-        "EDI": "Edinburgh",
-        // Add commonly used airports
-        "LHR": "London Heathrow",
-        "FRA": "Frankfurt",
-        "AMS": "Amsterdam",
-        "MAD": "Madrid",
-        "BCN": "Barcelona",
-        "FCO": "Rome",
-        "MUC": "Munich",
-        "JFK": "New York",
-        "LAX": "Los Angeles",
-        "SFO": "San Francisco",
-        "SIN": "Singapore",
-        "BKK": "Bangkok",
-        "SYD": "Sydney"
-    };
 }
 
 // ---------------- MAIN FUNCTIONS -----------------
@@ -565,9 +534,9 @@ function generateBriefing() {
     // Process all flights
     for (let i = 0; i < flights.length; i++) {
         const flight = flights[i];
-        // Use directly provided origin/destination names if available, otherwise look them up
-        const originName = flight.originName || airportNames[flight.originCode] || flight.originCode;
-        const destinationName = flight.destinationName || airportNames[flight.destinationCode] || flight.destinationCode;
+        // Use only the airport codes to look up airport names
+        const originName = airportNames[flight.originCode] || flight.originCode;
+        const destinationName = airportNames[flight.destinationCode] || flight.destinationCode;
 
         // Format the date (13MAR → 13.03.2025)
         const formattedDate = formatDate(flight.date);
