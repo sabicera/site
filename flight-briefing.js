@@ -96,6 +96,20 @@ function extractPassengerName(text) {
         return singleName;
     }
     
+    // Check for pattern like "CHIYA/LOYISO WISEMAN MR" directly at the beginning of a line
+    const lines = text.split('\n');
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.includes('/') && trimmedLine.match(/^[A-Z]+\/[A-Z\s]+(MR|MS|MRS)?$/)) {
+            const nameMatch = trimmedLine.match(/([A-Z]+)\/([A-Z\s]+)(?:\s+(MR|MS|MRS))?$/);
+            if (nameMatch) {
+                const lastName = nameMatch[1];
+                const firstName = nameMatch[2];
+                return formatName(lastName) + " " + formatName(firstName);
+            }
+        }
+    }
+    
     // If we have multiple passenger names on separate lines, extract them all
     if (text.includes('\n')) {
         const multipleNames = extractMultiplePassengerNames(text);
@@ -142,7 +156,9 @@ function parseAlternativeFormat(text) {
     const lines = text.split('\n');
 
     // Check for Flight Date, Org, Dest format with dashes
-    // This handles the specific format from your example
+    // This handles formats like: 
+    // CM 226 14MAR PANAMA CIT PTY   MIAMI INTL MIA   0801  1208           2PC
+    // AA3433 14MAR MIAMI INTL MIA   FREEPORT FPO     1615  1705           0PC
     if (text.includes("Flight Date") && text.includes("Org") && text.includes("Dest")) {
         console.log("Detected Flight Date/Org/Dest format with dashes");
 
@@ -165,27 +181,39 @@ function parseAlternativeFormat(text) {
             }
             
             // Try to match flight details line
-            // Example: CM 273 13MAR PANAMA CIT PTY GUAYAQUIL GYE 0901 1119 2PC
-            const match = line.match(/([A-Z]{2})\s+(\d+)\s+(\d{2}[A-Z]{3})/);
+            // Example: CM 226 14MAR PANAMA CIT PTY   MIAMI INTL MIA   0801  1208           2PC
+            const flightMatch = line.match(/([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})/);
             
-            if (match) {
-                const airline = match[1];
-                const flightNumber = match[2];
-                const date = match[3];
+            if (flightMatch) {
+                const airline = flightMatch[1];
+                const flightNumber = flightMatch[2];
+                const date = flightMatch[3];
                 
-                // Find airport codes - usually three letters
-                const airportCodes = line.match(/\b([A-Z]{3})\b/g) || [];
+                // Find origin and destination with their airport codes
+                // The pattern looks for text followed by a 3-letter code
+                const locationPattern = /\b([A-Z][A-Z\s]+)\s+([A-Z]{3})\b/g;
+                const locations = [];
+                let locationMatch;
+                
+                while ((locationMatch = locationPattern.exec(line)) !== null) {
+                    locations.push({
+                        cityName: locationMatch[1].trim(),
+                        airportCode: locationMatch[2]
+                    });
+                }
                 
                 // Find time patterns - usually 4 digits
                 const times = line.match(/\b(\d{4})\b/g) || [];
                 
-                if (airportCodes.length >= 2 && times.length >= 2) {
+                if (locations.length >= 2 && times.length >= 2) {
                     parsedFlights.push({
                         airline,
                         flightNumber,
                         date,
-                        originCode: airportCodes[0],
-                        destinationCode: airportCodes[1],
+                        originCode: locations[0].airportCode,
+                        originName: locations[0].cityName,
+                        destinationCode: locations[1].airportCode,
+                        destinationName: locations[1].cityName,
                         departure: times[0],
                         arrival: times[1]
                     });
@@ -375,38 +403,6 @@ function getAirportNames() {
     if (window.airportNames) {
         return window.airportNames;
     }
-    
-    // Fallback to a basic mapping if airportNames is not available
-    console.warn("Airport data not loaded from airport-data.js, using fallback data.");
-    return {
-        "PTY": "Panama City",
-        "GYE": "Guayaquil",
-        "IST": "Istanbul",
-        "CND": "Constanta",
-        "DUR": "Durban",
-        "PLZ": "Port Elizabeth",
-        "JNB": "Johannesburg",
-        "CPT": "Cape Town",
-        "ARI": "Arica",
-        "SCL": "Santiago",
-        "CDG": "Paris Charles de Gaulle",
-        "EDI": "Edinburgh",
-        // Add commonly used airports
-        "LHR": "London Heathrow",
-        "FRA": "Frankfurt",
-        "AMS": "Amsterdam",
-        "MAD": "Madrid",
-        "BCN": "Barcelona",
-        "FCO": "Rome",
-        "MUC": "Munich",
-        "JFK": "New York",
-        "LAX": "Los Angeles",
-        "SFO": "San Francisco",
-        "SIN": "Singapore",
-        "BKK": "Bangkok",
-        "SYD": "Sydney"
-    };
-}
 
 // ---------------- MAIN FUNCTIONS -----------------
 
@@ -537,8 +533,9 @@ function generateBriefing() {
     // Process all flights
     for (let i = 0; i < flights.length; i++) {
         const flight = flights[i];
-        const originName = airportNames[flight.originCode] || flight.originCode;
-        const destinationName = airportNames[flight.destinationCode] || flight.destinationCode;
+        // Use directly provided origin/destination names if available, otherwise look them up
+        const originName = flight.originName || airportNames[flight.originCode] || flight.originCode;
+        const destinationName = flight.destinationName || airportNames[flight.destinationCode] || flight.destinationCode;
 
         // Format the date (13MAR → 13.03.2025)
         const formattedDate = formatDate(flight.date);
