@@ -19,31 +19,24 @@ function formatDate(date) {
     return `${day}.${month}.${year}`;
 }
 
-// Detect whether the input is in an alternative format 
-function isAlternativeFormat(text) {
-    // Check if it has GDS format (1.1NAME/SURNAME)
-    if (text.match(/\d\.\d[A-Z]+\/[A-Z\s]+/)) {
-        return true;
+// Extract passenger name from a text string
+function extractPassengerName(text) {
+    // Check for pattern like "CHIYA/LOYISO WISEMAN MR" at the beginning of a line
+    const lines = text.split('\n');
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.includes('/') && !trimmedLine.includes(':') && !trimmedLine.includes('----')) {
+            const nameMatch = trimmedLine.match(/([A-Z]+)\/([A-Z\s]+)(?:\s+(MR|MS|MRS))?$/);
+            if (nameMatch) {
+                const lastName = nameMatch[1];
+                const firstName = nameMatch[2];
+                return formatName(lastName) + " " + formatName(firstName);
+            }
+        }
     }
     
-    // Check if it has the standard format with Flight Date, Org, Dest columns
-    if (text.includes('Flight Date') && text.includes('Org') && text.includes('Dest')) {
-        return true;
-    }
-    
-    // Check for various flight formats
-    if (text.match(/\d\s\.\s[A-Z]{2}\s\d+\s[A-Z]\s\d{2}[A-Z]{3}/) || // GDS dot-separated flight format
-        text.match(/[A-Z]{2}\d+\s+\d{2}[A-Z]{3}/) ||  // Simple airline code + number format
-        text.match(/\([A-Z]{3}\)/)) {  // City/airport code format
-        return true;
-    }
-    
-    return false;
-}
-
-// Extract a single passenger name from a text string
-function extractSinglePassengerName(text) {
-    // Format: 1.1TLALI/RAMAQHUBU CHRISTIAN
+    // Fallback to other patterns
+    // Format: 1.1NAME/SURNAME
     const gdsNameMatch = text.match(/\d\.\d([A-Z]+)\/([A-Z\s]+)/);
     if (gdsNameMatch) {
         const lastName = gdsNameMatch[1];
@@ -67,270 +60,64 @@ function extractSinglePassengerName(text) {
         return formatName(lastName) + " " + formatName(firstName);
     }
     
-    return null;
-}
-
-// Extract multiple passenger names from a text containing multiple names
-function extractMultiplePassengerNames(text) {
-    const lines = text.split('\n');
-    const names = [];
-    
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine && trimmedLine.includes('/')) {
-            const extractedName = extractSinglePassengerName(trimmedLine);
-            if (extractedName) {
-                names.push(extractedName);
-            }
-        }
-    }
-    
-    return names.length > 0 ? names : ["Passenger"];
-}
-
-// Main function to extract passenger name from input text
-function extractPassengerName(text) {
-    // First try to extract a single passenger name
-    const singleName = extractSinglePassengerName(text);
-    if (singleName) {
-        return singleName;
-    }
-    
-    // Check for pattern like "CHIYA/LOYISO WISEMAN MR" directly at the beginning of a line
-    const lines = text.split('\n');
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine.includes('/') && trimmedLine.match(/^[A-Z]+\/[A-Z\s]+(MR|MS|MRS)?$/)) {
-            const nameMatch = trimmedLine.match(/([A-Z]+)\/([A-Z\s]+)(?:\s+(MR|MS|MRS))?$/);
-            if (nameMatch) {
-                const lastName = nameMatch[1];
-                const firstName = nameMatch[2];
-                return formatName(lastName) + " " + formatName(firstName);
-            }
-        }
-    }
-    
-    // If we have multiple passenger names on separate lines, extract them all
-    if (text.includes('\n')) {
-        const multipleNames = extractMultiplePassengerNames(text);
-        if (multipleNames.length > 0 && multipleNames[0] !== "Passenger") {
-            return multipleNames[0]; // Return the first name for the briefing
-        }
-    }
-    
-    // If text contains spaces, split it and check each part for potential name patterns
-    if (text.includes(' ')) {
-        const parts = text.split(/\s+/);
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (part.includes('/')) {
-                // Look for patterns like "NAME/SOMETHING"
-                let fullName = part;
-                
-                // Check if the next parts are part of the name (like "GEOFF MR")
-                let j = i + 1;
-                while (j < parts.length && 
-                      !parts[j].includes('/') && 
-                      !parts[j].includes('-------') && 
-                      parts[j].toUpperCase() === parts[j]) {
-                    fullName += " " + parts[j];
-                    j++;
-                }
-                
-                const extractedName = extractSinglePassengerName(fullName);
-                if (extractedName) {
-                    return extractedName;
-                }
-            }
-        }
-    }
-    
     return "Passenger";
 }
 
 // ---------------- FLIGHT PARSING -----------------
 
-// Parse flight information from alternative format text
-function parseAlternativeFormat(text) {
+// Parse flight information from text
+function parseFlights(text) {
     const parsedFlights = [];
     const lines = text.split('\n');
 
-    // Check for Flight Date, Org, Dest format with dashes
-    // This handles formats like: 
-    // CM 226 14MAR PANAMA CIT PTY   MIAMI INTL MIA   0801  1208           2PC
-    // AA3433 14MAR MIAMI INTL MIA   FREEPORT FPO     1615  1705           0PC
-    if (text.includes("Flight Date") && text.includes("Org") && text.includes("Dest")) {
-        console.log("Detected Flight Date/Org/Dest format with dashes");
-
-        let foundHeader = false;
+    // Find flight data lines
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
         
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Skip until we find the header line
-            if (!foundHeader) {
-                if (line.includes("Flight Date") && line.includes("Org") && line.includes("Dest")) {
-                    foundHeader = true;
-                }
-                continue;
-            }
-            
-            // Skip separator lines
-            if (line.includes("----")) {
-                continue;
-            }
-            
-            // Try to match flight details line
-            // Example: CM 226 14MAR PANAMA CIT PTY   MIAMI INTL MIA   0801  1208           2PC
-            const flightMatch = line.match(/([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})/);
-            
-            if (flightMatch) {
-                const airline = flightMatch[1];
-                const flightNumber = flightMatch[2];
-                const date = flightMatch[3];
-                
-                // Find origin and destination with their airport codes
-                // The pattern looks for text followed by a 3-letter code
-                const locationPattern = /\b([A-Z][A-Z\s]+)\s+([A-Z]{3})\b/g;
-                const locations = [];
-                let locationMatch;
-                
-                while ((locationMatch = locationPattern.exec(line)) !== null) {
-                    locations.push({
-                        cityName: locationMatch[1].trim(),
-                        airportCode: locationMatch[2]
-                    });
-                }
-                
-                // Find time patterns - usually 4 digits
-                const times = line.match(/\b(\d{4})\b/g) || [];
-                
-                if (locations.length >= 2 && times.length >= 2) {
-                    parsedFlights.push({
-                        airline,
-                        flightNumber,
-                        date,
-                        originCode: locations[0].airportCode,
-                        originName: locations[0].cityName,
-                        destinationCode: locations[1].airportCode,
-                        destinationName: locations[1].cityName,
-                        departure: times[0],
-                        arrival: times[1]
-                    });
-                }
-            }
+        // Skip separator and header lines
+        if (line.includes("----") || line.includes("Flight Date") || line.length === 0) {
+            continue;
         }
         
-        if (parsedFlights.length > 0) {
-            return parsedFlights;
-        }
-    }
-
-    // Check for GDS dot-separated flight format
-    // Examples: 
-    // 1 . UX 4064 H 17MAR VLCMAD HK1 1225 1330
-    // 1 . LA  181 L  22MAR ARISCL HK1  0800   1031  O*        E SA
-    // 2 . AF  401 M  22MAR SCLCDG HK1  1210  #0600  O*        E SA/SU 15
-    const gdsPattern = /\d\s\.\s([A-Z]{2})\s+(\d+)\s+[A-Z]\s+(\d{2}[A-Z]{3})\s+([A-Z]{3,6})\s+\w+\s+(\d{4})\s+#?(\d{4})/;
-    if (text.match(gdsPattern)) {
-        console.log("Detected GDS dot-separated format");
+        // Look for lines with flight information (airline code + number)
+        // Examples: CM 485 13MAR, UP 230 13MAR
+        const flightMatch = line.match(/^([A-Z]{2})\s*(\d+)\s+(\d{2}[A-Z]{3})/);
         
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            const match = line.match(gdsPattern);
-
-            if (match) {
-                const [_, airline, flightNumber, date, originDestCode, departure, arrival] = match;
-                
-                // We need to split the origin/destination code as it might be in different formats
-                let originCode, destinationCode;
-                
-                // Format could be ARISCL (6 chars) or joined like VLCMAD (6 chars)
-                if (originDestCode.length === 6) {
-                    originCode = originDestCode.substring(0, 3);
-                    destinationCode = originDestCode.substring(3, 6);
-                } else {
-                    // Handle other formats by looking for airport codes in the line
-                    const airportCodes = line.match(/\b([A-Z]{3})\b/g);
-                    if (airportCodes && airportCodes.length >= 2) {
-                        originCode = airportCodes[0];
-                        destinationCode = airportCodes[1];
-                    } else {
-                        // Fallback
-                        originCode = originDestCode;
-                        destinationCode = "UNK"; // Unknown
-                    }
+        if (flightMatch) {
+            const airline = flightMatch[1];
+            const flightNumber = flightMatch[2];
+            const date = flightMatch[3];
+            
+            // Extract airport codes using the most reliable method (end of segments)
+            const segments = line.split(/\s{2,}/); // Split by 2 or more spaces
+            const airportCodes = [];
+            
+            for (const segment of segments) {
+                // Look for 3-letter codes at the end of segments
+                const codeMatch = segment.match(/([A-Z]{3})$/);
+                if (codeMatch) {
+                    airportCodes.push(codeMatch[1]);
                 }
-                
+            }
+            
+            // Find time patterns (four digits)
+            const times = line.match(/\b(\d{4})\b/g) || [];
+            
+            // Only proceed if we found both airport codes and times
+            if (airportCodes.length >= 2 && times.length >= 2) {
                 parsedFlights.push({
-                    airline, 
-                    flightNumber, 
-                    date, 
-                    originCode, 
-                    destinationCode, 
-                    departure, 
-                    arrival
+                    airline,
+                    flightNumber,
+                    date,
+                    originCode: airportCodes[0],
+                    destinationCode: airportCodes[1],
+                    departure: times[0],
+                    arrival: times[1]
                 });
             }
         }
-        if (parsedFlights.length > 0) return parsedFlights;
     }
-
-    // Check for simple flight format (like "AZ7507 09MAR OTP FCO 1130 1240")
-    const simpleFlightPattern = /([A-Z]{2})(\d+)\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})\s+([A-Z]{3})\s+(\d{4})\s+(\d{4})/;
-    if (text.match(simpleFlightPattern)) {
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            const match = line.match(simpleFlightPattern);
-
-            if (match) {
-                const [_, airline, flightNumber, date, originCode, destCode, departure, arrival] = match;
-                parsedFlights.push({
-                    airline, flightNumber, date, originCode, 
-                    destinationCode: destCode, departure, arrival
-                });
-            }
-        }
-        if (parsedFlights.length > 0) return parsedFlights;
-    }
-
-    // Try to match any patterns with airline codes, dates, and airport codes
-    if (parsedFlights.length === 0) {
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Look for airline code and flight number pattern
-            const flightMatch = line.match(/\b([A-Z]{2})\s*(\d+)\b/);
-            
-            if (flightMatch) {
-                const airline = flightMatch[1];
-                const flightNumber = flightMatch[2];
-                
-                // Try to find date in DDMMM format
-                const dateMatch = line.match(/\b(\d{2}[A-Z]{3})\b/);
-                const date = dateMatch ? dateMatch[1] : '';
-                
-                // Try to find airport codes
-                const airportCodes = line.match(/\b([A-Z]{3})\b/g);
-                
-                // Try to find time patterns
-                const times = line.match(/\b(\d{4})\b/g);
-                
-                if (date && airportCodes && airportCodes.length >= 2 && times && times.length >= 2) {
-                    parsedFlights.push({
-                        airline,
-                        flightNumber,
-                        date,
-                        originCode: airportCodes[0],
-                        destinationCode: airportCodes[1],
-                        departure: times[0],
-                        arrival: times[1]
-                    });
-                }
-            }
-        }
-    }
-
+    
     return parsedFlights;
 }
 
@@ -397,42 +184,26 @@ function calculateLayover(prevArrival, nextDeparture, prevDate, nextDate) {
     };
 }
 
-// Return airport names mapping
+// Return airport names mapping (with fallback if external data not loaded)
 function getAirportNames() {
     // Try to use the global airportNames object if it exists
     if (window.airportNames) {
         return window.airportNames;
     }
     
-    // Fallback to a basic mapping if airportNames is not available
+    // Fallback to minimal mapping if airportNames is not available
     console.warn("Airport data not loaded from airport-data.js, using fallback data.");
     return {
         "PTY": "Panama City",
-        "GYE": "Guayaquil",
-        "IST": "Istanbul",
-        "CND": "Constanta",
-        "DUR": "Durban",
-        "PLZ": "Port Elizabeth",
-        "JNB": "Johannesburg",
-        "CPT": "Cape Town",
-        "ARI": "Arica",
-        "SCL": "Santiago",
-        "CDG": "Paris Charles de Gaulle",
-        "EDI": "Edinburgh",
-        // Add commonly used airports
-        "LHR": "London Heathrow",
-        "FRA": "Frankfurt",
-        "AMS": "Amsterdam",
-        "MAD": "Madrid",
-        "BCN": "Barcelona",
-        "FCO": "Rome",
-        "MUC": "Munich",
+        "MIA": "Miami",
+        "NAS": "Nassau",
+        "FPO": "Freeport",
+        // Add a few more common airports
         "JFK": "New York",
-        "LAX": "Los Angeles",
-        "SFO": "San Francisco",
-        "SIN": "Singapore",
-        "BKK": "Bangkok",
-        "SYD": "Sydney"
+        "LHR": "London",
+        "CDG": "Paris",
+        "FRA": "Frankfurt",
+        "SIN": "Singapore"
     };
 }
 
@@ -451,104 +222,10 @@ function generateBriefing() {
     // Extract passenger name from the input text
     const passengerName = extractPassengerName(inputText);
     
-    // Detect format and parse flights
-    const isAltFormat = isAlternativeFormat(inputText);
-    let flights;
-
-    if (isAltFormat) {
-        // Handle alternative format
-        flights = parseAlternativeFormat(inputText);
-    } else {
-        // Handle original format
-        const flightLines = inputText.split("\n").filter(line => line.trim() !== "");
-        flights = [];
-
-        // Parse each flight line 
-        for (const line of flightLines) {
-            const parts = line.match(/(\w+)\s+(\d+)\s+([A-Z])\s+(\d{2}[A-Z]{3})\s+(\w{3})(\w{3})\s+\w+\s+(\d{4})\s+(?:#?(\d{4}))?/);
-
-            if (parts) {
-                const [_, airline, flightNumber, bookingClass, date, origin, destination, departure, arrival] = parts;
-
-                flights.push({
-                    airline: airline,
-                    flightNumber: flightNumber,
-                    date: date,
-                    originCode: origin,
-                    destinationCode: destination,
-                    departure: departure,
-                    arrival: arrival || departure // Default to departure if arrival is missing
-                });
-            }
-        }
-    }
-
-    // Try one more approach if no flights were parsed yet - for the specific LATAM/Air France format
-    if (!flights || flights.length === 0) {
-        console.log("Trying alternate GDS format parser");
-        const alternateGdsPattern = /\d\s\.\s([A-Z]{2})\s+(\d+)\s+[A-Z]\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})([A-Z]{3})\s+\w+\s+(\d{4})\s+#?(\d{4})/;
-        
-        const lines = inputText.split('\n');
-        flights = [];
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Try the LATAM/AF format first
-            if (line.match(/\d\s\.\s[A-Z]{2}\s+\d+\s+[A-Z]/)) {
-                // Get the airline code and flight number
-                const basicInfo = line.match(/\d\s\.\s([A-Z]{2})\s+(\d+)\s+([A-Z])\s+(\d{2}[A-Z]{3})/);
-                
-                if (basicInfo) {
-                    const airline = basicInfo[1];
-                    const flightNumber = basicInfo[2];
-                    const date = basicInfo[4];
-                    
-                    // Get airport codes - might be together like ARISCL or separate
-                    let originCode = "", destinationCode = "";
-                    const airportCodes = line.match(/\b([A-Z]{3})\b/g);
-                    
-                    if (airportCodes && airportCodes.length >= 2) {
-                        originCode = airportCodes[0];
-                        destinationCode = airportCodes[1];
-                    } else {
-                        // Try to find joined codes like ARISCL
-                        const joinedCodes = line.match(/\s([A-Z]{6})\s/);
-                        if (joinedCodes) {
-                            originCode = joinedCodes[1].substring(0, 3);
-                            destinationCode = joinedCodes[1].substring(3, 6);
-                        }
-                    }
-                    
-                    // Get times
-                    const times = line.match(/\b(\d{4})\b/g);
-                    let departure = "", arrival = "";
-                    
-                    if (times && times.length >= 2) {
-                        departure = times[0];
-                        arrival = times[1].replace('#', ''); // Remove # from arrival if present
-                    } else if (times && times.length === 1) {
-                        departure = times[0];
-                        arrival = departure; // Default if no arrival found
-                    }
-                    
-                    if (airline && flightNumber && date && originCode && destinationCode && departure) {
-                        flights.push({
-                            airline,
-                            flightNumber,
-                            date,
-                            originCode,
-                            destinationCode,
-                            departure,
-                            arrival
-                        });
-                    }
-                }
-            }
-        }
-    }
+    // Parse flights from the input text
+    const flights = parseFlights(inputText);
     
-    // If still no flights were parsed successfully, show an error
+    // If no flights were parsed successfully, show an error
     if (!flights || flights.length === 0) {
         alert("Could not recognize flight details. Please check the format and try again.");
         console.error("Failed to parse flights from input:", inputText);
@@ -565,7 +242,7 @@ function generateBriefing() {
     // Process all flights
     for (let i = 0; i < flights.length; i++) {
         const flight = flights[i];
-        // Use only the airport codes to look up airport names
+        // Use airport code to look up the airport name, or use code if not found
         const originName = airportNames[flight.originCode] || flight.originCode;
         const destinationName = airportNames[flight.destinationCode] || flight.destinationCode;
 
