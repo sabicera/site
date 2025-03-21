@@ -371,8 +371,13 @@ function calculateLayover(prevArrival, nextDeparture, prevDate, nextDate) {
 
 // Return airport names mapping
 function getAirportNames() {
-    // This could be loaded from a separate file 
-    // For now, return an example mapping
+    // Try to use the global airportNames object if it exists
+    if (window.airportNames) {
+        return window.airportNames;
+    }
+    
+    // Fallback to a basic mapping if airportNames is not available
+    console.warn("Airport data not loaded from airport-data.js, using fallback data.");
     return {
         "PTY": "Panama City",
         "GYE": "Guayaquil",
@@ -382,7 +387,24 @@ function getAirportNames() {
         "PLZ": "Port Elizabeth",
         "JNB": "Johannesburg",
         "CPT": "Cape Town",
-        // Add more airport codes as needed
+        "ARI": "Arica",
+        "SCL": "Santiago",
+        "CDG": "Paris Charles de Gaulle",
+        "EDI": "Edinburgh",
+        // Add commonly used airports
+        "LHR": "London Heathrow",
+        "FRA": "Frankfurt",
+        "AMS": "Amsterdam",
+        "MAD": "Madrid",
+        "BCN": "Barcelona",
+        "FCO": "Rome",
+        "MUC": "Munich",
+        "JFK": "New York",
+        "LAX": "Los Angeles",
+        "SFO": "San Francisco",
+        "SIN": "Singapore",
+        "BKK": "Bangkok",
+        "SYD": "Sydney"
     };
 }
 
@@ -589,6 +611,11 @@ function clearFields() {
 
 // Set up event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if airport data is loaded
+    if (!window.airportNames) {
+        console.warn("Airport data not loaded. Make sure airport-data.js is included before flight-briefing.js");
+    }
+
     // Generate button click handler
     document.getElementById('generate-btn').addEventListener('click', generateBriefing);
 
