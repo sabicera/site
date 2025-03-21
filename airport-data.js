@@ -9798,3 +9798,5 @@ const airportNames = {
 "ZZU": "Northern Region, Mzuzu",
 "ZZV": "Ohio, Zanesville",
 };
+
+window.airportNames = airportNames;
