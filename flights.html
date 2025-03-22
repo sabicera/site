@@ -63,23 +63,21 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Flight Briefing Generator</h1>
-        
-        <textarea id="flights" placeholder="Paste flight details here..."></textarea>
-        
-        <div class="buttons">
-            <button id="generate-btn">Generate Briefing</button>
-            <button id="copy-btn">Copy to Clipboard</button>
-            <button id="clear-btn">Clear</button>
+    <main>
+        <div class="container">
+            <h1>Flight Briefing Generator</h1>
+            <label for="flights">Flight Details:</label>
+            <textarea id="flights" placeholder="Paste flight details here..."></textarea>
+            <div class="buttons">
+                <button id="generate-btn">Generate Briefing</button>
+                <button id="copy-btn">Copy to Clipboard</button>
+                <button id="clear-btn">Clear</button>
+            </div>
+            <div class="output-container">
+                <pre id="output"></pre>
+            </div>
         </div>
-        
-        <div class="output-container">
-            <pre id="output"></pre>
-        </div>
-    </div>
-
-    <!-- Make sure to include airport-data.js BEFORE flight-briefing.js -->
+    </main>
     <script src="airport-data.js"></script>
     <script src="flight-briefing.js"></script>
 </body>
