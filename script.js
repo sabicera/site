@@ -152,7 +152,7 @@ function loadVesselsFromLocalStorage() {
 
 // Test database connection
 function testDatabaseConnection() {
-    return fetch(`${app.apiUrl}/test`)
+    return fetch(`${app.apiUrl}/server/db-connector.php`)
         .then(response => response.json())
         .then(data => {
             app.dbConnection = data.success;
