@@ -152,7 +152,7 @@ function loadVesselsFromLocalStorage() {
 
 // Test database connection
 function testDatabaseConnection() {
-    return fetch(`${app.apiUrl}/db-connector.php/test`)
+    return fetch(`${app.apiUrl}/test.php`)
         .then(response => {
             // Add error handling for non-OK responses
             if (!response.ok) {
