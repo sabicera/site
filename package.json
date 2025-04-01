@@ -1,11 +1,11 @@
 {
-  "name": "vessel-management-api-proxy",
+  "name": "vessel-management-api",
   "version": "1.0.0",
-  "description": "API Proxy for Vessel Management System",
-  "main": "database-api.js",
+  "description": "API for Vessel Management System",
+  "main": "server.js",
   "scripts": {
-    "start": "node database-api.js",
-    "dev": "nodemon database-api.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
