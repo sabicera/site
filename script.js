@@ -152,13 +152,16 @@ function loadVesselsFromLocalStorage() {
 
 // Test database connection
 function testDatabaseConnection() {
-    return fetch(`${app.apiUrl}/test.php`)
+    return fetch(`${app.apiUrl}/test`)
         .then(response => {
-            // Add error handling for non-OK responses
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
+        })
+        .then(data => {
+            app.dbConnection = data.success;
+            return data.success;
         })
         .catch(error => {
             console.error('Error testing database connection:', error);
@@ -170,7 +173,12 @@ function testDatabaseConnection() {
 // Function to fetch vessels from database
 function fetchVesselsFromDatabase() {
     fetch(`${app.apiUrl}/vessels`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 app.vessels = data.data.vessels;
@@ -201,7 +209,12 @@ function addVesselToDatabase(vessel) {
         },
         body: JSON.stringify(vessel)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Refresh vessel list
