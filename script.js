@@ -152,11 +152,13 @@ function loadVesselsFromLocalStorage() {
 
 // Test database connection
 function testDatabaseConnection() {
-    return fetch(`${app.apiUrl}/server/db-connector.php`)
-        .then(response => response.json())
-        .then(data => {
-            app.dbConnection = data.success;
-            return data.success;
+    return fetch(`${app.apiUrl}/db-connector.php/test`)
+        .then(response => {
+            // Add error handling for non-OK responses
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
         })
         .catch(error => {
             console.error('Error testing database connection:', error);
