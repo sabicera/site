@@ -107,7 +107,7 @@ const app = {
     darkMode: false,
     selectedRow: null,
     dbConnection: false,
-    apiUrl: 'http://your-server.com/db-connector.php', // CHANGE THIS to your actual server URL
+    apiUrl: 'https://web-inspections.onrender.com', // CHANGE THIS to your actual server URL
     portToTimezone: {
         "Colon": "America/Panama",
         "Rodman": "America/Panama",
