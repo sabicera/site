@@ -252,6 +252,3 @@ th {
         height: 50%;
     }
 }
-
-/* Add a custom font to match Claude's style */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
