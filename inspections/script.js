@@ -18,6 +18,12 @@ const pendingTbody = document.getElementById('pending-tbody');
 let pendingInspections = [];
 let blinkState = false;
 
+const link = document.createElement('link');
+link.rel = 'icon';
+link.href = 'underwater.ico';
+link.type = 'image/x-icon';
+document.getElementsByTagName('head')[0].appendChild(link);
+
 // Initialize the application
 function initApp() {
     loadSavedText();
