@@ -79,15 +79,16 @@ function calculateNetFromGross(grossSalary) {
     const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
     const monthlyGross = grossSalary / (is13thMonthEnabled ? 13 : 12);
     
-    // Calculate taxable amount (excluding 13th month for tax only)
+    // Calculate taxable amount (excluding 13th month for tax and provident fund)
     const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossSalary;
     
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
-    const providentFund = grossSalary * providentFundRate;
+    // Apply provident fund only on taxable amount (excluding 13th month)
+    const providentFund = taxableAmount * providentFundRate;
 
-    // Calculate tax on reduced amount, but social and GESI on full amount
+    // Calculate tax and social/GESI on the taxable amount
     const { tax, brackets } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
@@ -123,13 +124,17 @@ function calculateGrossFromNet(netSalary) {
 
     const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
     const monthlyGross = grossYear / (is13thMonthEnabled ? 13 : 12);
+    
+    // Calculate taxable amount (excluding 13th month for tax and provident fund)
     const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossYear;
     
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
-    const providentFund = grossYear * providentFundRate;
+    // Apply provident fund only on taxable amount (excluding 13th month)
+    const providentFund = taxableAmount * providentFundRate;
 
+    // Calculate tax and social/GESI on the taxable amount
     const { tax, brackets } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(grossYear - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
 
@@ -140,13 +145,17 @@ function calculateGrossFromNet(netSalary) {
 function calculateNetFromGrossInternal(grossSalary) {
     const is13thMonthEnabled = document.getElementById('thirteenthSalary').checked;
     const monthlyGross = grossSalary / (is13thMonthEnabled ? 13 : 12);
+    
+    // Calculate taxable amount (excluding 13th month for tax and provident fund)
     const taxableAmount = is13thMonthEnabled ? (monthlyGross * 12) : grossSalary;
 
     const providentFundRate = parseFloat(document.getElementById('providentFundPercentage').value) / 100;
-    const providentFund = grossSalary * providentFundRate;
+    // Apply provident fund only on taxable amount (excluding 13th month)
+    const providentFund = taxableAmount * providentFundRate;
 
+    // Calculate tax and social/GESI on the taxable amount
     const { tax } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
+    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
