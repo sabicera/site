@@ -116,7 +116,7 @@ main {
     border: none;
     resize: none;
     padding: 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Calibri', Courier, monospace;
     font-size: 1rem;
     outline: none;
     white-space: pre;
@@ -138,7 +138,7 @@ main {
     pointer-events: none;
     overflow: auto;
     padding: 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Calibri', Courier, monospace;
     font-size: 1rem;
     line-height: 1.5;
     white-space: pre;
