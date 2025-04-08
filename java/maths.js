@@ -86,9 +86,11 @@ function calculateNetFromGross(grossSalary) {
     // Apply provident fund only on taxable amount (excluding 13th month)
     const providentFund = taxableAmount * providentFundRate;
 
-    // Calculate tax and social/GESI on the taxable amount
+    // Calculate tax on taxable amount (excluding 13th month)
     const { tax, brackets } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
+    
+    // Calculate social and GESI on full amount (including 13th month)
+    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
@@ -132,9 +134,11 @@ function calculateGrossFromNet(netSalary) {
     // Apply provident fund only on taxable amount (excluding 13th month)
     const providentFund = taxableAmount * providentFundRate;
 
-    // Calculate tax and social/GESI on the taxable amount
+    // Calculate tax on taxable amount (excluding 13th month)
     const { tax, brackets } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
+    
+    // Calculate social and GESI on full amount (including 13th month)
+    const { social, gesi } = calculateSocialAndGesi(grossYear - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
 
@@ -153,9 +157,11 @@ function calculateNetFromGrossInternal(grossSalary) {
     // Apply provident fund only on taxable amount (excluding 13th month)
     const providentFund = taxableAmount * providentFundRate;
 
-    // Calculate tax and social/GESI on the taxable amount
+    // Calculate tax on taxable amount (excluding 13th month)
     const { tax } = calculateTax(taxableAmount - providentFund);
-    const { social, gesi } = calculateSocialAndGesi(taxableAmount - providentFund);
+    
+    // Calculate social and GESI on full amount (including 13th month)
+    const { social, gesi } = calculateSocialAndGesi(grossSalary - providentFund);
     
     const totalDeductions = tax + social + gesi + providentFund;
     const netYear = grossSalary - totalDeductions;
