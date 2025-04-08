@@ -1,4 +1,4 @@
-/* Reset and base styles */
+/* Base styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Calibri';
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background-color: #2F4F4F; /* Dark slate gray */
     color: white;
     height: 100vh;
@@ -45,6 +45,13 @@ header {
     color: yellow;
 }
 
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ddd;
+}
+
 .header-buttons {
     display: flex;
     gap: 10px;
@@ -77,6 +84,16 @@ header {
 .btn-danger {
     background-color: #FF8080; /* Light coral */
     color: black;
+}
+
+.btn-small {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
 }
 
 /* Main content area */
@@ -115,7 +132,7 @@ main {
     border: none;
     resize: none;
     padding: 10px;
-    font-family: 'Calibri';
+    font-family: 'Courier New', Courier, monospace;
     font-size: 1rem;
     outline: none;
     white-space: pre;
@@ -137,7 +154,7 @@ main {
     pointer-events: none;
     overflow: auto;
     padding: 10px;
-    font-family: 'Calibri';
+    font-family: 'Courier New', Courier, monospace;
     font-size: 1rem;
     line-height: 1.5;
     white-space: pre;
@@ -199,6 +216,12 @@ main {
     border-bottom: 1px solid #ddd;
 }
 
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
 .close-btn {
     font-size: 1.5rem;
     cursor: pointer;
@@ -242,13 +265,193 @@ th {
     100% { background-color: #FF6B6B; }
 }
 
+/* Save session styles */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.sessions-list-container {
+    margin-top: 20px;
+}
+
+.sessions-list-container h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.sessions-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-info {
+    flex: 1;
+}
+
+.session-name {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.session-date {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.session-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.loading {
+    padding: 15px;
+    text-align: center;
+    color: #666;
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Login and Register page styles */
+.login-page {
+    background-color: #2F4F4F;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-header h1 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.login-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+.login-form {
+    margin-top: 20px;
+}
+
+.error-message, .success-message {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.form-footer a {
+    color: #4a6fdc;
+    text-decoration: none;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
     .split-container {
         flex-direction: column;
     }
     
     .panel {
         height: 50%;
+    }
+    
+    .modal-content {
+        width: 95%;
     }
 }
