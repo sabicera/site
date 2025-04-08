@@ -11,24 +11,16 @@ const uwClearBtn = document.getElementById('uw-clear-btn');
 const k9CopyBtn = document.getElementById('k9-copy-btn');
 const uwCopyBtn = document.getElementById('uw-copy-btn');
 const pendingModal = document.getElementById('pending-modal');
-const closePendingModalBtn = document.getElementById('close-pending-modal');
+const closeModalBtn = document.getElementById('close-modal');
 const pendingTbody = document.getElementById('pending-tbody');
-const saveBtn = document.getElementById('save-btn');
-const saveModal = document.getElementById('save-modal');
-const closeSaveModalBtn = document.getElementById('close-save-modal');
-const sessionNameInput = document.getElementById('session-name');
-const sessionIdInput = document.getElementById('session-id');
-const saveSessionBtn = document.getElementById('save-session-btn');
-const sessionsList = document.getElementById('sessions-list');
-const saveMessage = document.getElementById('save-message');
 
 // Application state
 let pendingInspections = [];
 let blinkState = false;
-let currentSessionId = null;
 
 // Initialize the application
 function initApp() {
+    loadSavedText();
     setupEventListeners();
     startTimers();
     syncScroll(k9TextArea, k9HighlightDiv);
@@ -40,10 +32,12 @@ function setupEventListeners() {
     // Text areas
     k9TextArea.addEventListener('input', () => {
         updatePendingInspections();
+        saveText();
     });
     
     uwTextArea.addEventListener('input', () => {
         updatePendingInspections();
+        saveText();
     });
     
     // Keyboard handling for tabs
@@ -53,33 +47,18 @@ function setupEventListeners() {
     // Buttons
     checkBtn.addEventListener('click', compareTextAreas);
     pendingBtn.addEventListener('click', togglePendingModal);
-    k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; });
-    uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; });
+    k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; saveText(); });
+    uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; saveText(); });
     k9CopyBtn.addEventListener('click', () => copyToClipboard(k9TextArea.value));
     uwCopyBtn.addEventListener('click', () => copyToClipboard(uwTextArea.value));
     
-    // Pending Modal
-    closePendingModalBtn.addEventListener('click', togglePendingModal);
+    // Modal
+    closeModalBtn.addEventListener('click', togglePendingModal);
     window.addEventListener('click', (e) => {
         if (e.target === pendingModal) {
             togglePendingModal();
         }
     });
-    
-    // Save Modal
-    saveBtn.addEventListener('click', () => {
-        showSaveModal();
-        loadSessions();
-    });
-    
-    closeSaveModalBtn.addEventListener('click', () => hideSaveModal());
-    window.addEventListener('click', (e) => {
-        if (e.target === saveModal) {
-            hideSaveModal();
-        }
-    });
-    
-    saveSessionBtn.addEventListener('click', saveSession);
 }
 
 // Start timers for updating time and data
@@ -355,246 +334,6 @@ function togglePendingModal() {
     }
 }
 
-// Show save modal
-function showSaveModal() {
-    saveModal.classList.remove('hidden');
-}
-
-// Hide save modal
-function hideSaveModal() {
-    saveModal.classList.add('hidden');
-    
-    // Clear form
-    sessionNameInput.value = '';
-    sessionIdInput.value = '';
-    hideMessage();
-}
-
-// Load user's sessions
-function loadSessions() {
-    // Show loading message
-    sessionsList.innerHTML = '<div class="loading">Loading your sessions...</div>';
-    
-    // Fetch sessions from server
-    fetch('get_sessions.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displaySessions(data.sessions);
-            } else {
-                sessionsList.innerHTML = `<div class="loading">Error loading sessions: ${data.message}</div>`;
-            }
-        })
-        .catch(error => {
-            sessionsList.innerHTML = `<div class="loading">Error loading sessions: ${error.message}</div>`;
-        });
-}
-
-// Display sessions in the list
-function displaySessions(sessions) {
-    if (sessions.length === 0) {
-        sessionsList.innerHTML = '<div class="loading">No saved sessions yet</div>';
-        return;
-    }
-    
-    // Clear sessions list
-    sessionsList.innerHTML = '';
-    
-    // Add each session to the list
-    sessions.forEach(session => {
-        const sessionItem = document.createElement('div');
-        sessionItem.className = 'session-item';
-        
-        const sessionInfo = document.createElement('div');
-        sessionInfo.className = 'session-info';
-        
-        const sessionName = document.createElement('div');
-        sessionName.className = 'session-name';
-        sessionName.textContent = session.session_name;
-        
-        const sessionDate = document.createElement('div');
-        sessionDate.className = 'session-date';
-        sessionDate.textContent = `Last modified: ${session.last_modified_formatted}`;
-        
-        sessionInfo.appendChild(sessionName);
-        sessionInfo.appendChild(sessionDate);
-        
-        const sessionActions = document.createElement('div');
-        sessionActions.className = 'session-actions';
-        
-        const loadBtn = document.createElement('button');
-        loadBtn.className = 'btn btn-small btn-primary';
-        loadBtn.textContent = 'Load';
-        loadBtn.addEventListener('click', () => loadSessionData(session.session_id));
-        
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn btn-small';
-        editBtn.textContent = 'Edit';
-        editBtn.addEventListener('click', () => {
-            sessionNameInput.value = session.session_name;
-            sessionIdInput.value = session.session_id;
-        });
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-small btn-danger';
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.addEventListener('click', () => deleteSession(session.session_id, session.session_name));
-        
-        sessionActions.appendChild(loadBtn);
-        sessionActions.appendChild(editBtn);
-        sessionActions.appendChild(deleteBtn);
-        
-        sessionItem.appendChild(sessionInfo);
-        sessionItem.appendChild(sessionActions);
-        
-        sessionsList.appendChild(sessionItem);
-    });
-}
-
-// Save session
-function saveSession() {
-    // Get form data
-    const sessionName = sessionNameInput.value.trim();
-    const sessionId = sessionIdInput.value;
-    
-    // Validate session name
-    if (!sessionName) {
-        showMessage('Please enter a session name', 'error');
-        return;
-    }
-    
-    // Prepare data
-    const data = {
-        session_name: sessionName,
-        k9_text: k9TextArea.value,
-        uw_text: uwTextArea.value
-    };
-    
-    // If session ID exists, add it to the data
-    if (sessionId) {
-        data.session_id = sessionId;
-    }
-    
-    // Send data to server
-    fetch('save_session.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            showMessage(result.message, 'success');
-            
-            // Update current session ID
-            currentSessionId = result.session_id;
-            if (!sessionId) {
-                sessionIdInput.value = result.session_id;
-            }
-            
-            // Reload sessions list
-            loadSessions();
-        } else {
-            showMessage(result.message, 'error');
-        }
-    })
-    .catch(error => {
-        showMessage('Error saving session: ' + error.message, 'error');
-    });
-}
-
-// Load session data
-function loadSessionData(sessionId) {
-    fetch(`load_session.php?id=${sessionId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update text areas
-                k9TextArea.value = data.session.k9_text;
-                uwTextArea.value = data.session.uw_text;
-                
-                // Update form
-                sessionNameInput.value = data.session.session_name;
-                sessionIdInput.value = data.session.session_id;
-                
-                // Set current session ID
-                currentSessionId = data.session.session_id;
-                
-                // Compare text areas
-                compareTextAreas();
-                
-                // Show success message
-                showMessage(`Session "${data.session.session_name}" loaded successfully`, 'success');
-                
-                // Hide modal after a short delay
-                setTimeout(() => {
-                    hideSaveModal();
-                }, 1500);
-            } else {
-                showMessage(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            showMessage('Error loading session: ' + error.message, 'error');
-        });
-}
-
-// Delete session
-function deleteSession(sessionId, sessionName) {
-    if (!confirm(`Are you sure you want to delete "${sessionName}"?`)) {
-        return;
-    }
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('session_id', sessionId);
-    
-    // Send request to server
-    fetch('delete_session.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showMessage(data.message, 'success');
-            
-            // If the deleted session was the current one, clear form
-            if (currentSessionId === sessionId) {
-                sessionIdInput.value = '';
-                currentSessionId = null;
-            }
-            
-            // Reload sessions list
-            loadSessions();
-        } else {
-            showMessage(data.message, 'error');
-        }
-    })
-    .catch(error => {
-        showMessage('Error deleting session: ' + error.message, 'error');
-    });
-}
-
-// Show message in save modal
-function showMessage(message, type = 'info') {
-    saveMessage.textContent = message;
-    saveMessage.className = `message ${type}`;
-    saveMessage.classList.remove('hidden');
-    
-    // Auto-hide success messages after a delay
-    if (type === 'success') {
-        setTimeout(hideMessage, 3000);
-    }
-}
-
-// Hide message
-function hideMessage() {
-    saveMessage.classList.add('hidden');
-}
-
 // Copy text to clipboard
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
@@ -643,6 +382,30 @@ function copyToClipboard(text) {
             
             document.body.removeChild(textArea);
         });
+}
+
+// Save text to local storage
+function saveText() {
+    localStorage.setItem('k9Text', k9TextArea.value);
+    localStorage.setItem('uwText', uwTextArea.value);
+}
+
+// Load text from local storage
+function loadSavedText() {
+    const savedK9Text = localStorage.getItem('k9Text');
+    const savedUWText = localStorage.getItem('uwText');
+    
+    if (savedK9Text) {
+        k9TextArea.value = savedK9Text;
+    }
+    
+    if (savedUWText) {
+        uwTextArea.value = savedUWText;
+    }
+    
+    if (savedK9Text || savedUWText) {
+        compareTextAreas();
+    }
 }
 
 // Initialize the application when the page loads
