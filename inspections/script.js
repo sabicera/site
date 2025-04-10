@@ -294,9 +294,15 @@ function updatePendingTableDisplay() {
         
         // Apply styling based on priority
         if (inspection.isUrgent) {
-            row.className = blinkState ? 'urgent-row' : '';
+            row.className = 'urgent-row';
+            // Apply blinking effect only for urgent rows
+            if (!blinkState) {
+                row.style.opacity = '0.7';
+            }
         } else if (inspection.isPriority) {
             row.className = 'priority-row';
+        } else if (inspection.isUpcoming) {
+            row.className = 'upcoming-row';
         }
         
         // Description cell
