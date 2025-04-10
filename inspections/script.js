@@ -253,8 +253,9 @@ function updatePendingInspections() {
         return {
             ...inspection,
             hoursUntil,
-            isPriority: hoursUntil < 12 && hoursUntil > 0,
-            isUrgent: hoursUntil < 6 && hoursUntil > 0
+            isUpcoming: hoursUntil < 24 && hoursUntil > 0,
+            isPriority: hoursUntil < 6 && hoursUntil > 0,
+            isUrgent: hoursUntil < 2 && hoursUntil > 0
         };
     });
     
