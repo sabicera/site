@@ -228,19 +228,26 @@ th {
 
 /* Row highlight classes */
 .urgent-row {
-    background-color: #FF6B6B;
-    animation: pulse 1.5s infinite;
+    background-color: #FF6B6B; /* Bright red */
+    color: white;
+    font-weight: bold;
 }
 
 .priority-row {
-    background-color: #FFD166;
+    background-color: #d19c20; /* Amber/gold */
+    color: black;
+    font-weight: bold;
 }
 
-/* Animations */
+.upcoming-row {
+    background-color: #27c255; /* Green */
+    color: black;
+}
+
 @keyframes pulse {
-    0% { background-color: #FF6B6B; }
-    50% { background-color: #FFB6B6; }
-    100% { background-color: #FF6B6B; }
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 
 /* Responsive adjustments */
