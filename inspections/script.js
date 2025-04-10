@@ -275,7 +275,7 @@ function updatePendingInspections() {
     }
 }
 
-// Update pending table display
+// Update pending table display - Updated for no wrapping
 function updatePendingTableDisplay() {
     pendingTbody.innerHTML = '';
     
@@ -294,7 +294,9 @@ function updatePendingTableDisplay() {
         const row = document.createElement('tr');
         
         // Apply styling based on priority
-        if (inspection.isUrgent) {
+        if (inspection.hoursUntil <= 0) {
+            row.className = 'overdue-row';
+        } else if (inspection.isUrgent) {
             row.className = 'urgent-row';
             // Apply blinking effect only for urgent rows
             if (!blinkState) {
@@ -306,15 +308,17 @@ function updatePendingTableDisplay() {
             row.className = 'upcoming-row';
         }
         
-        // Description cell
+        // Description cell - No text wrapping
         const descCell = document.createElement('td');
         descCell.style.fontFamily = 'monospace';
+        descCell.style.whiteSpace = 'nowrap';
         descCell.textContent = inspection.description;
         row.appendChild(descCell);
         
         // Time left cell
         const timeCell = document.createElement('td');
         timeCell.style.textAlign = 'center';
+        timeCell.style.whiteSpace = 'nowrap';
         timeCell.textContent = formatTimeLeft(inspection.hoursUntil);
         row.appendChild(timeCell);
         
@@ -324,7 +328,14 @@ function updatePendingTableDisplay() {
 
 // Format time left display
 function formatTimeLeft(hoursUntil) {
-    if (hoursUntil <= 0) return 'Overdue';
+    if (hoursUntil <= 0) {
+        // Calculate time passed since departure
+        const hoursPassed = Math.abs(hoursUntil);
+        const hours = Math.floor(hoursPassed);
+        const minutes = Math.floor((hoursPassed - hours) * 60);
+        
+        return `Overdue: ${hours}h ${minutes}m ago`;
+    }
     
     const hours = Math.floor(hoursUntil);
     const minutes = Math.floor((hoursUntil - hours) * 60);
