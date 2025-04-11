@@ -416,6 +416,7 @@ th {
 
   .container {
     margin-top: 0;
+    border-radius: 0;
   };
   
   table {
