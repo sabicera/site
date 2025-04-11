@@ -279,9 +279,14 @@ function updateTables(grossSalary, tax, social, gesi, providentFund, netYear, to
     const monthlyNet = netYear / 12;
     const monthlyDeductions = totalDeductions / 12;
     
-    // Format percentage for deductions
-    const deductionsPercentage = ((totalDeductions / grossSalary) * 100).toFixed(2);
-    
+    // Format percentage for deductions - prevent NaN% when grossSalary is 0
+    let deductionsPercentage;
+    if (grossSalary === 0 || isNaN(grossSalary)) {
+        deductionsPercentage = "0.00";
+    } else {
+        deductionsPercentage = ((totalDeductions / grossSalary) * 100).toFixed(2);
+    }
+
     // Update the summary table (always visible)
     document.getElementById('gross').textContent = '€' + formatNumber(grossSalary.toFixed(2));
     document.getElementById('monthlygross').textContent = '€' + formatNumber(monthlyGross.toFixed(2));
