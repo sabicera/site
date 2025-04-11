@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Keep the original background image but add an overlay in dark mode
         if (isDarkMode) {
-            bodyStyle.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../images/cyprus.webp")';
+            bodyStyle.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("./images/cyprus.webp")';
         } else {
-            bodyStyle.backgroundImage = 'url("../images/cyprus.webp")';
+            bodyStyle.backgroundImage = 'url("./images/cyprus.webp")';
         }
     }
     
