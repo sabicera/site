@@ -96,7 +96,7 @@ h1 {
 }
 
 .bmc img {
-  height: 36px;
+  height: 30px;
 }
 
 .theme-toggle {
@@ -157,7 +157,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  /*/width: 100%;*/
   padding: 6px 10px;
   background-color: var(--secondary-background);
   border-radius: 8px;
