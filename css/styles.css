@@ -44,7 +44,7 @@
 }
 
 body {
-  background-image: url('./images/bg.jpg');
+  background-image: url('../images/cyprus.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top;
@@ -325,7 +325,6 @@ input:checked + .toggle-slider:before {
   margin-bottom: 10px;
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
-  scrollbar-width: thin;
 }
 
 .tabs::-webkit-scrollbar {
@@ -415,8 +414,8 @@ th {
     font-size: 1.8em;
   }
 
-  container {
-    margin-top: auto;
+  .container {
+    margin-top: 0;
   };
   
   table {
