@@ -1,3 +1,12 @@
+// Define utility functions at the beginning so they're available throughout the code
+function removeCommas(value) {
+    return value.replace(/,/g, '');
+}
+
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const yearlySalaryInput = document.getElementById('grossYearlySalary');
     const monthlySalaryInput = document.getElementById('grossMonthlySalary');
@@ -8,7 +17,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Set max length for inputs
     [yearlySalaryInput, monthlySalaryInput, yearlyNetInput, monthlyNetInput].forEach(input => {
-        input.setAttribute('maxlength', '8');
+        input.setAttribute('maxlength', '10');
+    });
+
+    // Input formatting and validation
+    [yearlySalaryInput, monthlySalaryInput, yearlyNetInput, monthlyNetInput, providentFundPercentageInput].forEach(input => {
+        input.addEventListener('focus', function() {
+            if (this.value === '0') {
+                this.value = '';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.value = '0';
+            }
+        });
     });
 
     function parseInputValue(input) {
@@ -67,11 +91,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     providentFundPercentageInput.addEventListener('input', function () {
-        const providentFundPercentage = parseFloat(providentFundPercentageInput.value) / 100;
-        if (!isNaN(providentFundPercentage)) {
-            const grossYearly = parseInputValue(yearlySalaryInput);
-            calculateNetFromGross(grossYearly);
+        // Ensure provident fund percentage is valid (0-10%)
+        let value = parseFloat(this.value);
+        if (isNaN(value)) {
+            value = 0;
+        } else if (value > 10) {
+            value = 10;
+            this.value = "10";
+        } else if (value < 0) {
+            value = 0;
+            this.value = "0";
         }
+        
+        const grossYearly = parseInputValue(yearlySalaryInput);
+        calculateNetFromGross(grossYearly);
+    });
+
+    // Initialize the calculator with default values
+    calculateNetFromGross(0);
+
+    // Listen for theme changes to update table styles if needed
+    document.addEventListener('themeChanged', function(e) {
+        // No specific action needed here as CSS handles the styling changes
+        // This listener is here for potential future enhancements
     });
 });
 
@@ -99,7 +141,7 @@ function calculateNetFromGross(grossSalary) {
     document.getElementById('netYearlySalary').value = formatNumber(netYear.toFixed(2));
     document.getElementById('netMonthlySalary').value = formatNumber(netMonth.toFixed(2));
 
-    updateMainTable(grossSalary, tax, social, gesi, providentFund, netYear, totalDeductions);
+    updateTables(grossSalary, tax, social, gesi, providentFund, netYear, totalDeductions);
     updateBracketTable(brackets);
 }
 
@@ -142,7 +184,7 @@ function calculateGrossFromNet(netSalary) {
     
     const totalDeductions = tax + social + gesi + providentFund;
 
-    updateMainTable(grossYear, tax, social, gesi, providentFund, netSalary, totalDeductions);
+    updateTables(grossYear, tax, social, gesi, providentFund, netSalary, totalDeductions);
     updateBracketTable(brackets);
 }
 
@@ -227,47 +269,52 @@ function calculateSocialAndGesi(amount) {
     };
 }
 
-function updateMainTable(grossSalary, tax, social, gesi, providentFund, netYear, totalDeductions, netMonth, deductionsMonth) {
-
-    console.log('grossSalary:', grossSalary);
-    console.log('tax:', tax);
-    console.log('social:', social);
-    console.log('gesi:', gesi);
-    console.log('providentFund:', providentFund);
-    console.log('netYear:', netYear);
-    console.log('totalDeductions:', totalDeductions);
-
+function updateTables(grossSalary, tax, social, gesi, providentFund, netYear, totalDeductions) {
+    // Update both main table and summary table with calculated values
+    const monthlyGross = grossSalary / 12;
+    const monthlyTax = tax / 12;
+    const monthlySocial = social / 12;
+    const monthlyGesi = gesi / 12;
+    const monthlyProvidentFund = providentFund / 12;
+    const monthlyNet = netYear / 12;
+    const monthlyDeductions = totalDeductions / 12;
+    
+    // Format percentage for deductions
+    const deductionsPercentage = ((totalDeductions / grossSalary) * 100).toFixed(2);
+    
+    // Update the summary table (always visible)
     document.getElementById('gross').textContent = '€' + formatNumber(grossSalary.toFixed(2));
-    document.getElementById('monthlygross').textContent = '€' + formatNumber((grossSalary / 12).toFixed(2));
-    document.getElementById('tax').textContent = '€' + formatNumber(tax.toFixed(2));
-    document.getElementById('monthlytax').textContent = '€' + formatNumber((tax / 12).toFixed(2));
-    document.getElementById('social').textContent = '€' + formatNumber(social.toFixed(2));
-    document.getElementById('monthlysocial').textContent = '€' + formatNumber((social / 12).toFixed(2));
-    document.getElementById('gesi').textContent = '€' + formatNumber(gesi.toFixed(2));
-    document.getElementById('monthlygesi').textContent = '€' + formatNumber((gesi / 12).toFixed(2));
-    document.getElementById('providentFund').textContent = '€' + formatNumber(providentFund.toFixed(2));
-    document.getElementById('monthlyProvidentFund').textContent = '€' + formatNumber((providentFund / 12).toFixed(2));
-    document.getElementById('netYear').textContent = '€' + formatNumber(netYear.toFixed(2));
+    document.getElementById('monthlygross').textContent = '€' + formatNumber(monthlyGross.toFixed(2));
     document.getElementById('deductionsYear').textContent = '€' + formatNumber(totalDeductions.toFixed(2));
-    document.getElementById('deductionsYearPercentage').textContent = '-' + ((totalDeductions / grossSalary) * 100).toFixed(2) + '%';
-    document.getElementById('netMonth').textContent = '€' + formatNumber((netYear / 12).toFixed(2));
-    document.getElementById('deductionsMonth').textContent = '€' + formatNumber((totalDeductions / 12).toFixed(2));
+    document.getElementById('deductionsMonth').textContent = '€' + formatNumber(monthlyDeductions.toFixed(2));
+    document.getElementById('netYear').textContent = '€' + formatNumber(netYear.toFixed(2));
+    document.getElementById('netMonth').textContent = '€' + formatNumber(monthlyNet.toFixed(2));
+    document.getElementById('deductionsYearPercentage').textContent = '-' + deductionsPercentage + '%';
+    
+    // Update the detailed table
+    document.getElementById('gross2').textContent = '€' + formatNumber(grossSalary.toFixed(2));
+    document.getElementById('monthlygross2').textContent = '€' + formatNumber(monthlyGross.toFixed(2));
+    document.getElementById('tax').textContent = '€' + formatNumber(tax.toFixed(2));
+    document.getElementById('monthlytax').textContent = '€' + formatNumber(monthlyTax.toFixed(2));
+    document.getElementById('social').textContent = '€' + formatNumber(social.toFixed(2));
+    document.getElementById('monthlysocial').textContent = '€' + formatNumber(monthlySocial.toFixed(2));
+    document.getElementById('gesi').textContent = '€' + formatNumber(gesi.toFixed(2));
+    document.getElementById('monthlygesi').textContent = '€' + formatNumber(monthlyGesi.toFixed(2));
+    document.getElementById('providentFund').textContent = '€' + formatNumber(providentFund.toFixed(2));
+    document.getElementById('monthlyProvidentFund').textContent = '€' + formatNumber(monthlyProvidentFund.toFixed(2));
+    document.getElementById('deductionsYear2').textContent = '€' + formatNumber(totalDeductions.toFixed(2));
+    document.getElementById('deductionsMonth2').textContent = '€' + formatNumber(monthlyDeductions.toFixed(2));
+    document.getElementById('netYear2').textContent = '€' + formatNumber(netYear.toFixed(2));
+    document.getElementById('netMonth2').textContent = '€' + formatNumber(monthlyNet.toFixed(2));
     document.getElementById('AccumulatedYear').textContent = '€' + formatNumber((netYear + providentFund).toFixed(2));
-    document.getElementById('AccumulatedMonth').textContent = '€' + formatNumber(((netYear / 12) + (providentFund / 12)).toFixed(2));
+    document.getElementById('AccumulatedMonth').textContent = '€' + formatNumber((monthlyNet + monthlyProvidentFund).toFixed(2));
 }
 
 function updateBracketTable(brackets) {
+    // Update the tax bracket table with the calculated values
     document.getElementById('tax0').textContent = '€' + formatNumber(brackets.tax0.toFixed(2));
     document.getElementById('tax20').textContent = '€' + formatNumber(brackets.tax20.toFixed(2));
     document.getElementById('tax25').textContent = '€' + formatNumber(brackets.tax25.toFixed(2));
     document.getElementById('tax30').textContent = '€' + formatNumber(brackets.tax30.toFixed(2));
     document.getElementById('tax35').textContent = '€' + formatNumber(brackets.tax35.toFixed(2));
-}
-
-function removeCommas(value) {
-    return value.replace(/,/g, '');
-}
-
-function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
