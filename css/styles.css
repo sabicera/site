@@ -44,7 +44,7 @@
 }
 
 body {
-  background-image: url('images/bg.jpg');
+  background-image: url('./images/bg.jpg');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top;
@@ -414,6 +414,10 @@ th {
   h1 {
     font-size: 1.8em;
   }
+
+  container {
+    margin-top: auto;
+  };
   
   table {
     font-size: 0.85em;
