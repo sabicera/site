@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vessel Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles2.css">
+    <script src="./script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">Vessel Management System</div>
+            <button id="themeToggle"><i class="fas fa-moon"></i> Toggle Theme</button>
+        </div>
+        <div class="clock-panel" id="clockPanel">
+            <!-- Clocks will be created by JavaScript -->
+        </div>
+        <div class="button-group">
+            <button id="informUWI"><i class="fas fa-water"></i> Inform UWI</button>
+            <button id="informK9"><i class="fas fa-dog"></i> Inform K9</button>
+            <button id="addVessel"><i class="fas fa-plus"></i> Add Vessel</button>
+            <button id="deleteSelected"><i class="fas fa-trash"></i> Delete Selected</button>
+            <button id="markAsDeparted"><i class="fas fa-ship"></i> Mark as Departed</button>
+            <button id="connectDB"><i class="fas fa-database"></i> Connect DB</button>
+        </div>
+
+        <div class="table-section">
+            <div class="section-title">All Vessels</div>
+                <div style="overflow-x: auto;">
+                    <table id="mainTable">
+                        <thead>
+                            <tr>
+                                <th>Inspection</th>
+                                <th>Vessels</th>
+                                <th>ETB</th>
+                                <th>ETD</th>
+                                <th>Port</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table data will be inserted by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+        </div>
+        <div class="table-section">
+            <div class="section-title">Priority List</div>
+            <div style="overflow-x: auto;">
+                <table id="departureTable">
+                    <thead>
+                        <tr>
+                            <th>Inspection</th>
+                            <th>Timing</th>
+                            <th>Vessels</th>
+                            <th>ETB/ETD</th>
+                            <th>Port</th>
+                            <th>Time Left</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table data will be inserted by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Add Vessel Modal -->
+    <div id="addVesselModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeAddModal">&times;</span>
+            <h2>Add New Vessel</h2>
+            <form id="addVesselForm">
+                <div class="form-group">
+                    <label for="inspectionType">Inspection:</label>
+                    <select id="inspectionType" required>
+                        <option value="Both">Both</option>
+                        <option value="K9">K9</option>
+                        <option value="Underwater">Underwater</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inspectionTiming">Inspection Timing:</label>
+                    <select id="inspectionTiming" required>
+                        <option value="Upon Departure">Upon Departure</option>
+                        <option value="Upon Arrival">Upon Arrival</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vesselName">Vessel Name:</label>
+                    <input type="text" id="vesselName" required>
+                </div>
+                <div class="form-group">
+                    <label for="etb">ETB (DD/MM - HHMM):</label>
+                    <input type="text" id="etb" placeholder="25/03 - 1500" required>
+                </div>
+                <div class="form-group">
+                    <label for="etd">ETD (DD/MM - HHMM):</label>
+                    <input type="text" id="etd" placeholder="27/03 - 1800" required>
+                </div>
+                <div class="form-group">
+                    <label for="port">Port:</label>
+                    <select id="port" required>
+                        <!-- Port options will be added by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="comments">Comments:</label>
+                    <textarea id="comments" rows="2"></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" id="cancelAddVessel">Cancel</button>
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Edit Cell Modal -->
+    <div id="editCellModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeEditModal">&times;</span>
+            <h2>Edit <span id="cellTitle"></span></h2>
+            <form id="editCellForm">
+                <div class="form-group">
+                    <label for="cellValue" id="cellLabel"></label>
+                    <input type="text" id="cellValue">
+                    <select id="cellValueSelect" style="display: none;">
+                        <!-- Options will be added dynamically -->
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" id="cancelEditCell">Cancel</button>
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Database Connection Modal -->
+    <div id="dbModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeDbModal">&times;</span>
+            <h2>Database Configuration</h2>
+            <form id="dbConfigForm">
+                <div class="form-group">
+                    <label for="dbHost">Host:</label>
+                    <input type="text" id="dbHost" value="2yzhf.h.filess.io" required>
+                </div>
+                <div class="form-group">
+                    <label for="dbPort">Port:</label>
+                    <input type="text" id="dbPort" value="61002" required>
+                </div>
+                <div class="form-group">
+                    <label for="dbName">Database:</label>
+                    <input type="text" id="dbName" value="inspections_strangeday" required>
+                </div>
+                <div class="form-group">
+                    <label for="dbUser">Username:</label>
+                    <input type="text" id="dbUser" value="inspections_strangeday" required>
+                </div>
+                <div class="form-group">
+                    <label for="dbPassword">Password:</label>
+                    <input type="password" id="dbPassword" value="6e3ffeb5c219f8488f16fef036db9bac69b21e53" required>
+                </div>
+                <div class="form-group">
+                    <p id="dbStatus"></p>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" id="cancelDbConfig">Cancel</button>
+                    <button type="submit">Connect</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Filtered Data Modal -->
+    <div id="filteredDataModal" class="modal">
+        <div class="modal-content" style="width: 80%; max-width: 800px;">
+            <span class="close-button" id="closeFilteredModal">&times;</span>
+            <h2 id="filteredTitle"></h2>
+            <div style="overflow-x: auto;">
+                <table id="filteredTable">
+                    <thead>
+                        <tr>
+                            <th>Inspection</th>
+                            <th>Vessels</th>
+                            <th>ETB</th>
+                            <th>ETD</th>
+                            <th>Port</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filtered data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-buttons">
+                <button id="copyToClipboard"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                <button id="closeFiltered">Close</button>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>
