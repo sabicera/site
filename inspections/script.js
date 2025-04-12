@@ -13,22 +13,60 @@ const uwCopyBtn = document.getElementById('uw-copy-btn');
 const pendingModal = document.getElementById('pending-modal');
 const closeModalBtn = document.getElementById('close-modal');
 const pendingTbody = document.getElementById('pending-tbody');
+const pendingPanel = document.getElementById('pending-panel');
+const pendingTbodyInline = document.getElementById('pending-tbody-inline');
 
 // Application state
 let pendingInspections = [];
 let blinkState = false;
+let isLargeScreen = false;
 
 // Initialize the application
 function initApp() {
+    console.log("App initialization started");
+    
+    // Check screen size first
+    checkScreenSize();
+    
+    // Then load text and set up listeners
     loadSavedText();
     setupEventListeners();
     startTimers();
     syncScroll(k9TextArea, k9HighlightDiv);
     syncScroll(uwTextArea, uwHighlightDiv);
+    
+    // Update pending inspections initially
+    updatePendingInspections();
+    
+    console.log("App initialization completed. Large screen:", isLargeScreen);
+}
+
+// Check screen size and update layout
+function checkScreenSize() {
+    isLargeScreen = window.innerWidth > 1200;
+    console.log("Screen size check - Width:", window.innerWidth, "Is large screen:", isLargeScreen);
+    
+    if (isLargeScreen) {
+        // Show the inline panel for large screens
+        if (pendingPanel) {
+            pendingPanel.style.display = 'flex';
+            console.log("Showing pending panel for large screen");
+        } else {
+            console.error("Pending panel element not found");
+        }
+    } else {
+        // Hide the inline panel for small screens
+        if (pendingPanel) {
+            pendingPanel.style.display = 'none';
+            console.log("Hiding pending panel for small screen");
+        }
+    }
 }
 
 // Set up event listeners
 function setupEventListeners() {
+    console.log("Setting up event listeners");
+    
     // Text areas
     k9TextArea.addEventListener('input', () => {
         updatePendingInspections();
@@ -46,7 +84,13 @@ function setupEventListeners() {
     
     // Buttons
     checkBtn.addEventListener('click', compareTextAreas);
-    pendingBtn.addEventListener('click', togglePendingModal);
+    pendingBtn.addEventListener('click', () => {
+        console.log("Pending button clicked, isLargeScreen:", isLargeScreen);
+        if (!isLargeScreen) {
+            togglePendingModal();
+        }
+    });
+    
     k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; saveText(); });
     uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; saveText(); });
     k9CopyBtn.addEventListener('click', () => copyToClipboard(k9TextArea.value));
@@ -59,6 +103,13 @@ function setupEventListeners() {
             togglePendingModal();
         }
     });
+    
+    // Window resize
+    window.addEventListener('resize', () => {
+        console.log("Window resized");
+        checkScreenSize();
+        updatePendingTableDisplay(); // Update tables when resizing
+    });
 }
 
 // Start timers for updating time and data
@@ -69,7 +120,6 @@ function startTimers() {
     
     // Update pending inspections every 10 seconds
     setInterval(updatePendingInspections, 10000);
-    updatePendingInspections(); // Initial update
     
     // Blink effect for urgent rows
     setInterval(() => {
@@ -228,6 +278,8 @@ function parseETDDates(text) {
 
 // Update pending inspections list
 function updatePendingInspections() {
+    console.log("Updating pending inspections");
+    
     const k9Inspections = parseETDDates(k9TextArea.value);
     const uwInspections = parseETDDates(uwTextArea.value);
     
@@ -262,10 +314,8 @@ function updatePendingInspections() {
     // Sort by ETD date
     pendingInspections.sort((a, b) => a.etdDate - b.etdDate);
     
-    // Update display if modal is open
-    if (!pendingModal.classList.contains('hidden')) {
-        updatePendingTableDisplay();
-    }
+    // Update both displays
+    updatePendingTableDisplay();
     
     // Update pending button appearance if there are urgent items
     if (pendingInspections.some(item => item.isUrgent)) {
@@ -273,11 +323,28 @@ function updatePendingInspections() {
     } else {
         pendingBtn.textContent = 'Pending';
     }
+    
+    console.log("Found", pendingInspections.length, "pending inspections");
 }
 
-// Update pending table display - Updated for no wrapping
+// Update pending table display for both modal and inline views
 function updatePendingTableDisplay() {
-    pendingTbody.innerHTML = '';
+    console.log("Updating table display. Modal table:", !!pendingTbody, "Inline table:", !!pendingTbodyInline);
+    
+    // Update modal table
+    if (pendingTbody) {
+        updateTableBody(pendingTbody);
+    }
+    
+    // Update inline table if exists
+    if (pendingTbodyInline) {
+        updateTableBody(pendingTbodyInline);
+    }
+}
+
+// Helper function to update a table body with pending data
+function updateTableBody(tableBody) {
+    tableBody.innerHTML = '';
     
     if (pendingInspections.length === 0) {
         const row = document.createElement('tr');
@@ -286,7 +353,7 @@ function updatePendingTableDisplay() {
         cell.textContent = 'No pending inspections';
         cell.style.textAlign = 'center';
         row.appendChild(cell);
-        pendingTbody.appendChild(row);
+        tableBody.appendChild(row);
         return;
     }
     
@@ -322,7 +389,7 @@ function updatePendingTableDisplay() {
         timeCell.textContent = formatTimeLeft(inspection.hoursUntil);
         row.appendChild(timeCell);
         
-        pendingTbody.appendChild(row);
+        tableBody.appendChild(row);
     });
 }
 
@@ -343,12 +410,22 @@ function formatTimeLeft(hoursUntil) {
     return `${hours}h ${minutes}m`;
 }
 
-// Toggle pending modal
+// Toggle pending modal - Only for small screens
 function togglePendingModal() {
-    pendingModal.classList.toggle('hidden');
+    console.log("Toggle pending modal called, isLargeScreen:", isLargeScreen);
     
-    if (!pendingModal.classList.contains('hidden')) {
-        updatePendingTableDisplay();
+    // Always show modal on small screens
+    if (!isLargeScreen) {
+        pendingModal.classList.toggle('hidden');
+        
+        if (!pendingModal.classList.contains('hidden')) {
+            console.log("Showing modal");
+            updatePendingTableDisplay();
+        } else {
+            console.log("Hiding modal");
+        }
+    } else {
+        console.log("Not toggling modal on large screen");
     }
 }
 
