@@ -505,3 +505,69 @@ function loadSavedText() {
 
 // Initialize the application when the page loads
 window.addEventListener('DOMContentLoaded', initApp);
+
+// Theme Toggle functionality
+// To be added to script.js
+
+// DOM elements for theme toggle 
+const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+const toggleLabel = document.querySelector('.toggle-label');
+
+// Function to set theme
+function setTheme(isDark) {
+    if (isDark) {
+        document.body.classList.remove('light-theme');
+        toggleLabel.textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'dark');
+        console.log("Theme set to dark mode");
+    } else {
+        document.body.classList.add('light-theme');
+        toggleLabel.textContent = 'Light Mode';
+        localStorage.setItem('theme', 'light');
+        console.log("Theme set to light mode");
+    }
+}
+
+// Initialize theme based on localStorage or default to dark
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const isDark = savedTheme === 'dark';
+    
+    console.log("Initializing theme from localStorage:", savedTheme);
+    
+    // Set checkbox state
+    themeToggleCheckbox.checked = isDark;
+    
+    // Apply theme
+    setTheme(isDark);
+}
+
+// Add this to your existing initialization
+function setupThemeToggle() {
+    // Add event listener for theme toggle
+    themeToggleCheckbox.addEventListener('change', (e) => {
+        setTheme(e.target.checked);
+    });
+    
+    // Initialize theme
+    initTheme();
+}
+
+// Add to the start of your initApp function
+function initApp() {
+    console.log("App initialization started");
+    
+    // Initialize theme first
+    setupThemeToggle();
+    
+    // Rest of your initialization code
+    checkScreenSize();
+    loadSavedText();
+    setupEventListeners();
+    startTimers();
+    syncScroll(k9TextArea, k9HighlightDiv);
+    syncScroll(uwTextArea, uwHighlightDiv);
+    updatePendingInspections();
+    
+    console.log("App initialization completed");
+}
