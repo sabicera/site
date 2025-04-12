@@ -153,6 +153,37 @@ main {
     border-radius: 0 0 4px 4px;
 }
 
+/* Pending Panel Specific Styles */
+.pending-panel {
+    display: none; /* Hidden by default, will be shown via JS for larger screens */
+    background-color: #1e3333;
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 0.7; /* Make it slightly narrower than the other panels */
+    border: 1px solid #495e5e;
+}
+
+.panel-header {
+    padding: 15px;
+    background-color: #1e3333;
+    border-bottom: 1px solid #495e5e;
+    text-align: center;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.pending-container {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    background-color: #fff;
+    color: #000;
+}
+
 /* Line highlight styles */
 .highlight-line {
     display: block;
@@ -215,40 +246,23 @@ main {
     overflow-x: auto;
 }
 
-/* Table styles */
+/* Common table styles */
 table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ddd;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: 600;
-}
-
-/* Table styles - Updated for no text wrap */
-#pending-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: auto;
     white-space: nowrap;
 }
 
-#pending-table th, 
-#pending-table td {
+th, td {
     padding: 10px 15px;
     text-align: left;
     border: 1px solid #ddd;
 }
 
-#pending-table th {
+th {
     background-color: #f2f2f2;
+    color: black;
     font-weight: 600;
     position: sticky;
     top: 0;
@@ -256,8 +270,8 @@ th {
 }
 
 /* Keep the Time Left column fixed width */
-#pending-table th:nth-child(2),
-#pending-table td:nth-child(2) {
+th:nth-child(2),
+td:nth-child(2) {
     width: 120px;
     text-align: center;
 }
@@ -294,12 +308,40 @@ th {
 }
 
 /* Responsive adjustments */
+@media (min-width: 1201px) {
+    /* Show the pending panel on large screens */
+    .pending-panel {
+        display: flex !important;
+        min-width: 700px; /* Increased minimum width for the countdown panel */
+        max-width: 600px; /* Increased maximum width for the countdown panel */
+        flex: none; /* Don't grow or shrink */
+    }
+    
+    /* Let the K9 and UW panels fill the remaining space */
+    .panel:nth-child(1),
+    .panel:nth-child(2) {
+        flex: 1; /* Both panels share the remaining space equally */
+    }
+}
+
+@media (max-width: 1200px) {
+    /* Hide the pending panel on smaller screens */
+    .pending-panel {
+        display: none !important;
+    }
+    
+    /* Keep the original 2-panel layout */
+    .panel:not(.pending-panel) {
+        flex: 1;
+    }
+}
+
 @media (max-width: 768px) {
     .split-container {
         flex-direction: column;
     }
     
-    .panel {
+    .panel:not(.pending-panel) {
         height: 50%;
     }
 }
