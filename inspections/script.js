@@ -20,16 +20,30 @@ const pendingTbodyInline = document.getElementById('pending-tbody-inline');
 let pendingInspections = [];
 let blinkState = false;
 let isLargeScreen = false;
+// Object to store inspection statuses
+let inspectionStatuses = {};
+
+// Inspection status constants
+const STATUSES = {
+    NONE: 'none',
+    UWI_ONGOING: 'uwi-ongoing',
+    UWI_DONE: 'uwi-done',
+    K9_ONGOING: 'k9-ongoing',
+    K9_DONE: 'k9-done'
+};
 
 // Initialize the application
 function initApp() {
     console.log("App initialization started");
     
+    // Initialize theme first
+    setupThemeToggle();
+    
     // Check screen size first
     checkScreenSize();
     
-    // Then load text and set up listeners
-    loadSavedText();
+    // Then load saved data and set up listeners
+    loadSavedData();
     setupEventListeners();
     startTimers();
     syncScroll(k9TextArea, k9HighlightDiv);
@@ -70,12 +84,12 @@ function setupEventListeners() {
     // Text areas
     k9TextArea.addEventListener('input', () => {
         updatePendingInspections();
-        saveText();
+        saveData();
     });
     
     uwTextArea.addEventListener('input', () => {
         updatePendingInspections();
-        saveText();
+        saveData();
     });
     
     // Keyboard handling for tabs
@@ -91,8 +105,8 @@ function setupEventListeners() {
         }
     });
     
-    k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; saveText(); });
-    uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; saveText(); });
+    k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; saveData(); });
+    uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; saveData(); });
     k9CopyBtn.addEventListener('click', () => copyToClipboard(k9TextArea.value));
     uwCopyBtn.addEventListener('click', () => copyToClipboard(uwTextArea.value));
     
@@ -110,6 +124,9 @@ function setupEventListeners() {
         checkScreenSize();
         updatePendingTableDisplay(); // Update tables when resizing
     });
+    
+    // Add our event listener for context menu creation
+    document.addEventListener('click', handleContextMenuClick);
 }
 
 // Start timers for updating time and data
@@ -302,12 +319,17 @@ function updatePendingInspections() {
         const diffInMillis = inspection.etdDate.getTime() - currentPanamaTime.getTime();
         const hoursUntil = diffInMillis / (1000 * 60 * 60);
         
+        // Create a unique ID for each inspection
+        const inspectionId = generateInspectionId(inspection.description);
+        
         return {
             ...inspection,
+            id: inspectionId, // Add unique ID
             hoursUntil,
             isUpcoming: hoursUntil < 24 && hoursUntil > 0,
             isPriority: hoursUntil < 6 && hoursUntil > 0,
-            isUrgent: hoursUntil < 2 && hoursUntil > 0
+            isUrgent: hoursUntil < 2 && hoursUntil > 0,
+            status: inspectionStatuses[inspectionId] || STATUSES.NONE // Add status from our tracking
         };
     });
     
@@ -325,6 +347,14 @@ function updatePendingInspections() {
     }
     
     console.log("Found", pendingInspections.length, "pending inspections");
+}
+
+// Generate a unique ID for an inspection based on its description
+function generateInspectionId(description) {
+    // Remove spaces and special characters, convert to lowercase
+    return description.trim()
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .toLowerCase();
 }
 
 // Update pending table display for both modal and inline views
@@ -349,7 +379,7 @@ function updateTableBody(tableBody) {
     if (pendingInspections.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 2;
+        cell.colSpan = 3; // Updated for status column
         cell.textContent = 'No pending inspections';
         cell.style.textAlign = 'center';
         row.appendChild(cell);
@@ -359,6 +389,7 @@ function updateTableBody(tableBody) {
     
     pendingInspections.forEach(inspection => {
         const row = document.createElement('tr');
+        row.dataset.inspectionId = inspection.id; // Store ID for reference
         
         // Apply styling based on priority
         if (inspection.hoursUntil <= 0) {
@@ -389,8 +420,151 @@ function updateTableBody(tableBody) {
         timeCell.textContent = formatTimeLeft(inspection.hoursUntil);
         row.appendChild(timeCell);
         
+        // Status cell - New!
+        const statusCell = document.createElement('td');
+        statusCell.style.textAlign = 'center';
+        statusCell.style.whiteSpace = 'nowrap';
+        statusCell.classList.add('status-cell');
+        
+        // Add status indicator based on current status
+        updateStatusIndicator(statusCell, inspection.status);
+        
+        row.appendChild(statusCell);
+        
+        // Add context menu event
+        row.addEventListener('contextmenu', handleRowContextMenu);
+        
         tableBody.appendChild(row);
     });
+}
+
+// Update the status indicator in a cell
+function updateStatusIndicator(cell, status) {
+    // Clear existing content
+    cell.innerHTML = '';
+    cell.className = 'status-cell';
+    
+    // Add appropriate icon/text based on status
+    switch(status) {
+        case STATUSES.UWI_ONGOING:
+            cell.classList.add('status-uwi-ongoing');
+            cell.textContent = 'UWI ⟳';
+            break;
+        case STATUSES.UWI_DONE:
+            cell.classList.add('status-uwi-done');
+            cell.textContent = 'UWI ✓';
+            break;
+        case STATUSES.K9_ONGOING:
+            cell.classList.add('status-k9-ongoing');
+            cell.textContent = 'K9 ⟳';
+            break;
+        case STATUSES.K9_DONE:
+            cell.classList.add('status-k9-done');
+            cell.textContent = 'K9 ✓';
+            break;
+        default:
+            cell.textContent = '—';
+            break;
+    }
+}
+
+// Handle right-click on a row to show context menu
+function handleRowContextMenu(e) {
+    e.preventDefault();
+    
+    // Get the inspection ID from the row
+    const inspectionId = this.dataset.inspectionId;
+    
+    // Create a context menu
+    showContextMenu(e.pageX, e.pageY, inspectionId);
+}
+
+// Show the custom context menu
+function showContextMenu(x, y, inspectionId) {
+    // Remove any existing context menus
+    removeContextMenu();
+    
+    // Create a new context menu
+    const contextMenu = document.createElement('div');
+    contextMenu.id = 'inspection-context-menu';
+    contextMenu.className = 'context-menu';
+    contextMenu.style.position = 'absolute';
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.dataset.inspectionId = inspectionId;
+    
+    // Add menu items
+    const menuItems = [
+        { text: 'UWI Ongoing', status: STATUSES.UWI_ONGOING },
+        { text: 'UWI Done', status: STATUSES.UWI_DONE },
+        { text: 'K9 Ongoing', status: STATUSES.K9_ONGOING },
+        { text: 'K9 Done', status: STATUSES.K9_DONE },
+        { text: 'Clear Status', status: STATUSES.NONE }
+    ];
+    
+    menuItems.forEach(item => {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'context-menu-item';
+        menuItem.textContent = item.text;
+        menuItem.dataset.status = item.status;
+        contextMenu.appendChild(menuItem);
+    });
+    
+    // Add the menu to the document
+    document.body.appendChild(contextMenu);
+    
+    // Add click event listener for the entire menu
+    contextMenu.addEventListener('click', handleContextMenuItemClick);
+    
+    // Add a click event listener to remove the menu when clicking elsewhere
+    setTimeout(() => {
+        document.addEventListener('click', removeContextMenu);
+    }, 0);
+}
+
+// Handle clicks on context menu items
+function handleContextMenuItemClick(e) {
+    if (e.target.classList.contains('context-menu-item')) {
+        const inspectionId = this.dataset.inspectionId;
+        const newStatus = e.target.dataset.status;
+        
+        // Update the status in our tracking object
+        inspectionStatuses[inspectionId] = newStatus;
+        
+        // Update the inspection in pendingInspections
+        const inspection = pendingInspections.find(insp => insp.id === inspectionId);
+        if (inspection) {
+            inspection.status = newStatus;
+        }
+        
+        // Update the table display
+        updatePendingTableDisplay();
+        
+        // Save the status
+        saveData();
+    }
+    
+    // Remove the context menu
+    removeContextMenu();
+}
+
+// Handle click on a context menu item
+function handleContextMenuClick(e) {
+    // If the click is not on a context menu or its items, remove it
+    if (!e.target.closest('#inspection-context-menu')) {
+        removeContextMenu();
+    }
+}
+
+// Remove the context menu
+function removeContextMenu() {
+    const contextMenu = document.getElementById('inspection-context-menu');
+    if (contextMenu) {
+        document.body.removeChild(contextMenu);
+    }
+    
+    // Remove the document click listener
+    document.removeEventListener('click', removeContextMenu);
 }
 
 // Format time left display
@@ -479,14 +653,16 @@ function copyToClipboard(text) {
         });
 }
 
-// Save text to local storage
-function saveText() {
+// Save text and status data to local storage
+function saveData() {
     localStorage.setItem('k9Text', k9TextArea.value);
     localStorage.setItem('uwText', uwTextArea.value);
+    localStorage.setItem('inspectionStatuses', JSON.stringify(inspectionStatuses));
 }
 
-// Load text from local storage
-function loadSavedText() {
+// Load text and status data from local storage
+function loadSavedData() {
+    // Load text data
     const savedK9Text = localStorage.getItem('k9Text');
     const savedUWText = localStorage.getItem('uwText');
     
@@ -498,18 +674,23 @@ function loadSavedText() {
         uwTextArea.value = savedUWText;
     }
     
+    // Load inspection statuses
+    const savedStatuses = localStorage.getItem('inspectionStatuses');
+    if (savedStatuses) {
+        try {
+            inspectionStatuses = JSON.parse(savedStatuses);
+        } catch (e) {
+            console.error('Error parsing saved statuses:', e);
+            inspectionStatuses = {};
+        }
+    }
+    
     if (savedK9Text || savedUWText) {
         compareTextAreas();
     }
 }
 
-// Initialize the application when the page loads
-window.addEventListener('DOMContentLoaded', initApp);
-
 // Theme Toggle functionality
-// To be added to script.js
-
-// DOM elements for theme toggle 
 const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
 const toggleLabel = document.querySelector('.toggle-label');
 
@@ -542,7 +723,7 @@ function initTheme() {
     setTheme(isDark);
 }
 
-// Add this to your existing initialization
+// Set up theme toggle
 function setupThemeToggle() {
     // Add event listener for theme toggle
     themeToggleCheckbox.addEventListener('change', (e) => {
@@ -553,21 +734,5 @@ function setupThemeToggle() {
     initTheme();
 }
 
-// Add to the start of your initApp function
-function initApp() {
-    console.log("App initialization started");
-    
-    // Initialize theme first
-    setupThemeToggle();
-    
-    // Rest of your initialization code
-    checkScreenSize();
-    loadSavedText();
-    setupEventListeners();
-    startTimers();
-    syncScroll(k9TextArea, k9HighlightDiv);
-    syncScroll(uwTextArea, uwHighlightDiv);
-    updatePendingInspections();
-    
-    console.log("App initialization completed");
-}
+// Initialize the application when the page loads
+window.addEventListener('DOMContentLoaded', initApp);
