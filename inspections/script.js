@@ -57,7 +57,7 @@ function initApp() {
 
 // Check screen size and update layout
 function checkScreenSize() {
-    isLargeScreen = window.innerWidth > 1200;
+    isLargeScreen = window.innerWidth > 1700;
     console.log("Screen size check - Width:", window.innerWidth, "Is large screen:", isLargeScreen);
     
     if (isLargeScreen) {
