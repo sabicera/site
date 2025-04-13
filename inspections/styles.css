@@ -486,6 +486,99 @@ td:nth-child(2) {
     font-weight: bold;
 }
 
+
+/* Context menu styles */
+.context-menu {
+    background-color: var(--modal-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    padding: 5px 0;
+    z-index: 1000;
+    min-width: 150px;
+    max-width: 250px;
+}
+
+.context-menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: var(--text-color);
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.context-menu-item:hover {
+    background-color: var(--btn-primary-bg);
+    color: #ffffff;
+}
+
+/* Status cell styles */
+.status-cell {
+    font-weight: bold;
+    width: 120px !important; /* Increased from 90px */
+    min-width: 120px !important; /* Added min-width to ensure it doesn't shrink */
+    text-align: center !important;
+}
+
+.status-uwi-ongoing {
+    color: #ffda44;
+}
+
+.status-uwi-done {
+    color: #4caf50;
+}
+
+.status-k9-ongoing {
+    color: #ff9800;
+}
+
+.status-k9-done {
+    color: #00bcd4;
+}
+
+/* Update table column widths for the new status column */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 120px !important; /* Increased from 90px */
+    min-width: 120px !important; /* Added min-width */
+    text-align: center;
+}
+
+/* Add a subtle visual indicator for right-clickable rows */
+tr[data-inspection-id] {
+    cursor: context-menu;
+    position: relative;
+}
+
+tr[data-inspection-id]:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--emphasis-color);
+}
+
+/* Make sure table header accommodates the status column */
+#pending-table thead tr th:first-child,
+#pending-table-inline thead tr th:first-child {
+    width: calc(100% - 240px) !important; /* 120px for time + 120px for status */
+}
+
+/* Make sure tables work correctly on mobile */
+@media (max-width: 576px) {
+    .context-menu {
+        max-width: 80vw;
+    }
+    
+    .modal-content {
+        min-width: unset;
+        width: 95%;
+    }
+}
+
 /* Animations */
 @keyframes pulse {
     0% { opacity: 1; }
@@ -494,14 +587,21 @@ td:nth-child(2) {
 }
 
 /* Responsive adjustments */
+/* Ensure the pending panel has sufficient width */
 @media (min-width: 1201px) {
-    /* Show the pending panel on large screens */
     .pending-panel {
-        display: flex !important;
-        min-width: 700px;
-        max-width: 500px;
-        flex: none;
+        min-width: 900px !important;
+        width: 900px !important; /* Added explicit width */
     }
+}
+
+.urgent-row .status-cell,
+.priority-row .status-cell,
+.upcoming-row .status-cell,
+.overdue-row .status-cell {
+    background-color: rgba(0, 0, 0, 0.2); /* Add slight background to make text more visible */
+    border-radius: 4px;
+    padding: 2px 6px;
     
     /* Let the K9 and UW panels fill the remaining space */
     .panel:nth-child(1),
