@@ -448,7 +448,7 @@ function updateStatusIndicator(cell, status) {
     switch(status) {
         case STATUSES.UWI_ONGOING:
             cell.classList.add('status-uwi-ongoing');
-            cell.textContent = 'UWI ⟳';
+            cell.textContent = 'UWI Ongoing';
             break;
         case STATUSES.UWI_DONE:
             cell.classList.add('status-uwi-done');
@@ -456,7 +456,7 @@ function updateStatusIndicator(cell, status) {
             break;
         case STATUSES.K9_ONGOING:
             cell.classList.add('status-k9-ongoing');
-            cell.textContent = 'K9 ⟳';
+            cell.textContent = 'K9 Ongoing';
             break;
         case STATUSES.K9_DONE:
             cell.classList.add('status-k9-done');
