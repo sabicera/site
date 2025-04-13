@@ -588,7 +588,7 @@ tr[data-inspection-id]:hover::after {
 
 /* Responsive adjustments */
 /* Ensure the pending panel has sufficient width */
-@media (min-width: 1201px) {
+@media (min-width: 1920px) {
     .pending-panel {
         min-width: 900px !important;
         width: 900px !important; /* Added explicit width */
