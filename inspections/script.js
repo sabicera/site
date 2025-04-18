@@ -1,30 +1,63 @@
-// DOM Elements
+// DOM Elements - Common
+const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+const portsThemeToggleCheckbox = document.getElementById('ports-theme-toggle-checkbox');
+const toggleLabel = document.querySelector('.toggle-label');
+const pendingModal = document.getElementById('pending-modal');
+const closeModalBtn = document.getElementById('close-modal');
+const pendingTbody = document.getElementById('pending-tbody');
+const modalTitle = document.getElementById('modal-title');
+const columnHeader = document.getElementById('column-header');
+
+// Navigation elements
+const panamaTab = document.getElementById('panama-tab');
+const portsTab = document.getElementById('ports-tab');
+const panamaPage = document.getElementById('panama-page');
+const portsPage = document.getElementById('ports-page');
+
+// Panama Page Elements
 const k9TextArea = document.getElementById('k9-textarea');
 const uwTextArea = document.getElementById('uw-textarea');
 const k9HighlightDiv = document.getElementById('k9-highlight');
 const uwHighlightDiv = document.getElementById('uw-highlight');
 const panamaTimeDisplay = document.getElementById('panama-time');
-const checkBtn = document.getElementById('check-btn');
-const pendingBtn = document.getElementById('pending-btn');
+const panamaCheckBtn = document.getElementById('panama-check-btn');
+const panamaPendingBtn = document.getElementById('panama-pending-btn');
 const k9ClearBtn = document.getElementById('k9-clear-btn');
 const uwClearBtn = document.getElementById('uw-clear-btn');
 const k9CopyBtn = document.getElementById('k9-copy-btn');
 const uwCopyBtn = document.getElementById('uw-copy-btn');
-const pendingModal = document.getElementById('pending-modal');
-const closeModalBtn = document.getElementById('close-modal');
-const pendingTbody = document.getElementById('pending-tbody');
-const pendingPanel = document.getElementById('pending-panel');
-const pendingTbodyInline = document.getElementById('pending-tbody-inline');
+const panamaPendingPanel = document.getElementById('panama-pending-panel');
+const panamaPendingTbodyInline = document.getElementById('panama-pending-tbody-inline');
+
+// Ports Page Elements
+const brazilTextArea = document.getElementById('brazil-textarea');
+const mexicoTextArea = document.getElementById('mexico-textarea');
+const brazilHighlightDiv = document.getElementById('brazil-highlight');
+const mexicoHighlightDiv = document.getElementById('mexico-highlight');
+const brazilTimeDisplay = document.getElementById('brazil-time');
+const mexicoTimeDisplay = document.getElementById('mexico-time');
+const portsCheckBtn = document.getElementById('ports-check-btn');
+const portsPendingBtn = document.getElementById('ports-pending-btn');
+const brazilClearBtn = document.getElementById('brazil-clear-btn');
+const mexicoClearBtn = document.getElementById('mexico-clear-btn');
+const brazilCopyBtn = document.getElementById('brazil-copy-btn');
+const mexicoCopyBtn = document.getElementById('mexico-copy-btn');
+const portsPendingPanel = document.getElementById('ports-pending-panel');
+const portsPendingTbodyInline = document.getElementById('ports-pending-tbody-inline');
 
 // Application state
+let activePage = 'panama'; // Default to panama page
 let pendingInspections = [];
+let pendingDepartures = [];
 let blinkState = false;
 let isLargeScreen = false;
-// Object to store inspection statuses
-let inspectionStatuses = {};
 
-// Inspection status constants
-const STATUSES = {
+// Status tracking
+let inspectionStatuses = {};
+let portStatuses = {};
+
+// Status constants
+const INSPECTION_STATUSES = {
     NONE: 'none',
     UWI_ONGOING: 'uwi-ongoing',
     UWI_DONE: 'uwi-done',
@@ -36,81 +69,103 @@ const STATUSES = {
 function initApp() {
     console.log("App initialization started");
     
-    // Initialize theme first
+    // Load active page from localStorage
+    const savedPage = localStorage.getItem('activePage');
+    if (savedPage) {
+        activePage = savedPage;
+        updateActivePage();
+    }
+    
+    // Initialize theme
     setupThemeToggle();
     
-    // Check screen size first
+    // Check screen size
     checkScreenSize();
     
-    // Then load saved data and set up listeners
+    // Set up navigation
+    setupNavigation();
+    
+    // Load saved data
     loadSavedData();
+    
+    // Set up event listeners
     setupEventListeners();
+    
+    // Start timers
     startTimers();
-    syncScroll(k9TextArea, k9HighlightDiv);
-    syncScroll(uwTextArea, uwHighlightDiv);
     
-    // Update pending inspections initially
-    updatePendingInspections();
+    // Set up scrolling for text areas
+    setupScrollSync();
     
-    console.log("App initialization completed. Large screen:", isLargeScreen);
+    // Update pending items initially
+    updatePendingItems();
+    
+    console.log("App initialization completed. Active page:", activePage);
+}
+
+// Set up navigation
+function setupNavigation() {
+    panamaTab.addEventListener('click', () => {
+        setActivePage('panama');
+    });
+    
+    portsTab.addEventListener('click', () => {
+        setActivePage('ports');
+    });
+}
+
+// Set active page
+function setActivePage(page) {
+    activePage = page;
+    localStorage.setItem('activePage', page);
+    updateActivePage();
+    updatePendingItems();
+}
+
+// Update active page display
+function updateActivePage() {
+    if (activePage === 'panama') {
+        panamaTab.classList.add('active');
+        portsTab.classList.remove('active');
+        panamaPage.classList.add('active');
+        portsPage.classList.remove('active');
+    } else {
+        panamaTab.classList.remove('active');
+        portsTab.classList.add('active');
+        panamaPage.classList.remove('active');
+        portsPage.classList.add('active');
+    }
 }
 
 // Check screen size and update layout
 function checkScreenSize() {
-    isLargeScreen = window.innerWidth > 1700;
+    isLargeScreen = window.innerWidth > 1200;
     console.log("Screen size check - Width:", window.innerWidth, "Is large screen:", isLargeScreen);
     
     if (isLargeScreen) {
-        // Show the inline panel for large screens
-        if (pendingPanel) {
-            pendingPanel.style.display = 'flex';
-            console.log("Showing pending panel for large screen");
-        } else {
-            console.error("Pending panel element not found");
+        // Show the inline panels for large screens
+        if (panamaPendingPanel) {
+            panamaPendingPanel.style.display = 'flex';
         }
+        if (portsPendingPanel) {
+            portsPendingPanel.style.display = 'flex';
+        }
+        console.log("Showing pending panels for large screen");
     } else {
-        // Hide the inline panel for small screens
-        if (pendingPanel) {
-            pendingPanel.style.display = 'none';
-            console.log("Hiding pending panel for small screen");
+        // Hide the inline panels for small screens
+        if (panamaPendingPanel) {
+            panamaPendingPanel.style.display = 'none';
         }
+        if (portsPendingPanel) {
+            portsPendingPanel.style.display = 'none';
+        }
+        console.log("Hiding pending panels for small screen");
     }
 }
 
 // Set up event listeners
 function setupEventListeners() {
-    console.log("Setting up event listeners");
-    
-    // Text areas
-    k9TextArea.addEventListener('input', () => {
-        updatePendingInspections();
-        saveData();
-    });
-    
-    uwTextArea.addEventListener('input', () => {
-        updatePendingInspections();
-        saveData();
-    });
-    
-    // Keyboard handling for tabs
-    k9TextArea.addEventListener('keydown', handleTabKey);
-    uwTextArea.addEventListener('keydown', handleTabKey);
-    
-    // Buttons
-    checkBtn.addEventListener('click', compareTextAreas);
-    pendingBtn.addEventListener('click', () => {
-        console.log("Pending button clicked, isLargeScreen:", isLargeScreen);
-        if (!isLargeScreen) {
-            togglePendingModal();
-        }
-    });
-    
-    k9ClearBtn.addEventListener('click', () => { k9TextArea.value = ''; k9HighlightDiv.innerHTML = ''; saveData(); });
-    uwClearBtn.addEventListener('click', () => { uwTextArea.value = ''; uwHighlightDiv.innerHTML = ''; saveData(); });
-    k9CopyBtn.addEventListener('click', () => copyToClipboard(k9TextArea.value));
-    uwCopyBtn.addEventListener('click', () => copyToClipboard(uwTextArea.value));
-    
-    // Modal
+    // Pending modal
     closeModalBtn.addEventListener('click', togglePendingModal);
     window.addEventListener('click', (e) => {
         if (e.target === pendingModal) {
@@ -118,25 +173,164 @@ function setupEventListeners() {
         }
     });
     
+    // Panama page event listeners
+    if (k9TextArea) {
+        k9TextArea.addEventListener('input', () => {
+            updatePendingInspections();
+            saveData();
+        });
+        k9TextArea.addEventListener('keydown', handleTabKey);
+    }
+    
+    if (uwTextArea) {
+        uwTextArea.addEventListener('input', () => {
+            updatePendingInspections();
+            saveData();
+        });
+        uwTextArea.addEventListener('keydown', handleTabKey);
+    }
+    
+    if (panamaCheckBtn) {
+        panamaCheckBtn.addEventListener('click', () => {
+            comparePanamaTextAreas();
+        });
+    }
+    
+    if (panamaPendingBtn) {
+        panamaPendingBtn.addEventListener('click', () => {
+            if (!isLargeScreen) {
+                togglePendingModal('panama');
+            }
+        });
+    }
+    
+    if (k9ClearBtn) {
+        k9ClearBtn.addEventListener('click', () => {
+            k9TextArea.value = '';
+            k9HighlightDiv.innerHTML = '';
+            saveData();
+        });
+    }
+    
+    if (uwClearBtn) {
+        uwClearBtn.addEventListener('click', () => {
+            uwTextArea.value = '';
+            uwHighlightDiv.innerHTML = '';
+            saveData();
+        });
+    }
+    
+    if (k9CopyBtn) {
+        k9CopyBtn.addEventListener('click', () => {
+            copyToClipboard(k9TextArea.value);
+        });
+    }
+    
+    if (uwCopyBtn) {
+        uwCopyBtn.addEventListener('click', () => {
+            copyToClipboard(uwTextArea.value);
+        });
+    }
+    
+    // Ports page event listeners
+    if (brazilTextArea) {
+        brazilTextArea.addEventListener('input', () => {
+            updatePendingDepartures();
+            saveData();
+        });
+        brazilTextArea.addEventListener('keydown', handleTabKey);
+    }
+    
+    if (mexicoTextArea) {
+        mexicoTextArea.addEventListener('input', () => {
+            updatePendingDepartures();
+            saveData();
+        });
+        mexicoTextArea.addEventListener('keydown', handleTabKey);
+    }
+    
+    if (portsCheckBtn) {
+        portsCheckBtn.addEventListener('click', () => {
+            comparePortsTextAreas();
+        });
+    }
+    
+    if (portsPendingBtn) {
+        portsPendingBtn.addEventListener('click', () => {
+            if (!isLargeScreen) {
+                togglePendingModal('ports');
+            }
+        });
+    }
+    
+    if (brazilClearBtn) {
+        brazilClearBtn.addEventListener('click', () => {
+            brazilTextArea.value = '';
+            brazilHighlightDiv.innerHTML = '';
+            saveData();
+        });
+    }
+    
+    if (mexicoClearBtn) {
+        mexicoClearBtn.addEventListener('click', () => {
+            mexicoTextArea.value = '';
+            mexicoHighlightDiv.innerHTML = '';
+            saveData();
+        });
+    }
+    
+    if (brazilCopyBtn) {
+        brazilCopyBtn.addEventListener('click', () => {
+            copyToClipboard(brazilTextArea.value);
+        });
+    }
+    
+    if (mexicoCopyBtn) {
+        mexicoCopyBtn.addEventListener('click', () => {
+            copyToClipboard(mexicoTextArea.value);
+        });
+    }
+    
     // Window resize
     window.addEventListener('resize', () => {
-        console.log("Window resized");
         checkScreenSize();
-        updatePendingTableDisplay(); // Update tables when resizing
+        updatePendingTableDisplay();
     });
     
-    // Add our event listener for context menu creation
+    // Context menu listeners
     document.addEventListener('click', handleContextMenuClick);
+}
+
+// Setup scrolling synchronization
+function setupScrollSync() {
+    if (k9TextArea && k9HighlightDiv) {
+        syncScroll(k9TextArea, k9HighlightDiv);
+    }
+    if (uwTextArea && uwHighlightDiv) {
+        syncScroll(uwTextArea, uwHighlightDiv);
+    }
+    if (brazilTextArea && brazilHighlightDiv) {
+        syncScroll(brazilTextArea, brazilHighlightDiv);
+    }
+    if (mexicoTextArea && mexicoHighlightDiv) {
+        syncScroll(mexicoTextArea, mexicoHighlightDiv);
+    }
 }
 
 // Start timers for updating time and data
 function startTimers() {
-    // Update Panama time every second
-    setInterval(updatePanamaTime, 1000);
-    updatePanamaTime(); // Initial update
+    // Update times every second
+    setInterval(() => {
+        updatePanamaTime();
+        updateLocalTimes();
+    }, 1000);
     
-    // Update pending inspections every 10 seconds
-    setInterval(updatePendingInspections, 10000);
+    // Initial time updates
+    updatePanamaTime();
+    updateLocalTimes();
+    
+    // Update pending items every 10 seconds
+    setInterval(updatePendingItems, 10000);
     
     // Blink effect for urgent rows
     setInterval(() => {
@@ -145,8 +339,19 @@ function startTimers() {
     }, 1000);
 }
 
+// Update pending items based on active page
+function updatePendingItems() {
+    if (activePage === 'panama') {
+        updatePendingInspections();
+    } else {
+        updatePendingDepartures();
+    }
+}
+
 // Update Panama time display
 function updatePanamaTime() {
+    if (!panamaTimeDisplay) return;
+    
     const now = new Date();
     const panamaOffset = -5; // UTC-5
     
@@ -162,6 +367,43 @@ function updatePanamaTime() {
     const seconds = String(panamaTime.getSeconds()).padStart(2, '0');
     
     panamaTimeDisplay.textContent = `${day}/${month} ${hours}:${minutes}:${seconds}`;
+}
+
+// Update Brazil and Mexico time displays
+function updateLocalTimes() {
+    if (!brazilTimeDisplay || !mexicoTimeDisplay) return;
+    
+    const now = new Date();
+    
+    // Brazil is UTC-3
+    const brazilOffset = -3;
+    // Mexico (assuming Mexico City) is UTC-6
+    const mexicoOffset = -6;
+    
+    // Calculate Brazil time
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const brazilTime = new Date(utcTime + (3600000 * brazilOffset));
+    
+    // Calculate Mexico time
+    const mexicoTime = new Date(utcTime + (3600000 * mexicoOffset));
+    
+    // Format: DD/MM HH:MM:SS
+    // Brazil time
+    const brazilDay = String(brazilTime.getDate()).padStart(2, '0');
+    const brazilMonth = String(brazilTime.getMonth() + 1).padStart(2, '0');
+    const brazilHours = String(brazilTime.getHours()).padStart(2, '0');
+    const brazilMinutes = String(brazilTime.getMinutes()).padStart(2, '0');
+    const brazilSeconds = String(brazilTime.getSeconds()).padStart(2, '0');
+    
+    // Mexico time
+    const mexicoDay = String(mexicoTime.getDate()).padStart(2, '0');
+    const mexicoMonth = String(mexicoTime.getMonth() + 1).padStart(2, '0');
+    const mexicoHours = String(mexicoTime.getHours()).padStart(2, '0');
+    const mexicoMinutes = String(mexicoTime.getMinutes()).padStart(2, '0');
+    const mexicoSeconds = String(mexicoTime.getSeconds()).padStart(2, '0');
+    
+    brazilTimeDisplay.textContent = `${brazilDay}/${brazilMonth} ${brazilHours}:${brazilMinutes}:${brazilSeconds}`;
+    mexicoTimeDisplay.textContent = `${mexicoDay}/${mexicoMonth} ${mexicoHours}:${mexicoMinutes}:${mexicoSeconds}`;
 }
 
 // Handle tab key in text areas
@@ -180,8 +422,10 @@ function handleTabKey(e) {
     }
 }
 
-// Compare text areas and highlight differences
-function compareTextAreas() {
+// Compare K9 and UW text areas
+function comparePanamaTextAreas() {
+    if (!k9TextArea || !uwTextArea || !k9HighlightDiv || !uwHighlightDiv) return;
+    
     // Get text content
     const k9Lines = k9TextArea.value.split('\n');
     const uwLines = uwTextArea.value.split('\n');
@@ -228,7 +472,60 @@ function compareTextAreas() {
     uwHighlightDiv.scrollLeft = uwTextArea.scrollLeft;
     
     // Ensure the highlight divs remain aligned when scrolling
-    syncScrollAfterCompare();
+    syncScrollAfterCompare('panama');
+}
+
+// Compare Brazil and Mexico text areas
+function comparePortsTextAreas() {
+    if (!brazilTextArea || !mexicoTextArea || !brazilHighlightDiv || !mexicoHighlightDiv) return;
+    
+    // Get text content
+    const brazilLines = brazilTextArea.value.split('\n');
+    const mexicoLines = mexicoTextArea.value.split('\n');
+    
+    // Create sets to track matched lines
+    const matchedBrazilLines = new Set();
+    const matchedMexicoLines = new Set();
+    
+    // Find matching lines
+    for (let i = 0; i < brazilLines.length; i++) {
+        for (let j = 0; j < mexicoLines.length; j++) {
+            if (!matchedMexicoLines.has(j) && brazilLines[i] === mexicoLines[j] && brazilLines[i].trim() !== '') {
+                matchedBrazilLines.add(i);
+                matchedMexicoLines.add(j);
+                break;
+            }
+        }
+    }
+    
+    // Generate highlighted HTML
+    let brazilHtml = '';
+    let mexicoHtml = '';
+    
+    brazilLines.forEach((line, index) => {
+        const isMatch = matchedBrazilLines.has(index);
+        const highlightClass = !isMatch && line.trim() !== '' ? 'highlight-diff' : '';
+        brazilHtml += `<div class="highlight-line ${highlightClass}">${escapeHtml(line) || '&nbsp;'}</div>`;
+    });
+    
+    mexicoLines.forEach((line, index) => {
+        const isMatch = matchedMexicoLines.has(index);
+        const highlightClass = !isMatch && line.trim() !== '' ? 'highlight-diff' : '';
+        mexicoHtml += `<div class="highlight-line ${highlightClass}">${escapeHtml(line) || '&nbsp;'}</div>`;
+    });
+    
+    // Update highlight divs
+    brazilHighlightDiv.innerHTML = brazilHtml;
+    mexicoHighlightDiv.innerHTML = mexicoHtml;
+    
+    // Make sure the highlight divs are properly aligned
+    brazilHighlightDiv.scrollTop = brazilTextArea.scrollTop;
+    brazilHighlightDiv.scrollLeft = brazilTextArea.scrollLeft;
+    mexicoHighlightDiv.scrollTop = mexicoTextArea.scrollTop;
+    mexicoHighlightDiv.scrollLeft = mexicoTextArea.scrollLeft;
+    
+    // Ensure the highlight divs remain aligned when scrolling
+    syncScrollAfterCompare('ports');
 }
 
 // Synchronize scrolling between textarea and highlight div
@@ -240,13 +537,28 @@ function syncScroll(textArea, highlightDiv) {
 }
 
 // Additional synchronization after comparison
-function syncScrollAfterCompare() {
+function syncScrollAfterCompare(page) {
     // Force synchronization after a short delay to ensure rendering is complete
     setTimeout(() => {
-        k9HighlightDiv.scrollTop = k9TextArea.scrollTop;
-        k9HighlightDiv.scrollLeft = k9TextArea.scrollLeft;
-        uwHighlightDiv.scrollTop = uwTextArea.scrollTop;
-        uwHighlightDiv.scrollLeft = uwTextArea.scrollLeft;
+        if (page === 'panama') {
+            if (k9HighlightDiv && k9TextArea) {
+                k9HighlightDiv.scrollTop = k9TextArea.scrollTop;
+                k9HighlightDiv.scrollLeft = k9TextArea.scrollLeft;
+            }
+            if (uwHighlightDiv && uwTextArea) {
+                uwHighlightDiv.scrollTop = uwTextArea.scrollTop;
+                uwHighlightDiv.scrollLeft = uwTextArea.scrollLeft;
+            }
+        } else { // ports
+            if (brazilHighlightDiv && brazilTextArea) {
+                brazilHighlightDiv.scrollTop = brazilTextArea.scrollTop;
+                brazilHighlightDiv.scrollLeft = brazilTextArea.scrollLeft;
+            }
+            if (mexicoHighlightDiv && mexicoTextArea) {
+                mexicoHighlightDiv.scrollTop = mexicoTextArea.scrollTop;
+                mexicoHighlightDiv.scrollLeft = mexicoTextArea.scrollLeft;
+            }
+        }
     }, 50);
 }
 
@@ -257,8 +569,8 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Parse ETD dates from text
-function parseETDDates(text) {
+// Parse ETD dates for Panama inspections
+function parseInspectionETDDates(text) {
     const results = [];
     const lines = text.split('\n');
     const regex = /ETD\s+(\d{2}\/\d{2}\s+\d{2}:\d{2})/;
@@ -293,12 +605,71 @@ function parseETDDates(text) {
     return results;
 }
 
+// Parse ETD dates from text with country information for ports
+function parsePortETDDates(text, country) {
+    const results = [];
+    const lines = text.split('\n');
+
+    // Updated regex to handle both formats:
+    // 1. ETD DD/MM HH:MM
+    // 2. ETD DD/MM HH:MM(content)
+    const regex = /ETD\s+(\d{2}\/\d{2}\s+\d{2}:\d{2})(?:\(|$|\s)/;
+
+    const offsetMap = {
+        'Brazil': -3,  // UTC-3
+        'Mexico': -6   // UTC-6 (e.g., Mexico City)
+    };
+
+    for (const line of lines) {
+        const match = line.match(regex);
+        if (match) {
+            const dateString = match[1];
+            const [datePart, timePart] = dateString.split(' ');
+            const [day, month] = datePart.split('/');
+            const [hours, minutes] = timePart.split(':');
+
+            // Create UTC date
+            const currentDate = new Date();
+            let year = currentDate.getFullYear();
+
+            // Handle year rollover (e.g., December -> January)
+            const currentMonth = currentDate.getMonth() + 1;
+            if (currentMonth === 12 && parseInt(month) === 1) {
+                year += 1;
+            }
+
+            const utcDate = new Date(Date.UTC(
+                year,
+                parseInt(month) - 1,
+                parseInt(day),
+                parseInt(hours),
+                parseInt(minutes)
+            ));
+
+            // Adjust to country local time
+            const offset = offsetMap[country] || 0;
+            const localDate = new Date(utcDate.getTime() - offset * 60 * 60 * 1000);
+
+            results.push({
+                description: line,
+                etdDate: localDate,
+                country: country
+            });
+        }
+    }
+
+    return results;
+}
+
+
 // Update pending inspections list
 function updatePendingInspections() {
+    if (!k9TextArea || !uwTextArea) return;
+    
     console.log("Updating pending inspections");
     
-    const k9Inspections = parseETDDates(k9TextArea.value);
-    const uwInspections = parseETDDates(uwTextArea.value);
+    const k9Inspections = parseInspectionETDDates(k9TextArea.value);
+    const uwInspections = parseInspectionETDDates(uwTextArea.value);
     
     // Combine lists and remove duplicates
     const allInspections = [...k9Inspections, ...uwInspections];
@@ -320,7 +691,7 @@ function updatePendingInspections() {
         const hoursUntil = diffInMillis / (1000 * 60 * 60);
         
         // Create a unique ID for each inspection
-        const inspectionId = generateInspectionId(inspection.description);
+        const inspectionId = generateId(inspection.description);
         
         return {
             ...inspection,
@@ -329,28 +700,83 @@ function updatePendingInspections() {
             isUpcoming: hoursUntil < 24 && hoursUntil > 0,
             isPriority: hoursUntil < 6 && hoursUntil > 0,
             isUrgent: hoursUntil < 2 && hoursUntil > 0,
-            status: inspectionStatuses[inspectionId] || STATUSES.NONE // Add status from our tracking
+            status: inspectionStatuses[inspectionId] || INSPECTION_STATUSES.NONE // Add status from our tracking
         };
     });
     
     // Sort by ETD date
     pendingInspections.sort((a, b) => a.etdDate - b.etdDate);
     
-    // Update both displays
-    updatePendingTableDisplay();
-    
-    // Update pending button appearance if there are urgent items
-    if (pendingInspections.some(item => item.isUrgent)) {
-        pendingBtn.innerHTML = 'Pending <span style="color: red;">⚠</span>';
-    } else {
-        pendingBtn.textContent = 'Pending';
+    // Update tables if on panama page
+    if (activePage === 'panama') {
+        updatePendingTableDisplay();
+        
+        // Update pending button appearance if there are urgent items
+        if (pendingInspections.some(item => item.isUrgent)) {
+            panamaPendingBtn.innerHTML = 'Pending <span style="color: red;">⚠</span>';
+        } else {
+            panamaPendingBtn.textContent = 'Pending';
+        }
     }
     
     console.log("Found", pendingInspections.length, "pending inspections");
 }
 
-// Generate a unique ID for an inspection based on its description
-function generateInspectionId(description) {
+// Update pending departures list
+function updatePendingDepartures() {
+    if (!brazilTextArea || !mexicoTextArea) return;
+    
+    console.log("Updating pending departures");
+    
+    // Parse the ETD dates with country information
+    const brazilDepartures = parsePortETDDates(brazilTextArea.value, 'Brazil');
+    const mexicoDepartures = parsePortETDDates(mexicoTextArea.value, 'Mexico');
+    
+    // Combine lists
+    const allDepartures = [...brazilDepartures, ...mexicoDepartures];
+    
+    // Get current time
+    const now = new Date();
+    
+    // Calculate priority status
+    pendingDepartures = allDepartures.map(departure => {
+        const diffInMillis = departure.etdDate.getTime() - now.getTime();
+        const hoursUntil = diffInMillis / (1000 * 60 * 60);
+        
+        // Create a unique ID for each departure
+        const departureId = generateId(departure.description);
+        
+        return {
+            ...departure,
+            id: departureId, // Add unique ID
+            hoursUntil,
+            isUpcoming: hoursUntil < 24 && hoursUntil > 0,
+            isPriority: hoursUntil < 6 && hoursUntil > 0,
+            isUrgent: hoursUntil < 2 && hoursUntil > 0,
+            status: portStatuses[departureId] || INSPECTION_STATUSES.NONE // Add status from our tracking
+        };
+    });
+    
+    // Sort by ETD date
+    pendingDepartures.sort((a, b) => a.etdDate - b.etdDate);
+    
+    // Update tables if on ports page
+    if (activePage === 'ports') {
+        updatePendingTableDisplay();
+        
+        // Update pending button appearance if there are urgent items
+        if (pendingDepartures.some(item => item.isUrgent)) {
+            portsPendingBtn.innerHTML = 'Pending <span style="color: red;">⚠</span>';
+        } else {
+            portsPendingBtn.textContent = 'Pending';
+        }
+    }
+    
+    console.log("Found", pendingDepartures.length, "pending departures");
+}
+
+// Generate a unique ID for an item based on its description
+function generateId(description) {
     // Remove spaces and special characters, convert to lowercase
     return description.trim()
         .replace(/[^a-zA-Z0-9]/g, '')
@@ -359,16 +785,29 @@ function generateInspectionId(description) {
 
 // Update pending table display for both modal and inline views
 function updatePendingTableDisplay() {
-    console.log("Updating table display. Modal table:", !!pendingTbody, "Inline table:", !!pendingTbodyInline);
+    console.log("Updating table display for", activePage);
+    
+    // Get the correct tbody elements based on active page
+    const modalTbody = pendingTbody;
+    const inlineTbody = activePage === 'panama' ? panamaPendingTbodyInline : portsPendingTbodyInline;
+    
+    // Update modal title and column header
+    if (modalTitle) {
+        modalTitle.textContent = activePage === 'panama' ? 'U/W & K9 Countdown' : 'Ports Countdown';
+    }
+    
+    if (columnHeader) {
+        columnHeader.textContent = activePage === 'panama' ? 'Inspection Priorities' : 'Port Priorities';
+    }
     
     // Update modal table
-    if (pendingTbody) {
-        updateTableBody(pendingTbody);
+    if (modalTbody) {
+        updateTableBody(modalTbody);
     }
     
     // Update inline table if exists
-    if (pendingTbodyInline) {
-        updateTableBody(pendingTbodyInline);
+    if (inlineTbody) {
+        updateTableBody(inlineTbody);
     }
 }
 
@@ -376,33 +815,42 @@ function updatePendingTableDisplay() {
 function updateTableBody(tableBody) {
     tableBody.innerHTML = '';
     
-    if (pendingInspections.length === 0) {
+    // Get items based on active page
+    const items = activePage === 'panama' ? pendingInspections : pendingDepartures;
+    
+    if (items.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 3; // Updated for status column
-        cell.textContent = 'No pending inspections';
+        cell.colSpan = 3;
+        cell.textContent = `No pending ${activePage === 'panama' ? 'inspections' : 'departures'}`;
         cell.style.textAlign = 'center';
         row.appendChild(cell);
         tableBody.appendChild(row);
         return;
     }
     
-    pendingInspections.forEach(inspection => {
+    items.forEach(item => {
         const row = document.createElement('tr');
-        row.dataset.inspectionId = inspection.id; // Store ID for reference
+        
+        // Set data attribute based on active page
+        if (activePage === 'panama') {
+            row.dataset.inspectionId = item.id;
+        } else {
+            row.dataset.departureId = item.id;
+        }
         
         // Apply styling based on priority
-        if (inspection.hoursUntil <= 0) {
+        if (item.hoursUntil <= 0) {
             row.className = 'overdue-row';
-        } else if (inspection.isUrgent) {
-            row.className = 'urgent-row';
+        } else if (item.isUrgent) {
+            row.className = 'urgent-row urgent-blink';
             // Apply blinking effect only for urgent rows
             if (!blinkState) {
                 row.style.opacity = '0.7';
             }
-        } else if (inspection.isPriority) {
+        } else if (item.isPriority) {
             row.className = 'priority-row';
-        } else if (inspection.isUpcoming) {
+        } else if (item.isUpcoming) {
             row.className = 'upcoming-row';
         }
         
@@ -410,24 +858,62 @@ function updateTableBody(tableBody) {
         const descCell = document.createElement('td');
         descCell.style.fontFamily = 'monospace';
         descCell.style.whiteSpace = 'nowrap';
-        descCell.textContent = inspection.description;
+        
+        // For ports page, add country badge
+        if (activePage === 'ports' && item.country) {
+            const countrySpan = document.createElement('span');
+            countrySpan.setAttribute('data-country', item.country);
+            countrySpan.textContent = `[${item.country}]`;
+            descCell.appendChild(countrySpan);
+            descCell.appendChild(document.createTextNode(' '));
+        }
+        
+        // Add main description text
+        descCell.appendChild(document.createTextNode(item.description));
         row.appendChild(descCell);
         
         // Time left cell
         const timeCell = document.createElement('td');
         timeCell.style.textAlign = 'center';
         timeCell.style.whiteSpace = 'nowrap';
-        timeCell.textContent = formatTimeLeft(inspection.hoursUntil);
+        
+        const formattedTime = formatTimeLeft(item.hoursUntil);
+        
+        // Add time left with enhanced styling for ports page
+        if (activePage === 'ports') {
+            const timeSpan = document.createElement('span');
+            
+            if (item.hoursUntil <= 0) {
+                timeSpan.className = 'time-left-overdue';
+            } else if (item.isUrgent) {
+                timeSpan.className = 'time-left-urgent';
+            } else if (item.isPriority) {
+                timeSpan.className = 'time-left-priority';
+            } else if (item.isUpcoming) {
+                timeSpan.className = 'time-left-upcoming';
+            }
+            
+            timeSpan.textContent = formattedTime;
+            timeCell.appendChild(timeSpan);
+        } else {
+            // Standard format for panama page
+            timeCell.textContent = formattedTime;
+        }
+        
         row.appendChild(timeCell);
         
-        // Status cell - New!
+        // Status cell
         const statusCell = document.createElement('td');
         statusCell.style.textAlign = 'center';
         statusCell.style.whiteSpace = 'nowrap';
         statusCell.classList.add('status-cell');
         
-        // Add status indicator based on current status
-        updateStatusIndicator(statusCell, inspection.status);
+        // Add appropriate status indicator based on page
+        if (activePage === 'panama') {
+            updateInspectionStatusIndicator(statusCell, item.status);
+        } else {
+            updatePortStatusIndicator(statusCell, item.status);
+        }
         
         row.appendChild(statusCell);
         
@@ -438,27 +924,27 @@ function updateTableBody(tableBody) {
     });
 }
 
-// Update the status indicator in a cell
-function updateStatusIndicator(cell, status) {
+// Update inspection status indicator
+function updateInspectionStatusIndicator(cell, status) {
     // Clear existing content
     cell.innerHTML = '';
     cell.className = 'status-cell';
     
     // Add appropriate icon/text based on status
     switch(status) {
-        case STATUSES.UWI_ONGOING:
+        case INSPECTION_STATUSES.UWI_ONGOING:
             cell.classList.add('status-uwi-ongoing');
             cell.textContent = 'UWI Ongoing';
             break;
-        case STATUSES.UWI_DONE:
+        case INSPECTION_STATUSES.UWI_DONE:
             cell.classList.add('status-uwi-done');
             cell.textContent = 'UWI ✓';
             break;
-        case STATUSES.K9_ONGOING:
+        case INSPECTION_STATUSES.K9_ONGOING:
             cell.classList.add('status-k9-ongoing');
             cell.textContent = 'K9 Ongoing';
             break;
-        case STATUSES.K9_DONE:
+        case INSPECTION_STATUSES.K9_DONE:
             cell.classList.add('status-k9-done');
             cell.textContent = 'K9 ✓';
             break;
@@ -468,38 +954,138 @@ function updateStatusIndicator(cell, status) {
     }
 }
 
+// Update port status indicator
+function updatePortStatusIndicator(cell, status) {
+    // Clear existing content
+    cell.innerHTML = '';
+    cell.className = 'status-cell';
+    
+    // Add appropriate icon/text based on status
+    switch(status) {
+        case INSPECTION_STATUSES.UWI_ONGOING:
+            cell.classList.add('status-uwi-ongoing');
+            cell.textContent = 'UWI Ongoing';
+            break;
+        case INSPECTION_STATUSES.UWI_DONE:
+            cell.classList.add('status-uwi-done');
+            cell.textContent = 'UWI ✓';
+            break;
+        case INSPECTION_STATUSES.K9_ONGOING:
+            cell.classList.add('status-k9-ongoing');
+            cell.textContent = 'K9 Ongoing';
+            break;
+        case INSPECTION_STATUSES.K9_DONE:
+            cell.classList.add('status-k9-done');
+            cell.textContent = 'K9 ✓';
+            break;
+        default:
+            cell.textContent = '—';
+            break;
+    }
+}
+
+// Format time left display
+function formatTimeLeft(hoursUntil) {
+    if (hoursUntil <= 0) {
+        // Calculate time passed since departure
+        const hoursPassed = Math.abs(hoursUntil);
+        const hours = Math.floor(hoursPassed);
+        const minutes = Math.floor((hoursPassed - hours) * 60);
+        
+        return `Overdue: ${hours}h ${minutes}m ago`;
+    }
+    
+    const hours = Math.floor(hoursUntil);
+    const minutes = Math.floor((hoursUntil - hours) * 60);
+    
+    return `${hours}h ${minutes}m`;
+}
+
 // Handle right-click on a row to show context menu
 function handleRowContextMenu(e) {
     e.preventDefault();
     
-    // Get the inspection ID from the row
-    const inspectionId = this.dataset.inspectionId;
-    
-    // Create a context menu
-    showContextMenu(e.pageX, e.pageY, inspectionId);
+    if (activePage === 'panama') {
+        // Get inspection ID
+        const inspectionId = this.dataset.inspectionId;
+        if (inspectionId) {
+            showInspectionContextMenu(e.pageX, e.pageY, inspectionId);
+        }
+    } else {
+        // Get departure ID
+        const departureId = this.dataset.departureId;
+        if (departureId) {
+            showPortContextMenu(e.pageX, e.pageY, departureId);
+        }
+    }
 }
 
-// Show the custom context menu
-function showContextMenu(x, y, inspectionId) {
+// Show context menu for inspections
+function showInspectionContextMenu(x, y, inspectionId) {
     // Remove any existing context menus
     removeContextMenu();
     
     // Create a new context menu
     const contextMenu = document.createElement('div');
-    contextMenu.id = 'inspection-context-menu';
+    contextMenu.id = 'context-menu';
     contextMenu.className = 'context-menu';
     contextMenu.style.position = 'absolute';
     contextMenu.style.left = `${x}px`;
     contextMenu.style.top = `${y}px`;
     contextMenu.dataset.inspectionId = inspectionId;
+    contextMenu.dataset.type = 'inspection';
     
     // Add menu items
     const menuItems = [
-        { text: 'UWI Ongoing', status: STATUSES.UWI_ONGOING },
-        { text: 'UWI Done', status: STATUSES.UWI_DONE },
-        { text: 'K9 Ongoing', status: STATUSES.K9_ONGOING },
-        { text: 'K9 Done', status: STATUSES.K9_DONE },
-        { text: 'Clear Status', status: STATUSES.NONE }
+        { text: 'UWI Ongoing', status: INSPECTION_STATUSES.UWI_ONGOING },
+        { text: 'UWI Done', status: INSPECTION_STATUSES.UWI_DONE },
+        { text: 'K9 Ongoing', status: INSPECTION_STATUSES.K9_ONGOING },
+        { text: 'K9 Done', status: INSPECTION_STATUSES.K9_DONE },
+        { text: 'Clear Status', status: INSPECTION_STATUSES.NONE }
+    ];
+    
+    menuItems.forEach(item => {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'context-menu-item';
+        menuItem.textContent = item.text;
+        menuItem.dataset.status = item.status;
+        contextMenu.appendChild(menuItem);
+    });
+    
+    // Add the menu to the document
+    document.body.appendChild(contextMenu);
+    
+    // Add click event listener for the entire menu
+    contextMenu.addEventListener('click', handleContextMenuItemClick);
+    
+    // Add a click event listener to remove the menu when clicking elsewhere
+    setTimeout(() => {
+        document.addEventListener('click', removeContextMenu);
+    }, 0);
+}
+
+// Show context menu for ports
+function showPortContextMenu(x, y, departureId) {
+    // Remove any existing context menus
+    removeContextMenu();
+    
+    // Create a new context menu
+    const contextMenu = document.createElement('div');
+    contextMenu.id = 'context-menu';
+    contextMenu.className = 'context-menu';
+    contextMenu.style.position = 'absolute';
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.dataset.departureId = departureId;
+    contextMenu.dataset.type = 'port';
+    
+    // Add menu items
+    const menuItems = [
+        { text: 'UWI Ongoing', status: INSPECTION_STATUSES.UWI_ONGOING },
+        { text: 'UWI Done', status: INSPECTION_STATUSES.UWI_DONE },
+        { text: 'K9 Ongoing', status: INSPECTION_STATUSES.K9_ONGOING },
+        { text: 'K9 Done', status: INSPECTION_STATUSES.K9_DONE },
+        { text: 'Clear Status', status: INSPECTION_STATUSES.NONE }
     ];
     
     menuItems.forEach(item => {
@@ -525,16 +1111,31 @@ function showContextMenu(x, y, inspectionId) {
 // Handle clicks on context menu items
 function handleContextMenuItemClick(e) {
     if (e.target.classList.contains('context-menu-item')) {
-        const inspectionId = this.dataset.inspectionId;
         const newStatus = e.target.dataset.status;
+        const menuType = this.dataset.type;
         
-        // Update the status in our tracking object
-        inspectionStatuses[inspectionId] = newStatus;
-        
-        // Update the inspection in pendingInspections
-        const inspection = pendingInspections.find(insp => insp.id === inspectionId);
-        if (inspection) {
-            inspection.status = newStatus;
+        if (menuType === 'inspection') {
+            const inspectionId = this.dataset.inspectionId;
+            
+            // Update the status in our tracking object
+            inspectionStatuses[inspectionId] = newStatus;
+            
+            // Update the inspection in pendingInspections
+            const inspection = pendingInspections.find(insp => insp.id === inspectionId);
+            if (inspection) {
+                inspection.status = newStatus;
+            }
+        } else { // port
+            const departureId = this.dataset.departureId;
+            
+            // Update the status in our tracking object
+            portStatuses[departureId] = newStatus;
+            
+            // Update the departure in pendingDepartures
+            const departure = pendingDepartures.find(dep => dep.id === departureId);
+            if (departure) {
+                departure.status = newStatus;
+            }
         }
         
         // Update the table display
@@ -551,14 +1152,14 @@ function handleContextMenuItemClick(e) {
 // Handle click on a context menu item
 function handleContextMenuClick(e) {
     // If the click is not on a context menu or its items, remove it
-    if (!e.target.closest('#inspection-context-menu')) {
+    if (!e.target.closest('#context-menu')) {
         removeContextMenu();
     }
 }
 
 // Remove the context menu
 function removeContextMenu() {
-    const contextMenu = document.getElementById('inspection-context-menu');
+    const contextMenu = document.getElementById('context-menu');
     if (contextMenu) {
         document.body.removeChild(contextMenu);
     }
@@ -567,26 +1168,14 @@ function removeContextMenu() {
     document.removeEventListener('click', removeContextMenu);
 }
 
-// Format time left display
-function formatTimeLeft(hoursUntil) {
-    if (hoursUntil <= 0) {
-        // Calculate time passed since departure
-        const hoursPassed = Math.abs(hoursUntil);
-        const hours = Math.floor(hoursPassed);
-        const minutes = Math.floor((hoursPassed - hours) * 60);
-        
-        return `Overdue: ${hours}h ${minutes}m ago`;
+// Toggle pending modal
+function togglePendingModal(page) {
+    console.log("Toggle pending modal called for", page || activePage);
+    
+    // Set active page if provided
+    if (page && page !== activePage) {
+        setActivePage(page);
     }
-    
-    const hours = Math.floor(hoursUntil);
-    const minutes = Math.floor((hoursUntil - hours) * 60);
-    
-    return `${hours}h ${minutes}m`;
-}
-
-// Toggle pending modal - Only for small screens
-function togglePendingModal() {
-    console.log("Toggle pending modal called, isLargeScreen:", isLargeScreen);
     
     // Always show modal on small screens
     if (!isLargeScreen) {
@@ -655,83 +1244,119 @@ function copyToClipboard(text) {
 
 // Save text and status data to local storage
 function saveData() {
-    localStorage.setItem('k9Text', k9TextArea.value);
-    localStorage.setItem('uwText', uwTextArea.value);
+    // Save panama page data
+    if (k9TextArea) localStorage.setItem('k9Text', k9TextArea.value);
+    if (uwTextArea) localStorage.setItem('uwText', uwTextArea.value);
     localStorage.setItem('inspectionStatuses', JSON.stringify(inspectionStatuses));
+    
+    // Save ports page data
+    if (brazilTextArea) localStorage.setItem('brazilText', brazilTextArea.value);
+    if (mexicoTextArea) localStorage.setItem('mexicoText', mexicoTextArea.value);
+    localStorage.setItem('portStatuses', JSON.stringify(portStatuses));
 }
 
 // Load text and status data from local storage
 function loadSavedData() {
-    // Load text data
+    // Load panama page data
     const savedK9Text = localStorage.getItem('k9Text');
     const savedUWText = localStorage.getItem('uwText');
     
-    if (savedK9Text) {
+    if (savedK9Text && k9TextArea) {
         k9TextArea.value = savedK9Text;
     }
     
-    if (savedUWText) {
+    if (savedUWText && uwTextArea) {
         uwTextArea.value = savedUWText;
     }
     
     // Load inspection statuses
-    const savedStatuses = localStorage.getItem('inspectionStatuses');
-    if (savedStatuses) {
+    const savedInspectionStatuses = localStorage.getItem('inspectionStatuses');
+    if (savedInspectionStatuses) {
         try {
-            inspectionStatuses = JSON.parse(savedStatuses);
+            inspectionStatuses = JSON.parse(savedInspectionStatuses);
         } catch (e) {
-            console.error('Error parsing saved statuses:', e);
+            console.error('Error parsing saved inspection statuses:', e);
             inspectionStatuses = {};
         }
     }
     
-    if (savedK9Text || savedUWText) {
-        compareTextAreas();
+    // Load ports page data
+    const savedBrazilText = localStorage.getItem('brazilText');
+    const savedMexicoText = localStorage.getItem('mexicoText');
+    
+    if (savedBrazilText && brazilTextArea) {
+        brazilTextArea.value = savedBrazilText;
+    }
+    
+    if (savedMexicoText && mexicoTextArea) {
+        mexicoTextArea.value = savedMexicoText;
+    }
+    
+    // Load port statuses
+    const savedPortStatuses = localStorage.getItem('portStatuses');
+    if (savedPortStatuses) {
+        try {
+            portStatuses = JSON.parse(savedPortStatuses);
+        } catch (e) {
+            console.error('Error parsing saved port statuses:', e);
+            portStatuses = {};
+        }
     }
 }
 
 // Theme Toggle functionality
-const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
-const toggleLabel = document.querySelector('.toggle-label');
-
-// Function to set theme
-function setTheme(isDark) {
-    if (isDark) {
-        document.body.classList.remove('light-theme');
-        toggleLabel.textContent = 'Dark Mode';
-        localStorage.setItem('theme', 'dark');
-        console.log("Theme set to dark mode");
-    } else {
-        document.body.classList.add('light-theme');
-        toggleLabel.textContent = 'Light Mode';
-        localStorage.setItem('theme', 'light');
-        console.log("Theme set to light mode");
-    }
-}
-
-// Initialize theme based on localStorage or default to dark
-function initTheme() {
+function setupThemeToggle() {
+    const checkboxes = [themeToggleCheckbox, portsThemeToggleCheckbox].filter(Boolean);
+    const labels = document.querySelectorAll('.toggle-label');
+    
+    // Initialize theme based on localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const isDark = savedTheme === 'dark';
     
     console.log("Initializing theme from localStorage:", savedTheme);
     
-    // Set checkbox state
-    themeToggleCheckbox.checked = isDark;
+    // Set checkbox states
+    checkboxes.forEach(checkbox => {
+        if (checkbox) checkbox.checked = isDark;
+    });
     
     // Apply theme
     setTheme(isDark);
+    
+    // Add event listeners for theme toggle
+    checkboxes.forEach(checkbox => {
+        if (checkbox) {
+            checkbox.addEventListener('change', (e) => {
+                setTheme(e.target.checked);
+                
+                // Sync the other checkbox
+                checkboxes.forEach(otherCheckbox => {
+                    if (otherCheckbox && otherCheckbox !== e.target) {
+                        otherCheckbox.checked = e.target.checked;
+                    }
+                });
+            });
+        }
+    });
 }
 
-// Set up theme toggle
-function setupThemeToggle() {
-    // Add event listener for theme toggle
-    themeToggleCheckbox.addEventListener('change', (e) => {
-        setTheme(e.target.checked);
-    });
-    
-    // Initialize theme
-    initTheme();
+// Function to set theme
+function setTheme(isDark) {
+    if (isDark) {
+        document.body.classList.remove('light-theme');
+        document.querySelectorAll('.toggle-label').forEach(label => {
+            label.textContent = 'Dark Mode';
+        });
+        localStorage.setItem('theme', 'dark');
+        console.log("Theme set to dark mode");
+    } else {
+        document.body.classList.add('light-theme');
+        document.querySelectorAll('.toggle-label').forEach(label => {
+            label.textContent = 'Light Mode';
+        });
+        localStorage.setItem('theme', 'light');
+        console.log("Theme set to light mode");
+    }
 }
 
 // Initialize the application when the page loads
