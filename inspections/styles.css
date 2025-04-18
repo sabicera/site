@@ -1,136 +1,118 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
+/* Main theme variables */
 :root {
-    /* Dark Theme (Default) */
-    --bg-color: #121212;
-    --header-bg-color: #1a1a1a;
-    --panel-bg-color: #1e1e1e;
-    --text-color: #f0f0f0;
-    --textarea-bg-color: #000000;
-    --textarea-text-color: #f0f0f0;
-    --border-color: #333333;
-    --highlight-color: rgba(255, 70, 70, 0.5);
-    --btn-primary-bg: #3366cc;
-    --btn-primary-text: #ffffff;
-    --btn-danger-bg: #d32f2f;
-    --btn-danger-text: #ffffff;
-    --panama-time-color: #ffda44;
-    --table-header-bg: #2a2a2a;
-    --table-header-text: #f0f0f0;
-    --table-bg: #1e1e1e;
-    --table-border: #333333;
-    --modal-overlay: rgba(0, 0, 0, 0.7);
-    --modal-bg: #1e1e1e;
-    --modal-text: #f0f0f0;
-    --urgent-row-bg: #b71c1c;
-    --priority-row-bg: #bc5100;
-    --upcoming-row-bg: #1e5e20;
-    --overdue-row-bg: #4a0d0d;
-    --toggle-active: #3366cc;
-    --toggle-inactive: #666666;
-    --toggle-knob: #ffffff;
-    --scrollbar-track: #1a1a1a;
-    --scrollbar-thumb: #333333;
-    --scrollbar-thumb-hover: #444444;
-    --emphasis-color: #ffda44;
-    --header-title-color: #ffffff;
+    --primary-bg: #1a1a2e;
+    --secondary-bg: #162447;
+    --accent-color: #0f4c75;
+    --text-color: #e6e6e6;
+    --highlight-bg: rgba(255, 87, 51, 0.3);
+    --btn-primary: #2064bd;
+    --btn-primary-hover: #3478d1;
+    --btn-danger: #d9534f;
+    --btn-danger-hover: #c9302c;
+    --border-color: #2d4a73;
+    --priority-color: #ffc107;
+    --urgent-color: #dc3545;
+    --upcoming-color: #17a2b8;
+    --overdue-color: #6c757d;
 }
 
-.light-theme {
-    /* Light Theme */
-    --bg-color: #f5f5f5;
-    --header-bg-color: #2F4F4F;
-    --panel-bg-color: #ffffff;
+/* Light theme variables */
+body.light-theme {
+    --primary-bg: #f0f0f0;
+    --secondary-bg: #e0e0e0;
+    --accent-color: #0b5ed7;
     --text-color: #333333;
-    --textarea-bg-color: #ffffff;
-    --textarea-text-color: #333333;
-    --border-color: #dddddd;
-    --highlight-color: rgba(255, 70, 70, 0.5);
-    --btn-primary-bg: #0077cc;
-    --btn-primary-text: #ffffff;
-    --btn-danger-bg: #f44336;
-    --btn-danger-text: #ffffff;
-    --panama-time-color: #ffda44;
-    --table-header-bg: #eeeeee;
-    --table-header-text: #333333;
-    --table-bg: #ffffff;
-    --table-border: #dddddd;
-    --modal-overlay: rgba(0, 0, 0, 0.5);
-    --modal-bg: #ffffff;
-    --modal-text: #333333;
-    --urgent-row-bg: #f44336;
-    --priority-row-bg: #ff9800;
-    --upcoming-row-bg: #4caf50;
-    --overdue-row-bg: #b71c1c;
-    --toggle-active: #0077cc;
-    --toggle-inactive: #cccccc;
-    --toggle-knob: #ffffff;
-    --scrollbar-track: #f1f1f1;
-    --scrollbar-thumb: #c1c1c1;
-    --scrollbar-thumb-hover: #a1a1a1;
-    --emphasis-color: #0077cc;
-    --header-title-color: #ffffff;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    --highlight-bg: rgba(255, 87, 51, 0.15);
+    --btn-primary: #0b5ed7;
+    --btn-primary-hover: #0a58ca;
+    --btn-danger: #dc3545;
+    --btn-danger-hover: #bb2d3b;
+    --border-color: #cccccc;
+    --priority-color: #fd7e14;
+    --urgent-color: #dc3545;
+    --upcoming-color: #17a2b8;
+    --overdue-color: #6c757d;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--bg-color);
+    font-family: Arial, sans-serif;
+    background-color: var(--primary-bg);
     color: var(--text-color);
-    height: 100vh;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
+    max-width: 100%;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover);
-}
-
-/* Theme toggle */
-.theme-toggle {
+/* Navigation Bar */
+.nav-bar {
     display: flex;
-    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs {
+    display: flex;
     gap: 10px;
 }
 
-.toggle-label {
-    font-size: 0.9rem;
+.nav-tab {
+    padding: 8px 16px;
+    background-color: var(--btn-primary);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
     font-weight: 500;
-    color: var(--text-color);
+    transition: background-color 0.2s;
 }
 
-/* Toggle switch */
+.nav-tab:hover {
+    background-color: var(--btn-primary-hover);
+}
+
+.nav-tab.active {
+    background-color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Page Container */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+}
+
 .switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 40px;
+    height: 20px;
+    margin-right: 8px;
 }
 
 .switch input {
@@ -146,159 +128,175 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--toggle-inactive);
+    background-color: #ccc;
     transition: .4s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: var(--toggle-knob);
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
     transition: .4s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 input:checked + .slider {
-    background-color: var(--toggle-active);
+    background-color: var(--accent-color);
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 2px var(--toggle-active);
+    box-shadow: 0 0 1px var(--accent-color);
 }
 
 input:checked + .slider:before {
-    transform: translateX(26px);
+    transform: translateX(20px);
 }
 
 .slider.round {
-    border-radius: 24px;
+    border-radius: 20px;
 }
 
 .slider.round:before {
     border-radius: 50%;
 }
 
-/* Header styles */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: var(--header-bg-color);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
 }
 
 .time-display {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
 }
 
-.label {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--header-title-color);
+.time-display .label {
+    font-weight: normal;
+    font-size: 14px;
 }
 
-.time {
+.time-display .time {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--panama-time-color);
+    font-family: monospace;
+    color: #ffcc00;
+}
+
+.time-container {
+    display: flex;
+    gap: 20px;
+}
+
+.brazil-time, .mexico-time {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.brazil-time .time {
+    color: #4da6ff;
+}
+
+.mexico-time .time {
+    color: #ff9e4d;
+}
+
+.panama-time {
+    color: #ffcc00;
 }
 
 .header-buttons {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
-/* Button styles */
+/* Button Styles */
 .btn {
-    padding: 8px 16px;
     border: none;
     border-radius: 4px;
+    padding: 6px 12px;
     font-weight: 500;
     cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.btn:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s, transform 0.1s;
+    font-size: 14px;
 }
 
 .btn:active {
     transform: scale(0.98);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .btn-primary {
-    background-color: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
+    background-color: var(--btn-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover);
 }
 
 .btn-danger {
-    background-color: var(--btn-danger-bg);
-    color: var(--btn-danger-text);
+    background-color: var(--btn-danger);
+    color: white;
 }
 
-/* Main content area */
+.btn-danger:hover {
+    background-color: var(--btn-danger-hover);
+}
+
+/* Main Content Styles */
 main {
     flex: 1;
-    padding: 12px;
+    padding: 0;
     overflow: hidden;
 }
 
 .split-container {
     display: flex;
-    height: 100%;
-    gap: 12px;
+    height: calc(100vh - 53px);
+    overflow: hidden;
 }
 
 .panel {
     flex: 1;
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    background-color: var(--panel-bg-color);
-    border-radius: 6px;
+    flex-direction: column-reverse;
+    background-color: var(--primary-bg);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid var(--border-color);
 }
 
 .text-container {
-    flex: 1;
     position: relative;
+    flex: 1;
     overflow: hidden;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
 }
 
 .text-area {
     width: 100%;
     height: 100%;
-    background-color: var(--textarea-bg-color);
-    color: var(--textarea-text-color);
+    background-color: transparent;
     border: none;
     resize: none;
-    padding: 12px;
-    font-family: 'Calibri', 'Consolas', monospace;
-    font-size: 1rem;
-    outline: none;
-    white-space: pre;
-    overflow: auto;
+    color: var(--text-color);
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px;
+    z-index: 1;
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
-    line-height: 1.5;
+    white-space: pre;
+    overflow: auto;
+}
+
+.text-area:focus {
+    outline: none;
 }
 
 .highlight-overlay {
@@ -307,80 +305,157 @@ main {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
-    pointer-events: none;
-    overflow: auto;
-    padding: 12px;
-    font-family: 'Calibri', 'Consolas', monospace;
-    font-size: 1rem;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
     line-height: 1.5;
     white-space: pre;
-    color: transparent;
+    overflow: auto;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.highlight-line {
+    width: 100%;
+}
+
+.highlight-diff {
+    background-color: var(--highlight-bg);
+    border-radius: 0;
 }
 
 .panel-buttons {
     display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: var(--header-bg-color);
+    padding: 4px;
+    gap: 5px;
+    justify-content: flex-start;
     border-top: 1px solid var(--border-color);
+    background-color: var(--secondary-bg);
 }
 
-/* Pending Panel Specific Styles */
+/* Pending Panel Styles */
 .pending-panel {
-    display: none; /* Hidden by default, will be shown via JS for larger screens */
-    background-color: var(--panel-bg-color);
-    border-radius: 6px;
-    overflow: hidden;
-    flex: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
 }
 
 .panel-header {
-    padding: 12px;
-    background-color: var(--header-bg-color);
+    padding: 10px;
+    background-color: var(--secondary-bg);
+    color: white;
     border-bottom: 1px solid var(--border-color);
     text-align: center;
 }
 
 .panel-header h2 {
     margin: 0;
-    font-size: 1.2rem;
-    text-align: center;
-    font-weight: 600;
-    color: var(--header-title-color);
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
 }
 
 .pending-container {
     flex: 1;
-    overflow: auto;
+    overflow-y: auto;
     padding: 0;
-    background-color: var(--panel-bg-color);
-    color: var(--text-color);
 }
 
-/* Line highlight styles */
-.highlight-line {
-    display: block;
-    min-height: 1.5em;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.highlight-diff {
-    background-color: var(--highlight-color);
+th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    vertical-align: middle;
 }
 
-/* Modal styles */
+th {
+    background-color: #8b0000;  /* Dark red background for header */
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+}
+
+th:first-child {
+    text-align: left;
+}
+
+/* Alternate row styling */
+tbody tr {
+    background-color: rgba(20, 20, 35, 0.9);
+}
+
+tbody tr:nth-child(odd) {
+    background-color: rgba(25, 25, 40, 0.9);
+}
+
+/* Priority styling for rows */
+tr.urgent-row td:nth-child(2) {
+    color: #ff4d4d !important;
+    font-weight: bold;
+}
+
+tr.priority-row td:nth-child(2) {
+    color: #ffcc00 !important;
+}
+
+tr.upcoming-row td:nth-child(2) {
+    color: #66ccff !important;
+}
+
+tr.overdue-row td:nth-child(2) {
+    color: #ff0000 !important;
+    font-weight: bold;
+}
+
+/* First column styling for rows with green asterisk */
+td:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+/* Add a green asterisk to urgent items */
+.urgent-row td:first-child::before {
+    content: "* ";
+    color: #2ecc71;  /* Green color */
+    font-weight: bold;
+}
+
+/* Status cell */
+td:last-child {
+    text-align: center;
+}
+
+/* Actual status indicator in last column - just a dash */
+td:last-child {
+    text-align: center;
+    min-width: 30px;
+}
+
+/* Modal Styles */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--modal-overlay);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .hidden {
@@ -388,265 +463,172 @@ main {
 }
 
 .modal-content {
-    background-color: var(--modal-bg);
-    color: var(--modal-text);
+    width: 90%;
+    max-width: 600px;
+    background-color: var(--secondary-bg);
     border-radius: 8px;
-    width: auto;
-    min-width: 700px;
-    max-width: 90%;
     max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    text-align: center;
-    padding: 16px;
+    padding: 10px;
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    background-color: var(--header-bg-color);
-    z-index: 1;
+    background-color: var(--accent-color);
 }
 
 .modal-header h2 {
-    color: var(--header-title-color);
-    font-weight: 600;
-    text-align: center;
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
 }
 
 .close-btn {
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--text-color);
-    transition: color 0.2s;
-}
-
-.close-btn:hover {
-    color: var(--emphasis-color);
+    color: white;
 }
 
 .modal-body {
-    padding: 0;
-    overflow-x: auto;
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
 }
 
-/* Common table styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: auto;
-    white-space: nowrap;
-}
-
-th, td {
-    padding: 10px 15px;
-    text-align: center;
-    border: 1px solid var(--table-border);
-}
-
-th {
-    background-color: var(--table-header-bg);
-    color: var(--table-header-text);
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-/* Keep the Time Left column fixed width */
-th:nth-child(2),
-td:nth-child(2) {
-    width: 120px;
-    text-align: center;
-}
-
-/* Row highlight classes */
-.urgent-row {
-    background-color: var(--urgent-row-bg);
-    color: white;
-    font-weight: bold;
-}
-
-.priority-row {
-    background-color: var(--priority-row-bg);
-    color: white;
-    font-weight: bold;
-}
-
-.upcoming-row {
-    background-color: var(--upcoming-row-bg);
-    color: white;
-    font-weight: bold;
-}
-
-.overdue-row {
-    background-color: var(--overdue-row-bg);
-    color: white;
-    font-weight: bold;
-}
-
-
-/* Context menu styles */
+/* Context Menu Styles */
 .context-menu {
-    background-color: var(--modal-bg);
+    position: absolute;
+    background-color: var(--secondary-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    padding: 5px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    min-width: 150px;
-    max-width: 250px;
 }
 
 .context-menu-item {
-    padding: 8px 15px;
+    padding: 0.5rem 1rem;
     cursor: pointer;
-    transition: background-color 0.2s;
-    color: var(--text-color);
-    white-space: nowrap;
-    font-size: 14px;
 }
 
 .context-menu-item:hover {
-    background-color: var(--btn-primary-bg);
-    color: #ffffff;
+    background-color: var(--accent-color);
+    color: white;
 }
 
-/* Status cell styles */
+/* Status Cell Styles */
 .status-cell {
-    font-weight: bold;
-    width: 120px !important; /* Increased from 90px */
-    min-width: 120px !important; /* Added min-width to ensure it doesn't shrink */
-    text-align: center !important;
+    text-align: center;
+    font-size: 0.9rem;
 }
 
+/* Status indicators - Panama */
 .status-uwi-ongoing {
-    color: #ffda44;
+    color: #17a2b8;
 }
 
 .status-uwi-done {
-    color: #4caf50;
+    color: #28a745;
 }
 
 .status-k9-ongoing {
-    color: #ff9800;
+    color: #fd7e14;
 }
 
 .status-k9-done {
-    color: #00bcd4;
+    color: #28a745;
 }
 
-/* Update table column widths for the new status column */
-th:nth-child(3),
-td:nth-child(3) {
-    width: 120px !important; /* Increased from 90px */
-    min-width: 120px !important; /* Added min-width */
-    text-align: center;
+/* Status indicators - Ports */
+.status-brazil-ongoing {
+    color: #4da6ff;
 }
 
-/* Add a subtle visual indicator for right-clickable rows */
-tr[data-inspection-id] {
-    cursor: context-menu;
-    position: relative;
+.status-brazil-done {
+    color: #4dff88;
 }
 
-tr[data-inspection-id]:hover::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--emphasis-color);
+.status-mexico-ongoing {
+    color: #ff9e4d;
 }
 
-/* Make sure table header accommodates the status column */
-#pending-table thead tr th:first-child,
-#pending-table-inline thead tr th:first-child {
-    width: calc(100% - 240px) !important; /* 120px for time + 120px for status */
+.status-mexico-done {
+    color: #4dff88;
 }
 
-/* Make sure tables work correctly on mobile */
-@media (max-width: 576px) {
-    .context-menu {
-        max-width: 80vw;
-    }
-    
-    .modal-content {
-        min-width: unset;
-        width: 95%;
-    }
+/* Country indicators */
+[data-country="Brazil"] {
+    color: #4da6ff;
+    margin-right: 5px;
+    font-weight: normal;
 }
 
-/* Animations */
-@keyframes pulse {
+[data-country="Mexico"] {
+    color: #ff9e4d;
+    margin-right: 5px;
+    font-weight: normal;
+}
+
+/* Blinking effect */
+@keyframes blink {
     0% { opacity: 1; }
     50% { opacity: 0.7; }
     100% { opacity: 1; }
 }
 
-/* Responsive adjustments */
-/* Ensure the pending panel has sufficient width */
-@media (min-width: 1700px) {
-    .pending-panel {
-        min-width: 900px !important;
-        width: 900px !important; /* Added explicit width */
-    }
+.urgent-blink {
+    animation: blink 1s infinite;
 }
 
-.urgent-row .status-cell,
-.priority-row .status-cell,
-.upcoming-row .status-cell,
-.overdue-row .status-cell {
-    background-color: rgba(0, 0, 0, 0.2); /* Add slight background to make text more visible */
-    border-radius: 4px;
-    padding: 2px 6px;
-    
-    /* Let the K9 and UW panels fill the remaining space */
-    .panel:nth-child(1),
-    .panel:nth-child(2) {
-        flex: 1;
-    }
-}
-
-@media (max-width: 1700px) {
-    /* Hide the pending panel on smaller screens */
-    .pending-panel {
-        display: none !important;
-    }
-    
-    /* Keep the original 2-panel layout */
-    .panel:not(.pending-panel) {
-        flex: 1;
-    }
-}
-
-@media (max-width: 700px) {
+/* Responsive styles */
+@media (max-width: 1200px) {
     .split-container {
+        flex-wrap: wrap;
+    }
+    
+    .panel {
+        flex: 1 1 100%;
+        max-width: 100%;
+        height: calc((100vh - 100px) / 2);
+    }
+    
+    .pending-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
         flex-direction: column;
+        gap: 0.5rem;
     }
     
-    .panel:not(.pending-panel) {
-        height: 50%;
-    }
-    
-    .header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    
-    .time-display {
-        width: 100%;
-        justify-content: center;
+    .time-container {
+        margin-bottom: 0.5rem;
     }
     
     .header-buttons {
         width: 100%;
         justify-content: center;
+    }
+    
+    .split-container {
+        height: auto;
+    }
+    
+    .panel {
+        height: calc(100vh - 150px);
+    }
+
+    .nav-tabs {
+        width: 100%;
+    }
+
+    .nav-tab {
+        flex: 1;
+        text-align: center;
     }
 }
