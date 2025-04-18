@@ -34,6 +34,43 @@ body.light-theme {
     --overdue-color: #6c757d;
 }
 
+body.light-theme tr.urgent-row td:nth-child(2) {
+    color: #c82333 !important; /* darker red */
+}
+
+body.light-theme tr.priority-row td:nth-child(2) {
+    color: #d39e00 !important;
+}
+
+body.light-theme tr.upcoming-row td:nth-child(2) {
+    color: #0d6efd !important;
+}
+
+body.light-theme tr.overdue-row td:nth-child(2) {
+    color: #dc3545 !important;
+}
+
+body.light-theme .urgent-row td:first-child::before {
+    color: #198754; /* Bootstrap green-ish */
+}
+
+body.light-theme tbody tr {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+body.light-theme tbody tr:nth-child(odd) {
+    background-color: rgba(245, 245, 245, 0.95);
+}
+
+body.light-theme th {
+    background-color: #6c757d; /* muted gray */
+    color: white;
+}
+
+body.light-theme td {
+    color: var(--text-color);
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: var(--primary-bg);
@@ -196,15 +233,20 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 5px;
 }
 
 .brazil-time .time {
-    color: #4da6ff;
-}
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: monospace;
+    color: #ffcc00;}
 
 .mexico-time .time {
-    color: #ff9e4d;
-}
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: monospace;
+    color: #ffcc00;}
 
 .panama-time {
     color: #ffcc00;
