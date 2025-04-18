@@ -221,7 +221,7 @@ input:checked + .slider:before {
     font-size: 1.1rem;
     font-weight: 600;
     font-family: monospace;
-    color: #ffcc00;
+    color: #82bf24;
 }
 
 .time-container {
@@ -240,16 +240,16 @@ input:checked + .slider:before {
     font-size: 1.1rem;
     font-weight: 600;
     font-family: monospace;
-    color: #ffcc00;}
+    color: #82bf24;}
 
 .mexico-time .time {
     font-size: 1.1rem;
     font-weight: 600;
     font-family: monospace;
-    color: #ffcc00;}
+    color: #82bf24;}
 
 .panama-time {
-    color: #ffcc00;
+    color: #82bf24;
 }
 
 .header-buttons {
