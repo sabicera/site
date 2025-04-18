@@ -317,29 +317,49 @@ function setupScrollSync() {
     }
 }
 
-// Start timers for updating time and data
-function startTimers() {
-    // Update times every second
-    setInterval(() => {
-        updatePanamaTime();
-        updateLocalTimes();
-    }, 1000);
-    
-    // Initial time updates
-    updatePanamaTime();
-    updateLocalTimes();
-    
-    // Update pending items every 10 seconds
-    setInterval(updatePendingItems, 10000);
-    
-    // Blink effect for urgent rows
-    setInterval(() => {
-        blinkState = !blinkState;
-        updatePendingTableDisplay();
-    }, 1000);
+function formatTime(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${day}/${month} ${hours}:${minutes}:${seconds}`;
 }
 
-// Update pending items based on active page
+// Helper function to update the time display for a specific element and UTC offset
+function updateTimeForLocation(element, offset) {
+    // Check if the target element exists
+    if (!element) {
+        // console.warn(`Time display element not found for offset ${offset}.`); // Optional: Log a warning
+        return;
+    }
+
+    const now = new Date();
+    // Calculate UTC time by adding the local timezone offset (in milliseconds)
+    const utcTimeMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+    // Calculate the target time by applying the desired offset (in milliseconds)
+    const targetTime = new Date(utcTimeMs + (3600000 * offset)); // 3600000 ms in an hour
+
+    // Update the element's text content
+    element.textContent = formatTime(targetTime);
+}
+
+// Combined function to update all relevant time displays
+function updateAllTimes() {
+    const now = new Date(); // Get current time once for efficiency (optional optimization)
+
+    // Update Panama time (UTC-5)
+    updateTimeForLocation(panamaTimeDisplay, -5);
+
+    // Update Brazil time (UTC-3)
+    updateTimeForLocation(brazilTimeDisplay, -3);
+
+    // Update Mexico time (UTC-6, assuming Mexico City - adjust if needed)
+    updateTimeForLocation(mexicoTimeDisplay, -6);
+}
+
+
+// Update pending items based on active page (remains the same)
 function updatePendingItems() {
     if (activePage === 'panama') {
         updatePendingInspections();
@@ -348,62 +368,22 @@ function updatePendingItems() {
     }
 }
 
-// Update Panama time display
-function updatePanamaTime() {
-    if (!panamaTimeDisplay) return;
-    
-    const now = new Date();
-    const panamaOffset = -5; // UTC-5
-    
-    // Calculate Panama time
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const panamaTime = new Date(utcTime + (3600000 * panamaOffset));
-    
-    // Format: DD/MM HH:MM:SS
-    const day = String(panamaTime.getDate()).padStart(2, '0');
-    const month = String(panamaTime.getMonth() + 1).padStart(2, '0');
-    const hours = String(panamaTime.getHours()).padStart(2, '0');
-    const minutes = String(panamaTime.getMinutes()).padStart(2, '0');
-    const seconds = String(panamaTime.getSeconds()).padStart(2, '0');
-    
-    panamaTimeDisplay.textContent = `${day}/${month} ${hours}:${minutes}:${seconds}`;
-}
+// Start timers for updating time and data (updated)
+function startTimers() {
+    // Update all times every second using the combined function
+    setInterval(updateAllTimes, 1000);
 
-// Update Brazil and Mexico time displays
-function updateLocalTimes() {
-    if (!brazilTimeDisplay || !mexicoTimeDisplay) return;
-    
-    const now = new Date();
-    
-    // Brazil is UTC-3
-    const brazilOffset = -3;
-    // Mexico (assuming Mexico City) is UTC-6
-    const mexicoOffset = -6;
-    
-    // Calculate Brazil time
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const brazilTime = new Date(utcTime + (3600000 * brazilOffset));
-    
-    // Calculate Mexico time
-    const mexicoTime = new Date(utcTime + (3600000 * mexicoOffset));
-    
-    // Format: DD/MM HH:MM:SS
-    // Brazil time
-    const brazilDay = String(brazilTime.getDate()).padStart(2, '0');
-    const brazilMonth = String(brazilTime.getMonth() + 1).padStart(2, '0');
-    const brazilHours = String(brazilTime.getHours()).padStart(2, '0');
-    const brazilMinutes = String(brazilTime.getMinutes()).padStart(2, '0');
-    const brazilSeconds = String(brazilTime.getSeconds()).padStart(2, '0');
-    
-    // Mexico time
-    const mexicoDay = String(mexicoTime.getDate()).padStart(2, '0');
-    const mexicoMonth = String(mexicoTime.getMonth() + 1).padStart(2, '0');
-    const mexicoHours = String(mexicoTime.getHours()).padStart(2, '0');
-    const mexicoMinutes = String(mexicoTime.getMinutes()).padStart(2, '0');
-    const mexicoSeconds = String(mexicoTime.getSeconds()).padStart(2, '0');
-    
-    brazilTimeDisplay.textContent = `${brazilDay}/${brazilMonth} ${brazilHours}:${brazilMinutes}:${brazilSeconds}`;
-    mexicoTimeDisplay.textContent = `${mexicoDay}/${mexicoMonth} ${mexicoHours}:${mexicoMinutes}:${mexicoSeconds}`;
+    // Initial time updates using the combined function
+    updateAllTimes();
+
+    // Update pending items every 10 seconds (remains the same)
+    setInterval(updatePendingItems, 10000);
+
+    // Blink effect for urgent rows (remains the same)
+    setInterval(() => {
+        blinkState = !blinkState;
+        updatePendingTableDisplay(); // Make sure this function exists
+    }, 1000); // Consider if this interval needs to be different
 }
 
 // Handle tab key in text areas
@@ -841,17 +821,23 @@ function updateTableBody(tableBody) {
         
         // Apply styling based on priority
         if (item.hoursUntil <= 0) {
-            row.className = 'overdue-row';
+            row.classList.add('overdue-row');
         } else if (item.isUrgent) {
-            row.className = 'urgent-row urgent-blink';
-            // Apply blinking effect only for urgent rows
-            if (!blinkState) {
-                row.style.opacity = '0.7';
+            row.classList.add('urgent-row');
+            if (blinkState) {
+                row.classList.add('urgent-blink');
+            } else {
+                row.style.opacity = '0.5';
             }
         } else if (item.isPriority) {
-            row.className = 'priority-row';
+            row.classList.add('priority-row');
+            if (blinkState) {
+                row.classList.add('urgent-blink');
+            } else {
+                row.style.opacity = '0.5';
+            }
         } else if (item.isUpcoming) {
-            row.className = 'upcoming-row';
+            row.classList.add('upcoming-row');
         }
         
         // Description cell - No text wrapping
@@ -878,27 +864,7 @@ function updateTableBody(tableBody) {
         timeCell.style.whiteSpace = 'nowrap';
         
         const formattedTime = formatTimeLeft(item.hoursUntil);
-        
-        // Add time left with enhanced styling for ports page
-        if (activePage === 'ports') {
-            const timeSpan = document.createElement('span');
-            
-            if (item.hoursUntil <= 0) {
-                timeSpan.className = 'time-left-overdue';
-            } else if (item.isUrgent) {
-                timeSpan.className = 'time-left-urgent';
-            } else if (item.isPriority) {
-                timeSpan.className = 'time-left-priority';
-            } else if (item.isUpcoming) {
-                timeSpan.className = 'time-left-upcoming';
-            }
-            
-            timeSpan.textContent = formattedTime;
-            timeCell.appendChild(timeSpan);
-        } else {
-            // Standard format for panama page
-            timeCell.textContent = formattedTime;
-        }
+        timeCell.textContent = formattedTime;
         
         row.appendChild(timeCell);
         
@@ -938,7 +904,7 @@ function updateInspectionStatusIndicator(cell, status) {
             break;
         case INSPECTION_STATUSES.UWI_DONE:
             cell.classList.add('status-uwi-done');
-            cell.textContent = 'UWI ✓';
+            cell.textContent = 'UWI Done';
             break;
         case INSPECTION_STATUSES.K9_ONGOING:
             cell.classList.add('status-k9-ongoing');
@@ -946,7 +912,7 @@ function updateInspectionStatusIndicator(cell, status) {
             break;
         case INSPECTION_STATUSES.K9_DONE:
             cell.classList.add('status-k9-done');
-            cell.textContent = 'K9 ✓';
+            cell.textContent = 'K9 Done';
             break;
         default:
             cell.textContent = '—';
