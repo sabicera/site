@@ -3,90 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inspections Checker</title>
-    <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
+    <title>Inspections & Ports Checker</title>
+    <link rel="icon" type="image/ico" sizes="32x32" href="app.ico">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 </head>
 <body>
     <div class="app-container">
-        <!-- Header with time display and buttons -->
-        <header>
-            <div class="theme-toggle">
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle-checkbox">
-                    <span class="slider round"></span>
-                </label>
-                <span class="toggle-label">Dark Mode</span>
+        <!-- Navigation Tabs -->
+        <div class="nav-bar">
+            <div class="nav-tabs">
+                <div id="panama-tab" class="nav-tab active">Panama Inspections</div>
+                <div id="ports-tab" class="nav-tab">Brazil/Mexico Ports</div>
             </div>
-            <div class="time-display">
-                <span class="label">Panama Now:</span>
-                <span id="panama-time" class="time">DD/MM HH:MM:SS</span>
-            </div>
-            <div class="header-buttons">
-                <button id="check-btn" class="btn btn-primary">Check</button>
-                <button id="pending-btn" class="btn btn-primary">Pending</button>
-            </div>
-        </header>
-        <!-- Main content area with panels -->
-        <main>
-            <div class="split-container">
-                <!-- K9 Panel -->
-                <div class="panel">
-                    <div class="text-container">
-                        <textarea id="k9-textarea" class="text-area" spellcheck="false" wrap="off">Copy K9 here....!!!</textarea>
-                        <div id="k9-highlight" class="highlight-overlay"></div>
+        </div>
+
+        <!-- Panama Inspections Page -->
+        <div id="panama-page" class="page active">
+            <!-- Header with time display and buttons -->
+            <header>
+                <div class="theme-toggle">
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle-checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Dark Mode</span>
+                </div>
+                <div class="time-display">
+                    <span class="label">Panama Now:</span>
+                    <span id="panama-time" class="time panama-time">DD/MM HH:MM:SS</span>
+                </div>
+                <div class="header-buttons">
+                    <button id="panama-check-btn" class="btn btn-primary">Check</button>
+                    <button id="panama-pending-btn" class="btn btn-primary">Pending</button>
+                </div>
+            </header>
+            <!-- Main content area with panels -->
+            <main>
+                <div class="split-container">
+                    <!-- K9 Panel -->
+                    <div class="panel">
+                        <div class="text-container">
+                            <textarea id="k9-textarea" class="text-area" spellcheck="false" wrap="off">Copy K9 here....!!!</textarea>
+                            <div id="k9-highlight" class="highlight-overlay"></div>
+                        </div>
+                        <div class="panel-buttons">
+                            <button id="k9-clear-btn" class="btn btn-danger">Delete</button>
+                            <button id="k9-copy-btn" class="btn btn-primary">Copy K9</button>
+                        </div>
                     </div>
-                    <div class="panel-buttons">
-                        <button id="k9-clear-btn" class="btn btn-danger">Delete</button>
-                        <button id="k9-copy-btn" class="btn btn-primary">Copy K9</button>
+                    <!-- UW Panel -->
+                    <div class="panel">
+                        <div class="text-container">
+                            <textarea id="uw-textarea" class="text-area" spellcheck="false" wrap="off">Copy UnderWater here...!!!</textarea>
+                            <div id="uw-highlight" class="highlight-overlay"></div>
+                        </div>
+                        <div class="panel-buttons">
+                            <button id="uw-clear-btn" class="btn btn-danger">Delete</button>
+                            <button id="uw-copy-btn" class="btn btn-primary">Copy U/W</button>
+                        </div>
+                    </div>
+                    <!-- Pending Panel - Will be visible only on larger screens -->
+                    <div id="panama-pending-panel" class="panel pending-panel">
+                        <div class="panel-header">
+                            <h2>U/W & K9 Countdown</h2>
+                        </div>
+                        <div class="pending-container">
+                            <table id="panama-pending-table-inline">
+                                <thead>
+                                    <tr>
+                                        <th>Inspection Priorities</th>
+                                        <th>Time Left</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="panama-pending-tbody-inline">
+                                    <!-- Table rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <!-- UW Panel -->
-                <div class="panel">
-                    <div class="text-container">
-                        <textarea id="uw-textarea" class="text-area" spellcheck="false" wrap="off">Copy UnderWater here...!!!</textarea>
-                        <div id="uw-highlight" class="highlight-overlay"></div>
+            </main>
+        </div>
+
+        <!-- Brazil/Mexico Ports Page -->
+        <div id="ports-page" class="page">
+            <!-- Header with time display and buttons -->
+            <header>
+                <div class="theme-toggle">
+                    <label class="switch">
+                        <input type="checkbox" id="ports-theme-toggle-checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Dark Mode</span>
+                </div>
+                <div class="time-container">
+                    <div class="brazil-time">
+                        <span class="label">Brazil Now:</span>
+                        <span id="brazil-time" class="time">DD/MM HH:MM:SS</span>
                     </div>
-                    <div class="panel-buttons">
-                        <button id="uw-clear-btn" class="btn btn-danger">Delete</button>
-                        <button id="uw-copy-btn" class="btn btn-primary">Copy U/W</button>
+                    <div class="mexico-time">
+                        <span class="label">Mexico Now:</span>
+                        <span id="mexico-time" class="time">DD/MM HH:MM:SS</span>
                     </div>
                 </div>
-                <!-- Pending Panel - Will be visible only on larger screens -->
-                <div id="pending-panel" class="panel pending-panel">
-                    <div class="panel-header">
-                        <h2>U/W & K9 Countdown</h2>
+                <div class="header-buttons">
+                    <button id="ports-check-btn" class="btn btn-primary">Check</button>
+                    <button id="ports-pending-btn" class="btn btn-primary">Pending</button>
+                </div>
+            </header>
+            <!-- Main content area with panels -->
+            <main>
+                <div class="split-container">
+                    <!-- Brazil Panel -->
+                    <div class="panel">
+                        <div class="text-container">
+                            <textarea id="brazil-textarea" class="text-area" spellcheck="false" wrap="off">Copy Brazil ports here...!!!</textarea>
+                            <div id="brazil-highlight" class="highlight-overlay"></div>
+                        </div>
+                        <div class="panel-buttons">
+                            <button id="brazil-clear-btn" class="btn btn-danger">Delete</button>
+                            <button id="brazil-copy-btn" class="btn btn-primary">Copy Brazil</button>
+                        </div>
                     </div>
-                    <div class="pending-container">
-                        <table id="pending-table-inline">
-                            <thead>
-                                <tr>
-                                    <th>Inspection Priorities</th>
-                                    <th>Time Left</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pending-tbody-inline">
-                                <!-- Table rows will be added here dynamically -->
-                            </tbody>
-                        </table>
+                    <!-- Mexico Panel -->
+                    <div class="panel">
+                        <div class="text-container">
+                            <textarea id="mexico-textarea" class="text-area" spellcheck="false" wrap="off">Copy Mexico ports here...!!!</textarea>
+                            <div id="mexico-highlight" class="highlight-overlay"></div>
+                        </div>
+                        <div class="panel-buttons">
+                            <button id="mexico-clear-btn" class="btn btn-danger">Delete</button>
+                            <button id="mexico-copy-btn" class="btn btn-primary">Copy Mexico</button>
+                        </div>
+                    </div>
+                    <!-- Pending Panel - Will be visible only on larger screens -->
+                    <div id="ports-pending-panel" class="panel pending-panel">
+                        <div class="panel-header">
+                            <h2>Ports Countdown</h2>
+                        </div>
+                        <div class="pending-container">
+                            <table id="ports-pending-table-inline">
+                                <thead>
+                                    <tr>
+                                        <th>Port Priorities</th>
+                                        <th>Time Left</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ports-pending-tbody-inline">
+                                    <!-- Table rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
-        <!-- Pending Inspections Modal - Will be used on smaller screens -->
+            </main>
+        </div>
+
+        <!-- Pending Modal - Will be used on smaller screens -->
         <div id="pending-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>U/W & K9 Countdown</h2>
+                    <h2 id="modal-title">Countdown</h2>
                     <span id="close-modal" class="close-btn">&times;</span>
                 </div>
                 <div class="modal-body">
                     <table id="pending-table">
                         <thead>
                             <tr>
-                                <th>Inspection Priorities</th>
+                                <th id="column-header">Priorities</th>
                                 <th>Time Left</th>
                                 <th>Status</th>
                             </tr>
@@ -99,6 +186,7 @@
             </div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
