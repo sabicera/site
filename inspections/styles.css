@@ -14,6 +14,7 @@
     --urgent-color: #dc3545;
     --upcoming-color: #17a2b8;
     --overdue-color: #6c757d;
+    --general-font: 'Roboto Flex', sans-serif;
 }
 
 /* Light theme variables */
@@ -29,9 +30,6 @@ body.light-theme {
     --btn-danger-hover: #bb2d3b;
     --border-color: #cccccc;
     --priority-color: #fd7e14;
-    --urgent-color: #dc3545;
-    --upcoming-color: #17a2b8;
-    --overdue-color: #6c757d;
 }
 
 body.light-theme tr.urgent-row td:nth-child(2) {
@@ -54,6 +52,66 @@ body.light-theme .urgent-row td:first-child::before {
     color: #198754; /* Bootstrap green-ish */
 }
 
+/* Time status colors - high priority */
+.time-left-urgent {
+    color: #ff4d4d !important;
+    font-weight: bold;
+}
+
+.time-left-priority {
+    color: #ffcc00 !important;
+}
+
+.time-left-upcoming {
+    color: #66ccff !important;
+}
+
+.time-left-overdue {
+    color: #ff0000 !important;
+    font-weight: bold;
+}
+
+/* Row highlight styling - high priority */
+tr.urgent-row {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+tr.priority-row {
+    background-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+tr.upcoming-row {
+    background-color: rgba(23, 162, 184, 0.08) !important;
+}
+
+tr.overdue-row {
+    background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+/* First column styling for rows with green asterisk - updated */
+.urgent-row td:first-child::before {
+    content: "* ";
+    color: #2ecc71;  /* Green color */
+    font-weight: bold;
+}
+
+/* For light theme */
+body.light-theme tr.urgent-row {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+}
+
+body.light-theme tr.priority-row {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+}
+
+body.light-theme tr.upcoming-row {
+    background-color: rgba(13, 110, 253, 0.05) !important;
+}
+
+body.light-theme tr.overdue-row {
+    background-color: rgba(108, 117, 125, 0.08) !important;
+}
+
 body.light-theme tbody tr {
     background-color: rgba(255, 255, 255, 0.95);
 }
@@ -72,7 +130,7 @@ body.light-theme td {
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: var(--general-font);
     background-color: var(--primary-bg);
     color: var(--text-color);
     margin: 0;
@@ -213,14 +271,14 @@ input:checked + .slider:before {
 }
 
 .time-display .label {
-    font-weight: normal;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 20px;
 }
 
 .time-display .time {
     font-size: 1.1rem;
     font-weight: 600;
-    font-family: monospace;
+    font-family: var(--general-font);
     color: #82bf24;
 }
 
@@ -229,28 +287,20 @@ input:checked + .slider:before {
     gap: 20px;
 }
 
-.brazil-time, .mexico-time {
+.brazil-time, .mexico-time, .panama-time {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5px;
 }
 
-.brazil-time .time {
+.brazil-time .time, .mexico-time .time, .panama-time .time {
     font-size: 1.1rem;
     font-weight: 600;
-    font-family: monospace;
-    color: #82bf24;}
-
-.mexico-time .time {
-    font-size: 1.1rem;
-    font-weight: 600;
-    font-family: monospace;
-    color: #82bf24;}
-
-.panama-time {
+    font-family: var(--general-font);
     color: #82bf24;
 }
+
 
 .header-buttons {
     display: flex;
@@ -325,7 +375,7 @@ main {
     border: none;
     resize: none;
     color: var(--text-color);
-    font-family: monospace;
+    font-family: var(--general-font);
     font-size: 14px;
     line-height: 1.5;
     padding: 10px;
@@ -348,7 +398,7 @@ main {
     top: 0;
     left: 0;
     padding: 10px;
-    font-family: monospace;
+    font-family: var(--general-font);
     font-size: 14px;
     line-height: 1.5;
     white-space: pre;
