@@ -594,7 +594,7 @@ td:last-child {
 }
 
 .status-mexico-ongoing {
-    color: #ff9e4d;
+    color: #11c211;
 }
 
 .status-mexico-done {
@@ -609,7 +609,7 @@ td:last-child {
 }
 
 [data-country="Mexico"] {
-    color: #ff9e4d;
+    color: #4dff88;
     margin-right: 5px;
     font-weight: normal;
 }
