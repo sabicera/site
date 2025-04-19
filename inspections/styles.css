@@ -458,6 +458,54 @@ main {
     font-family: var(--general-font);
 }
 
+.location-badge.location-malta {
+    background-color: #900C3F;
+    color: white;
+}
+.location-badge.location-hamburg {
+    background-color: #FFC300;
+    color: black;
+}
+.location-badge.location-lehavre {
+    background-color: #0074D9;
+    color: white;
+}
+.location-badge.location-antwerp {
+    background-color: #FF851B;
+    color: white;
+}
+.location-badge.location-rotterdam {
+    background-color: #2ECC40;
+    color: white;
+}
+
+/* Add port indicators for combined view */
+[data-port="Malta"] {
+    color: #FF5733;
+    margin-right: 5px;
+    font-weight: normal;
+}
+[data-port="Hamburg"] {
+    color: #DAF7A6;
+    margin-right: 5px;
+    font-weight: normal;
+}
+[data-port="Le Havre"] {
+    color: #85C1E9;
+    margin-right: 5px;
+    font-weight: normal;
+}
+[data-port="Antwerp"] {
+    color: #FFC300;
+    margin-right: 5px;
+    font-weight: normal;
+}
+[data-port="Rotterdam"] {
+    color: #7DCEA0;
+    margin-right: 5px;
+    font-weight: normal;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;

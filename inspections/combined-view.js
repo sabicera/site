@@ -70,6 +70,10 @@
                     text-align: center;
                 }
                 
+                .combined-pending-tbody {
+                font-size: 700;
+                }
+
                 .location-panama {
                     background-color: #0f4c75;
                     color: white;
