@@ -460,6 +460,7 @@ main {
 table {
     width: 100%;
     border-collapse: collapse;
+    font-family: var(--general-font);
 }
 
 th, td {
