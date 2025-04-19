@@ -165,10 +165,13 @@ function checkScreenSize() {
 
 // Set up event listeners
 function setupEventListeners() {
-    // Pending modal
-    closeModalBtn.addEventListener('click', togglePendingModal);
+    // Pending modal - add null checks to prevent errors
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', togglePendingModal);
+    }
+    
     window.addEventListener('click', (e) => {
-        if (e.target === pendingModal) {
+        if (pendingModal && e.target === pendingModal) {
             togglePendingModal();
         }
     });
