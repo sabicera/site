@@ -9,7 +9,7 @@ async function loadAirports() {
     // airports = await response.json();
     
     airports = [
-        "Houston", "New York", "Athens", "Larnaca", "London", "Paris", 
+        "Houston", "Athens", "Istanbul", "Antwerp", "Guayaquil", "Newark", "New York", "Larnaca", "London", "Paris", 
         "Dubai", "Tokyo", "Singapore", "Frankfurt", "Amsterdam", "Madrid",
         "Rome", "Barcelona", "Istanbul", "Bangkok", "Los Angeles", "Chicago",
         "Miami", "San Francisco", "Boston", "Seattle", "Las Vegas", "Orlando",
@@ -373,4 +373,5 @@ document.addEventListener('mousemove', (e) => {
     if (layer3) {
         layer3.style.transform = `translate(${mouseX * 40}px, ${mouseY * 40}px)`;
     }
+
 });
