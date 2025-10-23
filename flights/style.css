@@ -138,7 +138,7 @@ label {
     margin-bottom: 6px;
     color: #cbd5e0;
     font-size: 12px;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     letter-spacing: 0.5px;
 }
 
@@ -286,3 +286,4 @@ input[type="time"]::-webkit-calendar-picker-indicator {
         padding: 20px;
     }
 }
+
