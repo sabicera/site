@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Assistant</title>
+    <link rel="icon" type="image/ico" sizes="32x32" href="plane.ico">
+    <link rel="stylesheet" href="style.css"></head>
+<body>
+    <div class="container">
+        <h1>✈️ Flight Itinerary Generator</h1>
+        <p class="subtitle">Automatically calculate layover times between flights</p>
+
+        <div id="flightLegsContainer"></div>
+
+        <button class="btn btn-add" onclick="addFlightLeg()">+ Add Flight Leg</button>
+        <button class="btn btn-generate" onclick="generateBriefing()">Generate Briefing</button>
+
+        <div id="output" class="output"></div>
+        <button class="btn btn-copy" onclick="copyToClipboard()" style="display: none;" id="copyBtn">Copy to Clipboard</button>
+        <div class="success-msg" id="successMsg">✓ Copied to clipboard!</div>
+    </div>
+</body>
+<script src="script.js"></script>
+</html>
