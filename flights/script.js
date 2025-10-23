@@ -169,7 +169,7 @@ function renderFlightLegs() {
             
             <div class="input-row">
                 <div class="input-group">
-                    <label>Arrival Airport</label>
+                    <label>Departure Airport</label>
                     <input type="text" 
                            id="arrival-${leg.id}"
                            placeholder="e.g., Houston" 
@@ -193,7 +193,7 @@ function renderFlightLegs() {
             </div>
             <div class="input-row">
                 <div class="input-group">
-                    <label>Departure Airport</label>
+                    <label>Arrival Airport</label>
                     <input type="text" 
                            id="departure-${leg.id}"
                            placeholder="e.g., New York" 
@@ -375,3 +375,4 @@ document.addEventListener('mousemove', (e) => {
     }
 
 });
+
