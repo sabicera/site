@@ -8,7 +8,7 @@ window.formatVesselNameWithLink = function(text) {
         const index = upperText.indexOf(name);
         if (index !== -1) {
             const shipId = VESSEL_ID_DATABASE[name];
-            const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:8`;
+            const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:16`;
             const originalNameMatch = text.substr(index, name.length);
             const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">${originalNameMatch}</a>`;
             return text.replace(originalNameMatch, linkHtml);
