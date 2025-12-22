@@ -1,14 +1,17 @@
 window.formatVesselNameWithLink = function(text) {
-    const regex = /\*(.*?)\*\s*[-–—]/; 
-    const match = text.match(regex);
-    if (match) {
-        const rawName = match[1];
-        const cleanName = rawName.trim().replace(/\s+/g, ' ').toUpperCase();
-        const shipId = VESSEL_ID_DATABASE[cleanName];
-        if (shipId) {
+    if (!text) return text;
+    const vesselNames = Object.keys(VESSEL_ID_DATABASE);
+    vesselNames.sort((a, b) => b.length - a.length);
+    let formattedText = text;
+    const upperText = text.toUpperCase();
+    for (const name of vesselNames) {
+        const index = upperText.indexOf(name);
+        if (index !== -1) {
+            const shipId = VESSEL_ID_DATABASE[name];
             const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:10`;
-            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">${rawName}</a>`;
-            return text.replace(`*${rawName}*`, linkHtml);
+            const originalNameMatch = text.substr(index, name.length);
+            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">*${originalNameMatch}*</a>`;
+            return text.replace(originalNameMatch, linkHtml);
         }
     }
     return text;
