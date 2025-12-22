@@ -15,9 +15,9 @@ window.formatVesselNameWithLink = function(text) {
 };
 
 const VESSEL_ID_DATABASE = {
-    "MSC ZONDA III": "156432",
+    "MSC ZONDA III": "758102",
     "MSC PRETORIA II": "757962",
-    "MSC AMALFI": "173852",
+    "MSC AMALFI": "2956",
     "MSC VIGO": "758696",
     "ARTEMIS": "6291945",
     "EUROPE": "144594",
