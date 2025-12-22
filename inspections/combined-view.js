@@ -231,10 +231,13 @@
                         
                         // Description cell
                         const descCell = document.createElement('td');
-                        descCell.style.fontFamily = 'monospace';
-                        descCell.style.whiteSpace = 'nowrap';
-                        descCell.textContent = item.description;
-                        row.appendChild(descCell);
+                            // Calling the function from script.js
+                            if (window.formatVesselNameWithLink) {
+                                descCell.innerHTML = window.formatVesselNameWithLink(item.description);
+                            } else {
+                                descCell.textContent = item.description;
+                            }
+                            row.appendChild(descCell);
                         
                         // Time left cell
                         const timeCell = document.createElement('td');
