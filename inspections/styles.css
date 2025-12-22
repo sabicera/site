@@ -479,6 +479,22 @@ main {
     color: white;
 }
 
+.vessel-link {
+    color: var(--priority-color, #ffc107) !important;
+    text-decoration: underline !important;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.vessel-link:hover {
+    filter: brightness(1.2);
+}
+
+/* Ensure links are visible in light mode */
+body.light-theme .vessel-link {
+    color: #0056b3;
+}
+
 /* Add port indicators for combined view */
 [data-port="Malta"] {
     color: #FF5733;
