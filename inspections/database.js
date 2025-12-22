@@ -7,7 +7,7 @@ window.formatVesselNameWithLink = function(text) {
         const shipId = VESSEL_ID_DATABASE[cleanName];
         if (shipId) {
             const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:10`;
-            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">*${rawName}*</a>`;
+            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">${rawName}</a>`;
             return text.replace(`*${rawName}*`, linkHtml);
         }
     }
