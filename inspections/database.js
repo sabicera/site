@@ -24,6 +24,7 @@ const VESSEL_ID_DATABASE = {
     "MSC VIGO": "758696",
     "ARTEMIS": "6291945",
     "EUROPE": "144594",
+    "VALUE": "2657",
     "MSC ELOISE": "459901",
     "MSC EUGENIA": "7029539",
     "MSC MANYA": "755323",
