@@ -481,12 +481,15 @@ main {
 
 .vessel-link {
     color: var(--priority-color, #ffc107) !important;
-    text-decoration: underline !important;
-    font-weight: bold;
+    text-decoration: none !important; /* This removes the underline */
+    font-weight: 600;
     cursor: pointer;
+    transition: color 0.2s ease;
 }
 
 .vessel-link:hover {
+    color: #ffffff !important;
+    text-decoration: none !important; /* Ensures no underline on hover either */
     filter: brightness(1.2);
 }
 
@@ -792,3 +795,4 @@ td:last-child {
         text-align: center;
     }
 }
+
