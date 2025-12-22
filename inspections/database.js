@@ -1,17 +1,14 @@
 window.formatVesselNameWithLink = function(text) {
-    // Regex looks for *NAME* -
-    const regex = /\*(.*?)\*\s*-/;
+    const regex = /\*(.*?)\*\s*[-–—]/; 
     const match = text.match(regex);
-
     if (match) {
-        const vesselName = match[1].trim().toUpperCase();
-        const shipId = VESSEL_ID_DATABASE[vesselName];
-
+        const rawName = match[1];
+        const cleanName = rawName.trim().replace(/\s+/g, ' ').toUpperCase();
+        const shipId = VESSEL_ID_DATABASE[cleanName];
         if (shipId) {
-            // Live map link with zoom level 10
-            const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:8`;
-            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">${match[1].trim()}</a>`;
-            return text.replace(`*${match[1]}*`, linkHtml);
+            const url = `https://www.marinetraffic.com/en/ais/home/shipid:${shipId}/zoom:10`;
+            const linkHtml = `<a href="${url}" target="_blank" class="vessel-link">*${rawName}*</a>`;
+            return text.replace(`*${rawName}*`, linkHtml);
         }
     }
     return text;
@@ -30,5 +27,4 @@ const VESSEL_ID_DATABASE = {
     "MSC MANYA": "755323",
     "MSC SUAPE VII": "133878",
     "MSC MARIA CLARA": "714770",
-
 };
