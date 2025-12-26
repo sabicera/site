@@ -7,8 +7,7 @@ let searchQuery = '';
 // Ports categorized by region with timezones
 const PORT_CATEGORIES = {
     'Panama': {
-        ports: ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 
-                'COLON ANCHORAGE', 'BALB ANCH','CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'],
+        ports: ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH','CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'],
         timezone: 'America/Panama',
         offset: -5
     },
@@ -164,7 +163,7 @@ function setupEventListeners() {
     safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
     safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
     safeAddListener('add-row-btn', 'click', addNewRow);
-    safeAddListener('clear-all-btn', 'click', clearAllVessels);
+    //safeAddListener('clear-all-btn', 'click', clearAllVessels);
     
     // Search functionality
     const searchInput = document.getElementById('search-input');
@@ -710,7 +709,7 @@ function handleContextMenuAction(action, vesselId) {
 function copyVessels(inspectionType) {
     const filtered = vessels.filter(v => {
         const matchesType = v.inspectionType === inspectionType || v.inspectionType === 'Both';
-        const isPanama = ['Balboa', 'Cristobal', 'Manzanillo (Panama)', 'COLON', 'RODMAN', 'FREEPORT'].includes(v.port);
+        const isPanama = ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH','CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'].includes(v.port);
         return matchesType && isPanama;
     });
     
@@ -1364,3 +1363,4 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+
