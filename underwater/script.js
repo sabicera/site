@@ -2,6 +2,7 @@
 let vessels = [];
 let selectedRow = null;
 let updateInterval = null;
+let searchQuery = '';
 
 // Ports categorized by region with timezones
 const PORT_CATEGORIES = {
@@ -692,7 +693,7 @@ function handleContextMenuAction(action, vesselId) {
 function copyVessels(inspectionType) {
     const filtered = vessels.filter(v => {
         const matchesType = v.inspectionType === inspectionType || v.inspectionType === 'Both';
-        const isPanama = ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH','CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'].includes(v.port);
+        const isPanama = ['Balboa', 'Cristobal', 'Manzanillo (Panama)', 'COLON', 'RODMAN', 'FREEPORT'].includes(v.port);
         return matchesType && isPanama;
     });
     
@@ -978,16 +979,27 @@ function importExcel() {
                     
                     console.log(`Total rows in sheet: ${rawData.length}`);
                     
-                    // Find the header row (contains "Name")
+                    // Find the header row (contains "Name" or "Vessel Name")
                     let headerIndex = -1;
                     let headers = [];
+                    let isOwnFormat = false;
                     
                     for (let i = 0; i < rawData.length; i++) {
                         const row = rawData[i];
-                        if (row[0] === 'Name') {
+                        // Check for our own export format
+                        if (row[1] === 'Vessel Name') {
                             headerIndex = i;
                             headers = row;
-                            console.log(`Found header at row ${i}:`, headers);
+                            isOwnFormat = true;
+                            console.log(`Found our export format header at row ${i}:`, headers);
+                            break;
+                        }
+                        // Check for Monday.com format
+                        else if (row[0] === 'Name') {
+                            headerIndex = i;
+                            headers = row;
+                            isOwnFormat = false;
+                            console.log(`Found Monday.com format header at row ${i}:`, headers);
                             break;
                         }
                     }
@@ -997,20 +1009,39 @@ function importExcel() {
                         return;
                     }
                     
-                    // Find column indices
-                    const nameCol = headers.indexOf('Name');
-                    const dateCol = headers.indexOf('Date');
-                    const statusCol = headers.indexOf('Status');
-                    const vesselPosCol = headers.indexOf('Vessel Position');
-                    const portCol = headers.indexOf('Port of Inspection');
-                    const updatedEtdCol = headers.indexOf('Updated ETD from Agent');
-                    const textCol = headers.indexOf('Text');
+                    // Find column indices based on format
+                    let nameCol, dateCol, statusCol, vesselPosCol, portCol, updatedEtdCol, textCol, inspectionTypeCol;
+                    
+                    if (isOwnFormat) {
+                        // Our export format
+                        nameCol = headers.indexOf('Vessel Name');
+                        portCol = headers.indexOf('Port');
+                        inspectionTypeCol = headers.indexOf('Inspection Type');
+                        dateCol = headers.indexOf('ETD');
+                        vesselPosCol = headers.indexOf('Vessel Position');
+                        statusCol = headers.indexOf('Status');
+                        textCol = headers.indexOf('Notes');
+                        updatedEtdCol = -1; // Not used in our format
+                    } else {
+                        // Monday.com format
+                        nameCol = headers.indexOf('Name');
+                        dateCol = headers.indexOf('Date');
+                        statusCol = headers.indexOf('Status');
+                        vesselPosCol = headers.indexOf('Vessel Position');
+                        portCol = headers.indexOf('Port of Inspection');
+                        updatedEtdCol = headers.indexOf('Updated ETD from Agent');
+                        textCol = headers.indexOf('Text');
+                        inspectionTypeCol = -1; // Not in Monday.com format
+                    }
                     
                     console.log('Column indices:', {
+                        format: isOwnFormat ? 'Our Export' : 'Monday.com',
                         name: nameCol,
+                        port: portCol,
+                        inspectionType: inspectionTypeCol,
                         date: dateCol,
                         vesselPos: vesselPosCol,
-                        port: portCol,
+                        status: statusCol,
                         updatedEtd: updatedEtdCol,
                         text: textCol
                     });
@@ -1034,7 +1065,7 @@ function importExcel() {
                             id: Date.now() + Math.random(),
                             vesselName: vesselName.toUpperCase().trim(),
                             port: '',
-                            inspectionType: 'Both', // K9 & UWI from handover sheet
+                            inspectionType: 'Both', // Default, will be updated if available
                             etd: '',
                             vesselPosition: '',
                             status: 'Pending',
@@ -1048,37 +1079,42 @@ function importExcel() {
                             vessel.port = port.toUpperCase().trim();
                         }
                         
-                        // Get vessel position from Vessel Position column
-                        const vesselPos = row[vesselPosCol];
-                        if (vesselPos && typeof vesselPos === 'string') {
-                            const posUpper = vesselPos.toUpperCase();
-                            if (posUpper.includes('ANCHORAGE')) {
-                                vessel.vesselPosition = 'Anchorage';
-                            } else if (posUpper.includes('NOT BERTHED')) {
-                                vessel.vesselPosition = 'Not Berthed Yet';
-                            } else if (posUpper.includes('BERTHED')) {
-                                vessel.vesselPosition = 'Berthed';
-                            } else if (posUpper.includes('WORKING')) {
-                                vessel.vesselPosition = 'Working';
-                            } else if (posUpper.includes('SAILED')) {
-                                vessel.vesselPosition = 'Sailed';
-                            } else {
-                                vessel.vesselPosition = vesselPos.trim();
+                        // Get inspection type (if available in our export format)
+                        if (inspectionTypeCol >= 0) {
+                            const inspectionType = row[inspectionTypeCol];
+                            if (inspectionType && typeof inspectionType === 'string') {
+                                vessel.inspectionType = inspectionType.trim();
                             }
                         }
                         
-                        // Get notes from Text column
-                        const textNotes = row[textCol];
-                        if (textNotes && typeof textNotes === 'string') {
-                            vessel.notes = textNotes.trim();
+                        // Get vessel position
+                        if (vesselPosCol >= 0) {
+                            const vesselPos = row[vesselPosCol];
+                            if (vesselPos && typeof vesselPos === 'string') {
+                                vessel.vesselPosition = vesselPos.trim();
+                            } else if (vesselPos === null || vesselPos === undefined) {
+                                vessel.vesselPosition = '';
+                            }
                         }
                         
-                        // Get ETD - priority to "Updated ETD from Agent"
-                        let etdValue = row[updatedEtdCol] || row[dateCol];
+                        // Get status
+                        if (statusCol >= 0) {
+                            const statusValue = row[statusCol];
+                            if (statusValue && typeof statusValue === 'string') {
+                                vessel.status = statusValue.trim();
+                            }
+                        }
+                        
+                        // Get ETD - priority to "Updated ETD from Agent" for Monday.com, or "ETD" for our format
+                        let etdValue = updatedEtdCol >= 0 ? (row[updatedEtdCol] || row[dateCol]) : row[dateCol];
                         
                         if (etdValue) {
-                            // Handle "ETD DD/MM HH:MM" format
-                            if (typeof etdValue === 'string') {
+                            // Handle ISO format from our export (e.g., "2025-12-27T19:00")
+                            if (typeof etdValue === 'string' && etdValue.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
+                                vessel.etd = etdValue;
+                            }
+                            // Handle "ETD DD/MM HH:MM" format from Monday.com
+                            else if (typeof etdValue === 'string') {
                                 // Remove leading dash and spaces
                                 etdValue = etdValue.trim().replace(/^-\s*/, '');
                                 
@@ -1109,13 +1145,21 @@ function importExcel() {
                             }
                         }
                         
+                        // Get notes from Text/Notes column
+                        if (textCol >= 0) {
+                            const textNotes = row[textCol];
+                            if (textNotes && typeof textNotes === 'string') {
+                                vessel.notes = textNotes.trim();
+                            }
+                        }
+                        
                         // Calculate time left
                         if (vessel.etd) {
                             vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
                         }
                         
                         allVessels.push(vessel);
-                        console.log('Added vessel:', vessel.vesselName, vessel.port, vessel.etd, vessel.status);
+                        console.log('Added vessel:', vessel.vesselName, vessel.port, vessel.etd, vessel.vesselPosition, vessel.status);
                     }
                 });
                 
@@ -1187,7 +1231,7 @@ function updateFooter() {
     document.getElementById('uw-count').textContent = `U/W: ${uw}`;
 }
 
-// Clock
+// Clock - show multiple timezones
 function startClock() {
     updateClock();
     setInterval(updateClock, 1000);
@@ -1196,16 +1240,27 @@ function startClock() {
 function updateClock() {
     const now = new Date();
     
-    // Get UTC time
-    const utcDay = String(now.getUTCDate()).padStart(2, '0');
-    const utcMonth = String(now.getUTCMonth() + 1).padStart(2, '0');
+    // Get UTC time components
     const utcYear = now.getUTCFullYear();
-    const utcHours = String(now.getUTCHours()).padStart(2, '0');
-    const utcMinutes = String(now.getUTCMinutes()).padStart(2, '0');
-    const utcSeconds = String(now.getUTCSeconds()).padStart(2, '0');
+    const utcMonth = now.getUTCMonth();
+    const utcDay = now.getUTCDate();
+    const utcHours = now.getUTCHours();
+    const utcMinutes = now.getUTCMinutes();
     
-    document.getElementById('current-time').textContent = 
-        `UTC Time: ${utcDay}/${utcMonth}/${utcYear} ${utcHours}:${utcMinutes}:${utcSeconds}`;
+    // Helper function to format time
+    const formatTime = (offsetHours) => {
+        const localDate = new Date(Date.UTC(utcYear, utcMonth, utcDay, utcHours + offsetHours, utcMinutes));
+        const hours = String(localDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(localDate.getUTCMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+    
+    // Update each timezone clock
+    document.getElementById('panama-time').textContent = `🇵🇦 Panama: ${formatTime(-5)}`;
+    document.getElementById('brazil-time').textContent = `🇧🇷 Brazil: ${formatTime(-3)}`;
+    document.getElementById('freeport-time').textContent = `🇧🇸 Freeport: ${formatTime(-5)}`;
+    document.getElementById('chile-time').textContent = `🇨🇱 Chile: ${formatTime(-3)}`;
+    document.getElementById('laspalmas-time').textContent = `🇪🇸 Las Palmas: ${formatTime(1)}`;
 }
 
 // Keyboard shortcuts
