@@ -142,31 +142,43 @@ function setTheme(isDark) {
 
 // Event listeners
 function setupEventListeners() {
-    document.getElementById('import-btn').addEventListener('click', importExcel);
-    document.getElementById('export-btn').addEventListener('click', exportExcel);
-    document.getElementById('paste-btn').addEventListener('click', openPasteModal);
-    document.getElementById('cleanup-btn').addEventListener('click', manualCleanup);
-    document.getElementById('copy-k9-btn').addEventListener('click', () => copyVessels('K9'));
-    document.getElementById('copy-uw-btn').addEventListener('click', () => copyVessels('U/W'));
-    document.getElementById('add-row-btn').addEventListener('click', addNewRow);
-    //document.getElementById('clear-all-btn').addEventListener('click', clearAllVessels);
+    // Helper function to safely add event listener
+    const safeAddListener = (id, event, handler) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener(event, handler);
+        } else {
+            console.warn(`Element not found: ${id}`);
+        }
+    };
+    
+    safeAddListener('import-btn', 'click', importExcel);
+    safeAddListener('export-btn', 'click', exportExcel);
+    safeAddListener('paste-btn', 'click', openPasteModal);
+    safeAddListener('cleanup-btn', 'click', manualCleanup);
+    safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
+    safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
+    safeAddListener('add-row-btn', 'click', addNewRow);
+    safeAddListener('clear-all-btn', 'click', clearAllVessels);
     
     // Search functionality
     const searchInput = document.getElementById('search-input');
     const clearSearchBtn = document.getElementById('clear-search-btn');
     
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value.toLowerCase();
-        clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
-        renderVessels();
-    });
-    
-    clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        searchQuery = '';
-        clearSearchBtn.style.display = 'none';
-        renderVessels();
-    });
+    if (searchInput && clearSearchBtn) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
+            renderVessels();
+        });
+        
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            clearSearchBtn.style.display = 'none';
+            renderVessels();
+        });
+    }
     
     document.addEventListener('click', hideContextMenu);
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -1224,11 +1236,17 @@ function formatExcelDate(excelDate) {
 
 // Footer
 function updateFooter() {
-    document.getElementById('row-count').textContent = `Total Vessels: ${vessels.length}`;
+    const rowCountEl = document.getElementById('row-count');
+    const k9CountEl = document.getElementById('k9-count');
+    const uwCountEl = document.getElementById('uw-count');
+    
+    if (rowCountEl) rowCountEl.textContent = `Total Vessels: ${vessels.length}`;
+    
     const k9 = vessels.filter(v => v.inspectionType === 'K9' || v.inspectionType === 'Both').length;
     const uw = vessels.filter(v => v.inspectionType === 'U/W' || v.inspectionType === 'Both').length;
-    document.getElementById('k9-count').textContent = `K9: ${k9}`;
-    document.getElementById('uw-count').textContent = `U/W: ${uw}`;
+    
+    if (k9CountEl) k9CountEl.textContent = `K9: ${k9}`;
+    if (uwCountEl) uwCountEl.textContent = `U/W: ${uw}`;
 }
 
 // Clock - show multiple timezones
@@ -1255,12 +1273,20 @@ function updateClock() {
         return `${hours}:${minutes}`;
     };
     
+    // Helper function to safely update clock element
+    const updateClockElement = (id, text) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = text;
+        }
+    };
+    
     // Update each timezone clock
-    document.getElementById('panama-time').textContent = `🇵🇦 Panama: ${formatTime(-5)}`;
-    document.getElementById('brazil-time').textContent = `🇧🇷 Brazil: ${formatTime(-3)}`;
-    document.getElementById('freeport-time').textContent = `🇧🇸 Freeport: ${formatTime(-5)}`;
-    document.getElementById('chile-time').textContent = `🇨🇱 Chile: ${formatTime(-3)}`;
-    document.getElementById('laspalmas-time').textContent = `🇪🇸 Las Palmas: ${formatTime(1)}`;
+    updateClockElement('panama-time', `🇵🇦 Panama: ${formatTime(-5)}`);
+    updateClockElement('brazil-time', `🇧🇷 Brazil: ${formatTime(-3)}`);
+    updateClockElement('freeport-time', `🇧🇸 Freeport: ${formatTime(-5)}`);
+    updateClockElement('chile-time', `🇨🇱 Chile: ${formatTime(-3)}`);
+    updateClockElement('laspalmas-time', `🇪🇸 Las Palmas: ${formatTime(1)}`);
 }
 
 // Keyboard shortcuts
