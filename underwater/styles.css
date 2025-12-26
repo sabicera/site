@@ -338,7 +338,7 @@ main {
 }
 
 #vessel-table td {
-    padding: 0 0 0 10px;
+    padding: 0 10px 0 10px;
     border: 1px solid var(--cell-border);
     position: relative;
 }
@@ -901,4 +901,5 @@ body.light-theme .overdue-row {
 .loading {
     opacity: 0.5;
     pointer-events: none;
+
 }
