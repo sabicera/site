@@ -159,7 +159,7 @@ function setupEventListeners() {
     safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
     safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
     safeAddListener('add-row-btn', 'click', addNewRow);
-    safeAddListener('clear-all-btn', 'click', clearAllVessels);
+    //safeAddListener('clear-all-btn', 'click', clearAllVessels);
     
     // Search functionality
     const searchInput = document.getElementById('search-input');
@@ -1359,3 +1359,4 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+
