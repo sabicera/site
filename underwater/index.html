@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vessel Inspections Manager</title>
+    <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="🔍 Search vessels or ports...">
+                    <button id="clear-search-btn" class="clear-search-btn" style="display: none;">✕</button>
+                </div>
+            </div>
+            <div class="theme-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle-checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label">Dark Mode</span>
+            </div>
+            <div class="header-buttons">
+                <button id="import-btn" class="btn btn-primary">
+                    <span>📥</span> Import Excel
+                </button>
+                <button id="export-btn" class="btn btn-primary">
+                    <span>📤</span> Export Excel
+                </button>
+                <button id="paste-btn" class="btn btn-secondary">
+                    <span>📋</span> Paste Vessels
+                </button>
+                <button id="cleanup-btn" class="btn btn-secondary">
+                    <span>🧹</span> Clean Up
+                </button>
+                <button id="copy-k9-btn" class="btn btn-success">
+                    <span>📋</span> Copy K9
+                </button>
+                <button id="copy-uw-btn" class="btn btn-success">
+                    <span>📋</span> Copy U/W
+                </button>
+                <button id="add-row-btn" class="btn btn-secondary">
+                    <span>➕</span> Add Row
+                </button>
+            </div>
+        </header>
+
+        <!-- Main content area with Excel-like table -->
+        <main>
+            <div class="table-wrapper">
+                <div class="table-container" id="table-container">
+                    <table id="vessel-table">
+                        <thead>
+                            <tr>
+                                <th class="col-number">#</th>
+                                <th class="col-vessel">Vessel Name</th>
+                                <th class="col-port">Port</th>
+                                <th class="col-inspection">Inspection Type</th>
+                                <th class="col-etd">ETD</th>
+                                <th class="col-timeleft">Time Left</th>
+                                <th class="col-position">Vessel Position</th>
+                                <th class="col-status">Status</th>
+                                <th class="col-notes">Notes</th>
+                                <th class="col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vessel-tbody">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer with info -->
+        <footer>
+            <div class="footer-info">
+                <span id="row-count">Total Vessels: 0</span>
+                <span class="separator">|</span>
+                <span id="k9-count">K9: 0</span>
+                <span class="separator">|</span>
+                <span id="uw-count">U/W: 0</span>
+                <span class="separator">|</span>
+                <span id="current-time">Current Time: --:--:--</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Hidden file input for Excel import -->
+    <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;">
+
+    <!-- Paste Modal -->
+    <div id="paste-modal" class="modal hidden">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Paste Vessel Data</h2>
+                    <button class="close-modal" onclick="closePasteModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p>Paste vessel information below (one vessel per line). The format should include vessel names and optionally ports and ETD dates.</p>
+                    <textarea id="paste-textarea" placeholder="Example:
+MSC ZONDA III - Balboa - ETD: 25/12/2024
+MSC PRETORIA II - Cristobal
+EUROPE - Hamburg - ETD: 27/12/2024 15:00"></textarea>
+                    <div class="modal-options">
+                        <label>
+                            <input type="radio" name="inspection-type" value="K9" checked>
+                            K9 Inspection
+                        </label>
+                        <label>
+                            <input type="radio" name="inspection-type" value="U/W">
+                            U/W Inspection
+                        </label>
+                        <label>
+                            <input type="radio" name="inspection-type" value="Both">
+                            Both
+                        </label>
+                        <label>
+                            <input type="radio" name="inspection-type" value="None">
+                            None
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closePasteModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="processPastedVessels()">Add Vessels</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <div class="context-menu-item" data-action="edit">Edit Row</div>
+        <div class="context-menu-item" data-action="duplicate">Duplicate Row</div>
+        <div class="context-menu-item" data-action="delete">Delete Row</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="move-up">Move Up</div>
+        <div class="context-menu-item" data-action="move-down">Move Down</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="database.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
