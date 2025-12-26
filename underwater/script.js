@@ -12,8 +12,7 @@ const PORT_CATEGORIES = {
         offset: -5
     },
     'Brazil': {
-        ports: ['SANTOS', 'PARANAGUA', 'RIO GRANDE', 'ITAJAI', 'NAVEGANTES', 
-                'RIO DE JANEIRO', 'RDJ', 'SALVADOR', 'PECEM'],
+        ports: ['SANTOS', 'PARANAGUA', 'RIO GRANDE', 'ITAJAI', 'NAVEGANTES', 'RIO DE JANEIRO', 'RDJ', 'SALVADOR', 'PECEM'],
         timezone: 'America/Sao_Paulo',
         offset: -3
     },
@@ -38,8 +37,7 @@ const PORT_CATEGORIES = {
         offset: -6
     },
     'Europe': {
-        ports: ['MALTA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 
-                'LAS PALMAS', 'VALENCIA','MARSAXLOKK',],
+        ports: ['MALTA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA','MARSAXLOKK',],
         timezone: 'Europe/Brussels',
         offset: 1
     },
@@ -69,7 +67,6 @@ function getPortTimezoneOffset(port) {
             return regionData.offset;
         }
     }
-    
     return 0; // Default to UTC if port not found
 }
 
@@ -89,12 +86,11 @@ function getPortRegion(port) {
             return region;
         }
     }
-    
     return 'Unknown';
 }
 
 // Inspection types
-const INSPECTION_TYPES = ['K9', 'U/W', 'Both', 'None'];
+const INSPECTION_TYPES = ['K9', 'U/W', 'Both'];
 
 // Vessel position options (physical status)
 const VESSEL_POSITIONS = ['Not Berthed Yet', 'Anchorage', 'Berthed', 'Working', 'Sailed'];
@@ -217,10 +213,6 @@ function updateCountdowns() {
 function calculateTimeLeft(etdString, port) {
     if (!etdString) return null;
     
-    // Parse ETD string as if it's in the port's local timezone
-    // etdString format: "2025-12-26T06:00" (from datetime-local input)
-    // We need to interpret this as local port time, not browser local time
-    
     // Split the datetime string
     const parts = etdString.split('T');
     if (parts.length !== 2) return null;
@@ -230,24 +222,12 @@ function calculateTimeLeft(etdString, port) {
     
     // Create date in UTC, then adjust for port timezone
     const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
+    const month = parseInt(dateParts[1]) - 1;
     const day = parseInt(dateParts[2]);
     const hour = parseInt(timeParts[0]);
     const minute = parseInt(timeParts[1]);
-    
-    // Create the ETD as if it's in the port's local time
-    // We'll use Date.UTC to create a UTC timestamp, treating the input as UTC first
     const etdAsUTC = Date.UTC(year, month, day, hour, minute, 0);
-    
-    // Get timezone offset for the port (hours from UTC)
-    // Panama is UTC-5, so offset = -5
-    // Europe is UTC+1, so offset = 1
     const portOffset = getPortTimezoneOffset(port);
-    
-    // Convert from port local time to actual UTC
-    // If the time is 06:00 in Panama (UTC-5), it's actually 11:00 UTC
-    // Formula: UTC = Local - offset
-    // For Panama (offset=-5): UTC = 06:00 - (-5) = 06:00 + 5 hours
     const etdUTC = etdAsUTC - (portOffset * 60 * 60 * 1000);
     
     // Get current UTC time
@@ -1293,6 +1273,35 @@ function updateClock() {
     updateClockElement('laspalmas-time', `🇪🇸 Las Palmas: ${formatTime(1)}`);
 }
 
+function updateWorldClocks() {
+    const locations = [
+        { id: 'clock-panama', zone: 'America/Panama' },
+        { id: 'clock-brazil', zone: 'America/Sao_Paulo' },
+        { id: 'clock-freeport', zone: 'America/Nassau' },
+        { id: 'clock-chile', zone: 'America/Santiago' },
+        { id: 'clock-las-palmas', zone: 'Atlantic/Canary' }
+    ];
+
+    const now = new Date();
+    
+    locations.forEach(loc => {
+        const timeString = new Intl.DateTimeFormat('en-GB', {
+            timeZone: loc.zone,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(now);
+        
+        const element = document.getElementById(loc.id);
+        if (element) element.textContent = timeString;
+    });
+}
+
+// Start the clock
+setInterval(updateWorldClocks, 1000);
+updateWorldClocks(); // Initial call
+
 // Keyboard shortcuts
 function handleKeyboardShortcuts(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
@@ -1363,4 +1372,3 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
-
