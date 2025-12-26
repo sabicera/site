@@ -306,7 +306,7 @@ main {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 #vessel-table thead {
@@ -929,6 +929,7 @@ body.light-theme .overdue-row {
     opacity: 0.5;
     pointer-events: none;
 }
+
 
 
 
