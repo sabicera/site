@@ -311,6 +311,7 @@ main {
 
 #vessel-table thead {
     position: sticky;
+    text-align-last: center;
     top: 0;
     z-index: 10;
     background-color: var(--header-bg);
@@ -928,3 +929,4 @@ body.light-theme .overdue-row {
     opacity: 0.5;
     pointer-events: none;
 }
+
