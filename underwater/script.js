@@ -348,10 +348,10 @@ function renderVessels() {
     
     // Group by category
     const categorized = {
+        'Overdue': [],
         'Urgent (< 24h)': [],
         'Soon (< 72h)': [],
-        'Upcoming': [],
-        'Overdue': []
+        'Upcoming': []
     };
     
     sortedVessels.forEach(vessel => {
@@ -1372,3 +1372,4 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+
