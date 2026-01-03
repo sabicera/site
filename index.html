@@ -1,255 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyprus Tax Calculator | Calculate Yearly and Monthly Taxes</title>
-    <meta name="description" content="Use Cyprus Tax Calculator for your yearly and monthly taxes.">
-    <meta name="keywords" content="Cyprus tax calculator, Cyprus salary calculator, calculate tax in Cyprus, income tax Cyprus">
-    <link rel="canonical" href="https://sabicera.github.io/site/">
+    <title>Cyprus 2026 Tax Calculator</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" type="image/icon" href="images/euro.ico">
-    <script id="usercentrics-cmp" src="https://app.usercentrics.eu/browser-ui/latest/loader.js" data-settings-id="ExiKkDlkX8Hh4v" async></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKY9LS0HTF"></script>
-    <script src="java/maths.js"></script>
-    <script src="java/translation.js"></script>
-    <script src="java/theme.js"></script>
-    <script src="java/tabs.js"></script>
-    <script src="java/language-dropdown.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LL3HRC09SF"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-        dataLayer.push(arguments);
-    }
+    function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-BKY9LS0HTF');
+
+    gtag('config', 'G-LL3HRC09SF');
     </script>
-</head>
-<body>
-    <div class="container">
-        <div class="header-container">
+   </head>
+   <body>
+      <div class="container">
+         <h1>Cyprus 2026 Tax Calculator</h1>
+         <div class="calculator-grid">
+            <div class="input-card">
+               <label>Annual Gross Salary (€)</label>
+               <input type="number" id="grossSalary" value="27300" oninput="calculate()">
+               <label>Annual Installments</label>
+               <select id="installments" onchange="calculate()">
+                  <option value="12">12 Salaries</option>
+                  <option value="13">13 Salaries</option>
+                  <option value="14">14 Salaries</option>
+               </select>
+            </div>
+            <div class="input-card">
+               <label>Provident Fund (%)</label>
+               <input type="number" id="providentFundRate" placeholder="Deductible up to 10%." min="0" max="10" oninput="calculate()">
+               <label>Total Household Income (€)</label>
+               <input type="number" id="hhIncome" placeholder="Combined parents" oninput="calculate()">
+            </div>
+            <div class="input-card">
+               <label>Primary Residence Rent or Mortgage Interest (€)</label>
+               <input type="number" id="rentDeduction" placeholder="Max €2,000 eligible" oninput="calculate()">
+            </div>
+            <div class="input-card">
+               <label>Dependent Children</label>
+               <div class="stepper">
+                  <button onclick="updateChildren(-1)">-</button>
+                  <input type="number" id="children" value="0" readonly>
+                  <button onclick="updateChildren(1)">+</button>
+               </div>
+            </div>
+         </div>
+         <div class="results">
+            <table>
+               <thead>
+                  <tr>
+                     <th>Category</th>
+                     <th>Monthly</th>
+                     <th>Annual Total</th>
+                     <th class="gain-header">Tax Savings</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr>
+                     <td>Gross Amount</td>
+                     <td id="mGross">€0</td>
+                     <td id="aGross">€0</td>
+                     <td>-</td>
+                  </tr>
+                  <tr>
+                     <td>Soc. Insurance (8.8%)</td>
+                     <td id="mSoc">€0</td>
+                     <td id="aSoc">€0</td>
+                     <td>-</td>
+                  </tr>
+                  <tr>
+                     <td>GHS/GESY (2.65%)</td>
+                     <td id="mGesy">€0</td>
+                     <td id="aGesy">€0</td>
+                     <td>-</td>
+                  </tr>
+                  <tr>
+                     <td>Provident Fund</td>
+                     <td id="mProv">€0</td>
+                     <td id="aProv">€0</td>
+                     <td id="sProv" class="gain-cell">€0</td>
+                  </tr>
+                  <tr>
+                     <td>Child Allowance</td>
+                     <td colspan="2" class="included-txt">Included in Income Tax</td>
+                     <td id="sChild" class="gain-cell">€0</td>
+                  </tr>
+                  <tr>
+                     <td>Primary Residence</td>
+                     <td colspan="2" class="included-txt">Included in Income Tax</td>
+                     <td id="sRent" class="gain-cell">€0</td>
+                  </tr>
+                  <tr>
+                     <td>Income Tax</td>
+                     <td id="mTax">€0</td>
+                     <td id="aTax">€0</td>
+                     <td>-</td>
+                  </tr>
+                  <tr class="net-row">
+                     <td><strong>Net Take-Home</strong></td>
+                     <td id="mNet"><strong>€0</strong></td>
+                     <td id="aNet"><strong>€0</strong></td>
+                     <td id="tGain" class="gain-cell"><strong>€0</strong></td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+      <div class="footer">
             <a href="https://www.buymeacoffee.com/sabicera" class="bmc" alt="Buy me a Coffee">
-                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=sabicera&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" title="Buy me a Beer">
+                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&amp;emoji=🍺&amp;slug=sabicera&amp;button_colour=5F7FFF&amp;font_colour=ffffff&amp;font_family=Cookie&amp;outline_colour=000000&amp;coffee_colour=FFDD00" title="Buy me a Beer">
             </a>
-            <div class="language-dropdown" id="language-dropdown">
-                <div class="language-select" id="language-select">
-                    <span>Select Language</span>
-                </div>
-                <div class="language-options">
-                    <div class="language-option" data-lang="gr">
-                        <img src="https://flagcdn.com/w320/gr.png" alt="Greek">
-                        <span>Ελληνικά</span>
-                    </div>
-                    <div class="language-option" data-lang="en">
-                        <img src="https://flagcdn.com/w320/gb.png" alt="English">
-                        <span>English</span>
-                    </div>
-                    <div class="language-option" data-lang="ru">
-                        <img src="https://flagcdn.com/w320/ru.png" alt="Russian">
-                        <span>Русский</span>
-                    </div>
-                    <div class="language-option" data-lang="ua">
-                        <img src="https://flagcdn.com/w320/ua.png" alt="Ukrainian">
-                        <span>Український</span>
-                    </div>
-                    <div class="language-option" data-lang="ro">
-                        <img src="https://flagcdn.com/w320/ro.png" alt="Romanian">
-                        <span>Română</span>
-                    </div>
-                    <div class="language-option" data-lang="bg">
-                        <img src="https://flagcdn.com/w320/bg.png" alt="Bulgarian">
-                        <span>български</span>
-                    </div>
-                    <div class="language-option" data-lang="ph">
-                        <img src="https://flagcdn.com/w320/ph.png" alt="Filipino">
-                        <span>Filipino</span>
-                    </div>
-                    <div class="language-option" data-lang="hi">
-                        <img src="https://flagcdn.com/w320/in.png" alt="Hindu">
-                        <span>हिन्दू</span>
-                    </div>
-                </div>
-            </div>
-            <div class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode">
-                <div class="toggle-track">
-                    <svg viewBox="0 0 24 24" class="sun-icon">
-                        <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2 c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1 S11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0 s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41 c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36 c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z" />
-                    </svg>
-                    <svg viewBox="0 0 24 24" class="moon-icon">
-                        <path d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z" />
-                    </svg>
-                    <div class="toggle-thumb"></div>
-                </div>
-            </div>
         </div>
-        <h1>Cyprus Tax Calculator</h1>
-        <div class="calculator">
-            <div class="input-group">
-                <label for="grossYearlySalary" id="trgrossYearlySalary">Annual Gross:</label>
-                <input type="text" id="grossYearlySalary" value="0">
-            </div>
-            <div class="input-group">
-                <label for="netYearlySalary" id="trnetYearlySalary">Annual Net:</label>
-                <input type="text" id="netYearlySalary" value="0">
-            </div>
-            <div class="input-group">
-                <label for="grossMonthlySalary" id="trgrossMonthlySalary">Monthly Gross:</label>
-                <input type="text" id="grossMonthlySalary" value="0">
-            </div>
-            <div class="input-group">
-                <label for="netMonthlySalary" id="trnetMonthlySalary">Monthly Net:</label>
-                <input type="text" id="netMonthlySalary" value="0">
-            </div>
-            <div class="input-group2">
-                <label for="providentFundPercentage" id="trProvidentFundPercentage">Provident Fund (%):</label>
-                <input type="text" id="providentFundPercentage" min="0" max="10" step="0.1" value="0">
-            </div>
-            <div class="input-group2">
-                <label for="thirteenthSalary" id="trThirteenthSalary">13th salary</label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="thirteenthSalary">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-        </div>
-        <!-- Tab system -->
-        <div class="tabs">
-            <div class="tab active" data-tab="summary">Summary</div>
-            <div class="tab" data-tab="details">Full Details</div>
-            <div class="tab" data-tab="tax-brackets">Taxes</div>
-        </div>
-        <!-- Summary Tab Content -->
-        <div id="summary" class="tab-content active">
-            <table id="summaryTable">
-                <tr>
-                    <td></td>
-                    <td id="yearlyHeader">Annually</td>
-                    <td id="monthlyHeader">Monthly</td>
-                </tr>
-                <tr>
-                    <td id="grossHeader">Gross</td>
-                    <td id="gross">€0</td>
-                    <td id="monthlygross">€0</td>
-                </tr>
-                <tr>
-                    <td id="totalDeductionsHeader">Total Deductions</td>
-                    <td id="deductionsYear">€0</td>
-                    <td id="deductionsMonth">€0</td>
-                </tr>
-                <tr>
-                    <td id="netHeader">Net</td>
-                    <td id="netYear">€0</td>
-                    <td id="netMonth">€0</td>
-                </tr>
-                <tr>
-                    <td id="deductedPercentageHeader">Deducted %</td>
-                    <td id="deductionsYearPercentage" colspan="2">0%</td>
-                </tr>
-            </table>
-        </div>
-        <!-- Details Tab Content -->
-        <div id="details" class="tab-content">
-            <table id="mainTable">
-                <tr>
-                    <td></td>
-                    <td id="yearlyHeader2">Annually</td>
-                    <td id="monthlyHeader2">Monthly</td>
-                </tr>
-                <tr>
-                    <td id="grossHeader2">Gross</td>
-                    <td id="gross2">€0</td>
-                    <td id="monthlygross2">€0</td>
-                </tr>
-                <tr>
-                    <td id="taxHeader">Tax</td>
-                    <td id="tax">€0</td>
-                    <td id="monthlytax">€0</td>
-                </tr>
-                <tr>
-                    <td id="socialHeader">Social</td>
-                    <td id="social">€0</td>
-                    <td id="monthlysocial">€0</td>
-                </tr>
-                <tr>
-                    <td id="gesiHeader">GESI</td>
-                    <td id="gesi">€0</td>
-                    <td id="monthlygesi">€0</td>
-                </tr>
-                <tr>
-                    <td id="providentFundHeader">Provident Fund</td>
-                    <td id="providentFund">€0</td>
-                    <td id="monthlyProvidentFund">€0</td>
-                </tr>
-                <tr>
-                    <td id="yearlyDeductionsHeader">Deductions</td>
-                    <td id="deductionsYear2">€0</td>
-                    <td id="deductionsMonth2">€0</td>
-                </tr>
-                <tr>
-                    <td id="netHeader2">Net</td>
-                    <td id="netYear2">€0</td>
-                    <td id="netMonth2">€0</td>
-                </tr>
-                <tr>
-                    <td id="Accumulated Net + Fund">Accumulated Net + Fund</td>
-                    <td id="AccumulatedYear">€0</td>
-                    <td id="AccumulatedMonth">€0</td>
-                </tr>
-            </table>
-        </div>
-        <!-- Tax Brackets Tab Content -->
-        <div id="tax-brackets" class="tab-content">
-            <table id="bracketTable">
-                <tr>
-                    <th colspan="2" id="taxBracketHeader">Tax Bracket</th>
-                    <th id="rateHeader">Rate</th>
-                    <th id="taxDeductedHeader">Tax Deducted</th>
-                </tr>
-                <tr>
-                    <td id="fromHeader">From</td>
-                    <td id="untilHeader">Until</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>€0</td>
-                    <td>€22,000</td>
-                    <td>0%</td>
-                    <td id="tax0"></td>
-                </tr>
-                <tr>
-                    <td>€22,000</td>
-                    <td>€32,000</td>
-                    <td>20%</td>
-                    <td id="tax20"></td>
-                </tr>
-                <tr>
-                    <td>€32,001</td>
-                    <td>€42,000</td>
-                    <td>25%</td>
-                    <td id="tax25"></td>
-                </tr>
-                <tr>
-                    <td>€42,001</td>
-                    <td>€72,000</td>
-                    <td>30%</td>
-                    <td id="tax30"></td>
-                </tr>
-                <tr>
-                    <td>€72,001</td>
-                    <td>∞</td>
-                    <td>35%</td>
-                    <td id="tax35"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="footer">
-            <p>© 2025 Cyprus Tax Calculator | by Ramnuda</p>
-        </div>
-    </div>
-</body>
+      <script src="java/maths.js"></script>
+   </body>
 </html>
