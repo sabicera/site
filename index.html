@@ -1,121 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Calculate your net take-home salary in Cyprus for 2026 with tax deductions, social insurance, and child allowances.">
-    <title>Cyprus 2026 Tax Calculator</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" type="image/ico" sizes="32x32" href="images/cyprus.ico">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LL3HRC09SF"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-LL3HRC09SF');
-    </script>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+      <!-- Primary Meta Tags -->
+      <title>Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings</title>
+      <meta name="title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta name="description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary, income tax, social insurance, GESY, provident fund deductions, and child allowances. Accurate Cyprus payroll calculations.">
+      <meta name="keywords" content="Cyprus tax calculator, Cyprus salary calculator, Cyprus income tax, GESY calculator, social insurance Cyprus, provident fund Cyprus, net salary Cyprus, Cyprus payroll, tax deductions Cyprus 2026">
+      <meta name="author" content="Pavlos Mystakidis">
+      <meta name="robots" content="index, follow">
+      <link rel="canonical" href="https://sabicera.github.io/site/">
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="https://sabicera.github.io/site/">
+      <meta property="og:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta property="og:description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary with accurate income tax, social insurance, GESY, and provident fund calculations.">
+      <meta property="og:image" content="https://sabicera.github.io/images/cyprus-tax-calculator-og.jpg">
+      <meta property="og:locale" content="en_CY">
+      <!-- Twitter -->
+      <meta property="twitter:card" content="summary_large_image">
+      <meta property="twitter:url" content="https://sabicera.github.io/site/">
+      <meta property="twitter:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta property="twitter:description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary with accurate income tax, social insurance, GESY, and provident fund calculations.">
+      <meta property="twitter:image" content="https://sabicera.github.io/images/cyprus-tax-calculator-og.jpg">
+      <!-- Favicon -->
+      <link rel="icon" type="image/x-icon" href="images/cyprus.ico">
+      <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+      <!-- Stylesheet -->
+      <link rel="stylesheet" href="css/styles.css">
+      <!-- Preconnect for performance -->
+      <link rel="preconnect" href="https://www.googletagmanager.com">
+      <link rel="preconnect" href="https://img.buymeacoffee.com">
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LL3HRC09SF"></script>
+      <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+         gtag('config', 'G-LL3HRC09SF');
+      </script>
    </head>
    <body>
+      <!-- Dark Mode Toggle -->
+      <button type="button" class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <span id="darkModeIcon">🌙</span>
+      </button>
       <div class="container">
-         <h1>Cyprus 2026 Tax Calculator</h1>
-         <div class="calculator-grid">
-            <div class="input-card">
-               <label>Annual Gross Salary (€)</label>
-               <input type="number" id="grossSalary" value="27300" oninput="calculate()">
-               <label>Annual Installments</label>
-               <select id="installments" onchange="calculate()">
-                  <option value="12">12 Salaries</option>
-                  <option value="13">13 Salaries</option>
-                  <option value="14">14 Salaries</option>
-               </select>
-            </div>
-            <div class="input-card">
-               <label>Provident Fund (%)</label>
-               <input type="number" id="providentFundRate" placeholder="Deductible up to 10%." min="0" max="10" oninput="calculate()">
-               <label>Total Household Income (€)</label>
-               <input type="number" id="hhIncome" placeholder="Combined parents" oninput="calculate()">
-            </div>
-            <div class="input-card">
-               <label>Primary Residence Rent or Mortgage Interest (€)</label>
-               <input type="number" id="rentDeduction" placeholder="Max €2,000 eligible" oninput="calculate()">
-            </div>
-            <div class="input-card">
-               <label>Dependent Children</label>
-               <div class="stepper">
-                  <button type="button" onclick="updateChildren(-1)">-</button>
-                  <input type="number" id="children" value="0" readonly>
-                  <button type="button" onclick="updateChildren(1)">+</button>
+         <header>
+            <h1>Cyprus Tax Calculator 2026</h1>
+            <p class="subtitle">Calculate your net take-home salary with accurate tax deductions, social insurance, and child allowances</p>
+         </header>
+         <main>
+            <section aria-label="Tax Calculator Inputs">
+               <div class="calculator-grid">
+                  <div class="input-card">
+                     <label for="grossSalary">Annual Gross Salary (€)</label>
+                     <input type="number" id="grossSalary" name="grossSalary" value="27300" oninput="calculate()" aria-describedby="gross-salary-desc">
+                     <label for="installments">Annual Installments</label>
+                     <select id="installments" name="installments" onchange="calculate()" aria-label="Number of annual salary installments">
+                        <option value="12">12 Salaries</option>
+                        <option value="13">13 Salaries</option>
+                        <option value="14">14 Salaries</option>
+                     </select>
+                  </div>
+                  <div class="input-card">
+                     <label for="providentFundRate">Provident Fund (%)</label>
+                     <input type="number" id="providentFundRate" name="providentFundRate" placeholder="Deductible up to 10%." min="0" max="10" oninput="calculate()" aria-describedby="provident-fund-desc">
+                     <label for="hhIncome">Total Household Income (€)</label>
+                     <input type="number" id="hhIncome" name="hhIncome" placeholder="Combined parents" oninput="calculate()" aria-describedby="household-income-desc">
+                  </div>
+                  <div class="input-card">
+                     <label for="rentDeduction">Primary Residence Rent or Mortgage Interest (€)</label>
+                     <input type="number" id="rentDeduction" name="rentDeduction" placeholder="Max €2,000 eligible" oninput="calculate()" aria-describedby="rent-deduction-desc">
+                  </div>
+                  <div class="input-card">
+                     <label for="children">Dependent Children</label>
+                     <div class="stepper">
+                        <button type="button" onclick="updateChildren(-1)" aria-label="Decrease number of children">-</button>
+                        <input type="number" id="children" name="children" value="0" readonly tabindex="-1" aria-label="Number of dependent children" aria-live="polite">
+                        <button type="button" onclick="updateChildren(1)" aria-label="Increase number of children">+</button>
+                     </div>
+                  </div>
                </div>
-            </div>
-         </div>
-         <div class="results">
-            <table>
-               <thead>
-                  <tr>
-                     <th>Category</th>
-                     <th>Monthly</th>
-                     <th>Annual Total</th>
-                     <th class="gain-header">Tax Savings</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  <tr>
-                     <td>Gross Amount</td>
-                     <td id="mGross">€0</td>
-                     <td id="aGross">€0</td>
-                     <td>-</td>
-                  </tr>
-                  <tr>
-                     <td>Soc. Insurance (8.8%)</td>
-                     <td id="mSoc">€0</td>
-                     <td id="aSoc">€0</td>
-                     <td>-</td>
-                  </tr>
-                  <tr>
-                     <td>GHS/GESY (2.65%)</td>
-                     <td id="mGesy">€0</td>
-                     <td id="aGesy">€0</td>
-                     <td>-</td>
-                  </tr>
-                  <tr>
-                     <td>Provident Fund</td>
-                     <td id="mProv">€0</td>
-                     <td id="aProv">€0</td>
-                     <td id="sProv" class="gain-cell">€0</td>
-                  </tr>
-                  <tr>
-                     <td>Child Allowance</td>
-                     <td colspan="2" class="included-txt">Included in Income Tax</td>
-                     <td id="sChild" class="gain-cell">€0</td>
-                  </tr>
-                  <tr>
-                     <td>Primary Residence</td>
-                     <td colspan="2" class="included-txt">Included in Income Tax</td>
-                     <td id="sRent" class="gain-cell">€0</td>
-                  </tr>
-                  <tr>
-                     <td>Income Tax</td>
-                     <td id="mTax">€0</td>
-                     <td id="aTax">€0</td>
-                     <td>-</td>
-                  </tr>
-                  <tr class="net-row">
-                     <td><strong>Net Take-Home</strong></td>
-                     <td id="mNet"><strong>€0</strong></td>
-                     <td id="aNet"><strong>€0</strong></td>
-                     <td id="tGain" class="gain-cell"><strong>€0</strong></td>
-                  </tr>
-               </tbody>
-            </table>
-         </div>
+            </section>
+            <section aria-label="Tax Calculation Results">
+               <h2 class="sr-only">Calculation Results</h2>
+               <div class="results">
+                  <table role="table" aria-label="Salary breakdown and tax calculations">
+                     <thead>
+                        <tr>
+                           <th scope="col">Category</th>
+                           <th scope="col">Monthly</th>
+                           <th scope="col">Annual Total</th>
+                           <th scope="col" class="gain-header">Tax Savings</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <tr>
+                           <th scope="row">Gross Amount</th>
+                           <td id="mGross">€0</td>
+                           <td id="aGross">€0</td>
+                           <td>-</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">Soc. Insurance (8.8%)</th>
+                           <td id="mSoc">€0</td>
+                           <td id="aSoc">€0</td>
+                           <td>-</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">GHS/GESY (2.65%)</th>
+                           <td id="mGesy">€0</td>
+                           <td id="aGesy">€0</td>
+                           <td>-</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">Provident Fund</th>
+                           <td id="mProv">€0</td>
+                           <td id="aProv">€0</td>
+                           <td id="sProv" class="gain-cell">€0</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">Child Allowance</th>
+                           <td colspan="2" class="included-txt">Included in Income Tax</td>
+                           <td id="sChild" class="gain-cell">€0</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">Primary Residence</th>
+                           <td colspan="2" class="included-txt">Included in Income Tax</td>
+                           <td id="sRent" class="gain-cell">€0</td>
+                        </tr>
+                        <tr>
+                           <th scope="row">Income Tax</th>
+                           <td id="mTax">€0</td>
+                           <td id="aTax">€0</td>
+                           <td>-</td>
+                        </tr>
+                        <tr class="net-row">
+                           <th scope="row"><strong>Net Take-Home</strong></th>
+                           <td id="mNet"><strong>€0</strong></td>
+                           <td id="aNet"><strong>€0</strong></td>
+                           <td id="tGain" class="gain-cell"><strong>€0</strong></td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </section>
+         </main>
       </div>
-      <div class="footer">
-            <a href="https://www.buymeacoffee.com/sabicera" class="bmc" alt="Buy me a Coffee">
-                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&amp;emoji=🍺&amp;slug=sabicera&amp;button_colour=5F7FFF&amp;font_colour=ffffff&amp;font_family=Cookie&amp;outline_colour=000000&amp;coffee_colour=FFDD00" alt="Buy me a Beer" title="Buy me a Beer">
+      <footer class="footer">
+         <div class="footer-content">
+            <p class="footer-text">
+               <strong>About Cyprus Tax Calculator 2026</strong><br>
+               This free online calculator helps you estimate your net take-home salary in Cyprus for 2026. 
+               Calculate income tax, social insurance (8.8%), GESY contributions (2.65%), provident fund deductions, 
+               and child allowances accurately. Perfect for employees, employers, and HR professionals in Cyprus.
+            </p>
+            <p class="disclaimer">
+               <small><strong>Disclaimer:</strong> This calculator provides estimates for informational purposes only. 
+               Actual tax calculations may vary based on individual circumstances. Please consult with a tax professional 
+               or the Cyprus Tax Department for official tax advice.</small>
+            </p>
+            <a href="https://www.buymeacoffee.com/sabicera" class="bmc" rel="noopener noreferrer" target="_blank" aria-label="Support this project - Buy me a beer">
+            <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&amp;emoji=🍺&amp;slug=sabicera&amp;button_colour=5F7FFF&amp;font_colour=ffffff&amp;font_family=Cookie&amp;outline_colour=000000&amp;coffee_colour=FFDD00" alt="Buy me a Beer" title="Buy me a Beer" width="217" height="60">
             </a>
-        </div>
+            <p class="copyright">
+               <small>© 2026 Cyprus Tax Calculator. Made with ❤️ in Cyprus by <a href="#" rel="author">Pavlos Mystakidis</a></small>
+            </p>
+         </div>
+      </footer>
       <script src="java/maths.js"></script>
+      <script>
+         // Dark mode toggle functionality
+         function toggleDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('darkModeIcon');
+            
+            body.classList.toggle('dark-mode');
+            
+            // Update icon
+            if (body.classList.contains('dark-mode')) {
+               icon.textContent = '☀️';
+               localStorage.setItem('darkMode', 'enabled');
+            } else {
+               icon.textContent = '🌙';
+               localStorage.setItem('darkMode', 'disabled');
+            }
+         }
+         
+         // Check for saved dark mode preference on load
+         window.addEventListener('DOMContentLoaded', (event) => {
+            const darkMode = localStorage.getItem('darkMode');
+            const icon = document.getElementById('darkModeIcon');
+            
+            // Only enable dark mode if explicitly enabled in localStorage
+            // Ignore system preference by default to maintain light mode
+            if (darkMode === 'enabled') {
+               document.body.classList.add('dark-mode');
+               icon.textContent = '☀️';
+            } else {
+               // Explicitly set light mode
+               document.body.classList.remove('dark-mode');
+               icon.textContent = '🌙';
+               if (darkMode === null) {
+                  localStorage.setItem('darkMode', 'disabled');
+               }
+            }
+         });
+      </script>
    </body>
 </html>
