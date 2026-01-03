@@ -221,24 +221,24 @@ function calculateTax(taxableAmount) {
         tax35: 0,
     };
 
-    if (taxableAmount > 60000) {
-        brackets.tax35 = (taxableAmount - 60000) * 0.35;
-        brackets.tax30 = (60000 - 36300) * 0.30;
-        brackets.tax25 = (36300 - 28000) * 0.25;
-        brackets.tax20 = (28000 - 19500) * 0.20;
-        brackets.tax0 = 19500 * 0;
-    } else if (taxableAmount > 36300) {
-        brackets.tax30 = (taxableAmount - 36300) * 0.30;
-        brackets.tax25 = (36300 - 28000) * 0.25;
-        brackets.tax20 = (28000 - 19500) * 0.20;
-        brackets.tax0 = 19500 * 0;
+    if (taxableAmount > 72000) {
+        brackets.tax35 = (taxableAmount - 72001) * 0.35;
+        brackets.tax30 = (72000 - 42001) * 0.30;
+        brackets.tax25 = (42000 - 32001) * 0.25;
+        brackets.tax20 = (32000 - 22001) * 0.20;
+        brackets.tax0 = 22000 * 0;
+    } else if (taxableAmount > 42000) {
+        brackets.tax30 = (taxableAmount - 42001) * 0.30;
+        brackets.tax25 = (42000 - 32001) * 0.25;
+        brackets.tax20 = (32000 - 22001) * 0.20;
+        brackets.tax0 = 22000 * 0;
     } else if (taxableAmount > 28000) {
-        brackets.tax25 = (taxableAmount - 28000) * 0.25;
-        brackets.tax20 = (28000 - 19500) * 0.20;
-        brackets.tax0 = 19500 * 0;
-    } else if (taxableAmount > 19500) {
-        brackets.tax20 = (taxableAmount - 19500) * 0.20;
-        brackets.tax0 = 19500 * 0;
+        brackets.tax25 = (taxableAmount - 32001) * 0.25;
+        brackets.tax20 = (32000 - 22001) * 0.20;
+        brackets.tax0 = 22000 * 0;
+    } else if (taxableAmount > 22000) {
+        brackets.tax20 = (taxableAmount - 22001) * 0.20;
+        brackets.tax0 = 22000 * 0;
     } else {
         brackets.tax0 = taxableAmount * 0;
     }
@@ -322,4 +322,5 @@ function updateBracketTable(brackets) {
     document.getElementById('tax25').textContent = '€' + formatNumber(brackets.tax25.toFixed(2));
     document.getElementById('tax30').textContent = '€' + formatNumber(brackets.tax30.toFixed(2));
     document.getElementById('tax35').textContent = '€' + formatNumber(brackets.tax35.toFixed(2));
+
 }
