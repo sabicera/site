@@ -7,6 +7,15 @@
       <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
       <link rel="stylesheet" href="styles.css">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-L9YTZ5EX1W"></script>
+      <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+         
+         gtag('config', 'G-L9YTZ5EX1W');
+      </script>
    </head>
    <body>
       <div class="app-container">
@@ -95,7 +104,6 @@
       </div>
       <!-- Hidden file input for Excel import -->
       <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;">
-      
       <!-- Context Menu -->
       <div id="context-menu" class="context-menu hidden">
          <div class="context-menu-item" data-action="edit">Edit Row</div>
