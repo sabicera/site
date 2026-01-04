@@ -6,7 +6,7 @@
       <title>Vessel Inspections Manager</title>
       <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
       <link rel="stylesheet" href="styles.css">
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
    </head>
    <body>
       <div class="app-container">
@@ -32,9 +32,6 @@
                <button id="export-btn" class="btn btn-primary">
                <span>📤</span> Export Excel
                </button>
-               <button id="paste-btn" class="btn btn-secondary">
-               <span>📋</span> Paste Vessels
-               </button>
                <button id="cleanup-btn" class="btn btn-secondary">
                <span>🧹</span> Clean Up
                </button>
@@ -43,6 +40,9 @@
                </button>
                <button id="copy-uw-btn" class="btn btn-success">
                <span>📋</span> Copy U/W
+               </button>
+               <button id="copy-brazil-btn" class="btn btn-success">
+               <span>📋</span> Copy Brazil
                </button>
                <button id="add-row-btn" class="btn btn-secondary">
                <span>➕</span> Add Row
@@ -59,6 +59,7 @@
                            <th class="col-number">#</th>
                            <th class="col-vessel">Vessel Name</th>
                            <th class="col-port">Port</th>
+                           <th class="col-nextport">Next Port</th>
                            <th class="col-inspection">Inspection Type</th>
                            <th class="col-etd">ETD</th>
                            <th class="col-timeleft">Time Left</th>
@@ -94,42 +95,7 @@
       </div>
       <!-- Hidden file input for Excel import -->
       <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;">
-      <!-- Paste Modal -->
-      <div id="paste-modal" class="modal hidden">
-         <div class="modal-dialog">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h2>Paste Vessel Data</h2>
-                  <button class="close-modal" onclick="closePasteModal()">✕</button>
-               </div>
-               <div class="modal-body">
-                  <p>Paste vessel information below (one vessel per line). The format should include vessel names and optionally ports and ETD dates.</p>
-                  <textarea id="paste-textarea" placeholder="Example:
-                     MSC ZONDA III - Balboa - ETD: 25/12/2024
-                     MSC PRETORIA II - Cristobal
-                     EUROPE - Hamburg - ETD: 27/12/2024 15:00"></textarea>
-                  <div class="modal-options">
-                     <label>
-                     <input type="radio" name="inspection-type" value="K9" checked>
-                     K9 Inspection
-                     </label>
-                     <label>
-                     <input type="radio" name="inspection-type" value="U/W">
-                     U/W Inspection
-                     </label>
-                     <label>
-                     <input type="radio" name="inspection-type" value="Both">
-                     Both
-                     </label>
-                  </div>
-               </div>
-               <div class="modal-footer">
-                  <button class="btn btn-secondary" onclick="closePasteModal()">Cancel</button>
-                  <button class="btn btn-primary" onclick="processPastedVessels()">Add Vessels</button>
-               </div>
-            </div>
-         </div>
-      </div>
+      
       <!-- Context Menu -->
       <div id="context-menu" class="context-menu hidden">
          <div class="context-menu-item" data-action="edit">Edit Row</div>
