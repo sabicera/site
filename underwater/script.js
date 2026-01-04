@@ -17,7 +17,7 @@ const PORT_CATEGORIES = {
       offset: -3
    },
    'Freeport': {
-      ports: ['FREEPORT'],
+      ports: ['FREEPORT', 'FREEPORT ANCHORAGE'],
       timezone: 'America/Nassau',
       offset: -5
    },
@@ -50,6 +50,114 @@ const PORT_CATEGORIES = {
 
 // All ports flattened
 const PORTS = Object.values(PORT_CATEGORIES).flatMap(region => region.ports);
+
+// Port flag mappings
+const PORT_FLAGS = {
+   // Panama
+   'BALBOA': '🇵🇦',
+   'PA BALBOA': '🇵🇦',
+   'CRISTOBAL': '🇵🇦',
+   'PA CRISTOBAL': '🇵🇦',
+   'COLON': '🇵🇦',
+   'PA COLON': '🇵🇦',
+   'RODMAN': '🇵🇦',
+   'PA RODMAN': '🇵🇦',
+   'MANZANILLO (PANAMA)': '🇵🇦',
+   'MANZANILLO': '🇵🇦',
+   'PA MANZANILLO': '🇵🇦',
+   'COLON ANCHORAGE': '🇵🇦',
+   'PA COLON ANCHORAGE': '🇵🇦',
+   'BALB ANCH': '🇵🇦',
+   'PA BALB ANCH': '🇵🇦',
+   'CRISTOBAL ANCHORAGE': '🇵🇦',
+   'PA CRISTOBAL ANCHORAGE': '🇵🇦',
+   'BALBOA ANCHORAGE': '🇵🇦',
+   'PA BALBOA ANCHORAGE': '🇵🇦',
+   'BALB ANCH / PAN CAN': '🇵🇦',
+   'COLON INNER ANCHORAGE': '🇵🇦',
+   'CRISTOBAL ANCH': '🇵🇦',
+   'PA CRISTOBAL ANCH': '🇵🇦',
+   // Brazil
+   'SANTOS': '🇧🇷',
+   'BR SANTOS': '🇧🇷',
+   'PARANAGUA': '🇧🇷',
+   'BR PARANAGUA': '🇧🇷',
+   'RIO GRANDE': '🇧🇷',
+   'BR RIO GRANDE': '🇧🇷',
+   'ITAJAI': '🇧🇷',
+   'BR ITAJAI': '🇧🇷',
+   'NAVEGANTES': '🇧🇷',
+   'BR NAVEGANTES': '🇧🇷',
+   'RIO DE JANEIRO': '🇧🇷',
+   'BR RIO DE JANEIRO': '🇧🇷',
+   'RDJ': '🇧🇷',
+   'BR RDJ': '🇧🇷',
+   'SALVADOR': '🇧🇷',
+   'BR SALVADOR': '🇧🇷',
+   'PECEM': '🇧🇷',
+   'BR PECEM': '🇧🇷',
+   // Bahamas
+   'FREEPORT': '🇧🇸',
+   'BS FREEPORT': '🇧🇸',
+   'FREEPORT ANC': '🇧🇸',
+   'BS FREEPORT ANC': '🇧🇸',
+   // Colombia
+   'CARTAGENA': '🇨🇴',
+   'CO CARTAGENA': '🇨🇴',
+   // Chile
+   'LIRQUEN': '🇨🇱',
+   'CL LIRQUEN': '🇨🇱',
+   'SAN ANTONIO': '🇨🇱',
+   'CL SAN ANTONIO': '🇨🇱',
+   'VALPARAISO': '🇨🇱',
+   'CL VALPARAISO': '🇨🇱',
+   // Costa Rica
+   'MOIN': '🇨🇷',
+   'CR MOIN': '🇨🇷',
+   // Europe
+   'MALTA': '🇲🇹',
+   'MT MALTA': '🇲🇹',
+   'HAMBURG': '🇩🇪',
+   'DE HAMBURG': '🇩🇪',
+   'LE HAVRE': '🇫🇷',
+   'FR LE HAVRE': '🇫🇷',
+   'ANTWERP': '🇧🇪',
+   'BE ANTWERP': '🇧🇪',
+   'ROTTERDAM': '🇳🇱',
+   'NL ROTTERDAM': '🇳🇱',
+   'LAS PALMAS': '🇮🇨',
+   'ES LAS PALMAS': '🇮🇨',
+   'VALENCIA': '🇪🇸',
+   'ES VALENCIA': '🇪🇸',
+   'MARSAXLOKK': '🇲🇹',
+   'MT MARSAXLOKK': '🇲🇹'
+};
+
+// Get flag for a port
+function getPortFlag(port) {
+   if (!port) return '';
+   const portUpper = port.toUpperCase().trim();
+   
+   // Direct match
+   if (PORT_FLAGS[portUpper]) {
+      return PORT_FLAGS[portUpper] + ' ';
+   }
+   
+   // Remove common country code prefixes (BR, PA, BS, etc.) and try again
+   const withoutPrefix = portUpper.replace(/^(BR|PA|BS|CO|CL|CR|DE|FR|BE|NL|ES|MT)\s+/, '');
+   if (PORT_FLAGS[withoutPrefix]) {
+      return PORT_FLAGS[withoutPrefix] + ' ';
+   }
+   
+   // Partial match - check if port name contains any of the flag keys
+   for (const [portName, flag] of Object.entries(PORT_FLAGS)) {
+      if (portUpper.includes(portName)) {
+         return flag + ' ';
+      }
+   }
+   
+   return '';
+}
 
 // Get timezone offset for a port
 function getPortTimezoneOffset(port) {
@@ -154,10 +262,10 @@ function setupEventListeners() {
 
    safeAddListener('import-btn', 'click', importExcel);
    safeAddListener('export-btn', 'click', exportExcel);
-   safeAddListener('paste-btn', 'click', openPasteModal);
    safeAddListener('cleanup-btn', 'click', manualCleanup);
    safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
    safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
+   safeAddListener('copy-brazil-btn', 'click', copyBrazilVessels);
    safeAddListener('add-row-btn', 'click', addNewRow);
    //safeAddListener('clear-all-btn', 'click', clearAllVessels);
 
@@ -273,6 +381,7 @@ function addNewRow() {
       id: Date.now(),
       vesselName: '',
       port: '',
+      nextPort: '',
       inspectionType: 'None',
       etd: '',
       vesselPosition: '',
@@ -305,9 +414,9 @@ function renderVessels() {
    if (vessels.length === 0) {
       tbody.innerHTML = `
             <tr>
-                <td colspan="10" class="empty-state">
+                <td colspan="11" class="empty-state">
                     <h3>No vessels added yet</h3>
-                    <p>Click "Paste Vessels" to import from Monday.com, "Import Excel", or "Add Row" to start</p>
+                    <p>Click "Import Excel" or "Add Row" to start</p>
                 </td>
             </tr>
         `;
@@ -336,7 +445,7 @@ function renderVessels() {
       if (sortedVessels.length === 0) {
          tbody.innerHTML = `
                 <tr>
-                    <td colspan="10" class="empty-state">
+                    <td colspan="11" class="empty-state">
                         <h3>No vessels found</h3>
                         <p>No vessels match "${searchQuery}". Try a different search term.</p>
                     </td>
@@ -381,7 +490,7 @@ function renderVessels() {
          const headerRow = document.createElement('tr');
          headerRow.className = 'category-header';
          headerRow.innerHTML = `
-                <td colspan="10" class="category-title">
+                <td colspan="11" class="category-title">
                     <strong>${category}</strong> (${categoryVessels.length} vessel${categoryVessels.length > 1 ? 's' : ''})
                 </td>
             `;
@@ -403,6 +512,12 @@ function validateAndCleanVessels() {
    const originalCount = vessels.length;
 
    vessels = vessels.filter(vessel => {
+      // Auto-delete vessels with name "NAME" (case-insensitive)
+      if (vessel.vesselName && vessel.vesselName.trim().toUpperCase() === 'NAME') {
+         console.log('Auto-removing vessel with name "NAME"');
+         return false;
+      }
+
       // Must have a vessel name (at least 2 characters)
       if (!vessel.vesselName || vessel.vesselName.trim().length < 2) {
          console.log('Removing vessel: no valid name');
@@ -499,6 +614,12 @@ function createTableRow(vessel, index) {
    portCell.appendChild(portSelect);
    row.appendChild(portCell);
 
+   // Next Port
+   const nextPortCell = document.createElement('td');
+   const nextPortInput = createEditableCell('nextPort', vessel.nextPort || '', 'text', vessel.id);
+   nextPortCell.appendChild(nextPortInput);
+   row.appendChild(nextPortCell);
+
    // Inspection Type
    const inspectionCell = document.createElement('td');
    const inspectionSelect = createSelectCell('inspectionType', vessel.inspectionType, INSPECTION_TYPES, vessel.id);
@@ -541,7 +662,8 @@ function createTableRow(vessel, index) {
 
    // Actions
    const actionsCell = document.createElement('td');
-   actionsCell.innerHTML = `<button class="btn btn-danger btn-small" onclick="deleteRow(${vessel.id})">🗑️</button>`;
+   actionsCell.className = 'col-actions';
+   actionsCell.innerHTML = `<button class="btn btn-danger btn-small delete-btn" onclick="deleteRow(${vessel.id})">✕</button>`;
    row.appendChild(actionsCell);
 
    row.addEventListener('contextmenu', (e) => {
@@ -585,7 +707,13 @@ function createSelectCell(field, value, options, vesselId) {
    options.forEach(option => {
       const opt = document.createElement('option');
       opt.value = option;
-      opt.textContent = option;
+      // Add flag before port name if it's the port field
+      if (field === 'port') {
+         const flag = getPortFlag(option);
+         opt.textContent = flag + option;
+      } else {
+         opt.textContent = option;
+      }
       if (option === value) opt.selected = true;
       select.appendChild(opt);
    });
@@ -709,50 +837,224 @@ function copyVessels(inspectionType) {
       return;
    }
 
-   // Sort by time left (soonest first)
-   filtered.sort((a, b) => {
-      if (!a.timeLeft && !b.timeLeft) return 0;
-      if (!a.timeLeft) return 1;
-      if (!b.timeLeft) return -1;
-
-      // If overdue, put at the top
-      if (a.timeLeft.overdue && !b.timeLeft.overdue) return -1;
-      if (!a.timeLeft.overdue && b.timeLeft.overdue) return 1;
-
-      // Sort by total time in milliseconds
-      const aTotalMs = (a.timeLeft.days * 24 * 60 * 60 * 1000) +
-         (a.timeLeft.hours * 60 * 60 * 1000) +
-         (a.timeLeft.minutes * 60 * 1000);
-
-      const bTotalMs = (b.timeLeft.days * 24 * 60 * 60 * 1000) +
-         (b.timeLeft.hours * 60 * 60 * 1000) +
-         (b.timeLeft.minutes * 60 * 1000);
-
-      return aTotalMs - bTotalMs;
+   // Group vessels by port
+   const portGroups = {};
+   filtered.forEach(v => {
+      const port = v.port ? v.port.toUpperCase() : 'UNKNOWN';
+      if (!portGroups[port]) {
+         portGroups[port] = [];
+      }
+      portGroups[port].push(v);
    });
 
-   const text = filtered.map(v => {
-      let etdText = 'N/A';
+   // Sort vessels within each port by ETD
+   Object.keys(portGroups).forEach(port => {
+      portGroups[port].sort((a, b) => {
+         if (!a.etd && !b.etd) return 0;
+         if (!a.etd) return 1;
+         if (!b.etd) return -1;
+         return new Date(a.etd) - new Date(b.etd);
+      });
+   });
 
-      if (v.etd) {
-         const etdDate = new Date(v.etd);
-         const day = String(etdDate.getDate()).padStart(2, '0');
-         const month = String(etdDate.getMonth() + 1).padStart(2, '0');
-         const hours = String(etdDate.getHours()).padStart(2, '0');
-         const minutes = String(etdDate.getMinutes()).padStart(2, '0');
-         etdText = `${day}/${month} ${hours}:${minutes}`;
-      }
+   // Define port order
+   const portOrder = ['CRISTOBAL', 'COLON', 'RODMAN', 'BALBOA', 'MANZANILLO'];
+   const sortedPorts = Object.keys(portGroups).sort((a, b) => {
+      const aIndex = portOrder.findIndex(p => a.includes(p));
+      const bIndex = portOrder.findIndex(p => b.includes(p));
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return a.localeCompare(b);
+   });
 
-      const timeLeftText = v.timeLeft ? ` (${v.timeLeft.text})` : '';
-      return `${v.vesselName} - ${v.port} - ETD: ${etdText}${timeLeftText}`;
-   }).join('\n');
+   // Build formatted output
+   let output = [];
+   
+   sortedPorts.forEach(port => {
+      const vessels = portGroups[port];
+      output.push(`====${port}====`);
+      
+      vessels.forEach(v => {
+         const vesselName = v.vesselName || 'UNKNOWN';
+         
+         // Parse ETB and ETD from notes or create from ETD field
+         let etbText = '';
+         let etdText = '';
+         let nextPortText = '';
+         
+         // Try to parse from notes first (format: "ETB 03/01 12:00 – ETD 04/01 15:15 (EU)")
+         if (v.notes) {
+            const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
+            const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
+            const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
+            
+            if (etbMatch) {
+               etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
+            }
+            if (etdMatch) {
+               etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
+            }
+            if (nextPortMatch) {
+               nextPortText = ` (${nextPortMatch[1]})`;
+            }
+         }
+         
+         // If no notes parsing, use ETD field
+         if (!etdText && v.etd) {
+            const etdDate = new Date(v.etd);
+            const day = String(etdDate.getDate()).padStart(2, '0');
+            const month = String(etdDate.getMonth() + 1).padStart(2, '0');
+            const hours = String(etdDate.getHours()).padStart(2, '0');
+            const minutes = String(etdDate.getMinutes()).padStart(2, '0');
+            etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
+         }
+         
+         // Use nextPort field if available
+         if (!nextPortText && v.nextPort) {
+            nextPortText = ` (${v.nextPort.toUpperCase()})`;
+         }
+         
+         // Build the vessel line
+         let vesselLine = `* ${vesselName}`;
+         if (etbText) {
+            vesselLine += ` - ${etbText}`;
+         }
+         if (etdText) {
+            vesselLine += ` – ${etdText}`;
+         }
+         vesselLine += nextPortText;
+         
+         output.push(vesselLine);
+      });
+      
+      output.push(''); // Empty line after each port group
+   });
+
+   const text = output.join('\n');
 
    navigator.clipboard.writeText(text).then(() => {
       showNotification(`Copied ${filtered.length} ${inspectionType} vessel(s)!`);
    }).catch(() => alert('Failed to copy'));
 }
 
-// Paste Modal
+// Copy Brazil vessels (all inspection types)
+function copyBrazilVessels() {
+   const brazilPorts = ['SANTOS', 'PARANAGUA', 'RIO GRANDE', 'ITAJAI', 'NAVEGANTES', 'RIO DE JANEIRO', 'RDJ', 'SALVADOR', 'PECEM'];
+   
+   const filtered = vessels.filter(v => {
+      const isBrazil = brazilPorts.some(port => v.port && v.port.toUpperCase().includes(port));
+      return isBrazil;
+   });
+
+   if (filtered.length === 0) {
+      alert('No vessels in Brazil ports.');
+      return;
+   }
+
+   // Group vessels by port
+   const portGroups = {};
+   filtered.forEach(v => {
+      const port = v.port ? v.port.toUpperCase() : 'UNKNOWN';
+      if (!portGroups[port]) {
+         portGroups[port] = [];
+      }
+      portGroups[port].push(v);
+   });
+
+   // Sort vessels within each port by ETD
+   Object.keys(portGroups).forEach(port => {
+      portGroups[port].sort((a, b) => {
+         if (!a.etd && !b.etd) return 0;
+         if (!a.etd) return 1;
+         if (!b.etd) return -1;
+         return new Date(a.etd) - new Date(b.etd);
+      });
+   });
+
+   // Define port order for Brazil
+   const portOrder = ['SANTOS', 'PARANAGUA', 'RIO GRANDE', 'ITAJAI', 'NAVEGANTES', 'RIO DE JANEIRO', 'RDJ', 'SALVADOR', 'PECEM'];
+   const sortedPorts = Object.keys(portGroups).sort((a, b) => {
+      const aIndex = portOrder.findIndex(p => a.includes(p));
+      const bIndex = portOrder.findIndex(p => b.includes(p));
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return a.localeCompare(b);
+   });
+
+   // Build formatted output
+   let output = [];
+   
+   sortedPorts.forEach(port => {
+      const vessels = portGroups[port];
+      output.push(`====${port}====`);
+      
+      vessels.forEach(v => {
+         const vesselName = v.vesselName || 'UNKNOWN';
+         
+         // Parse ETB and ETD from notes or create from ETD field
+         let etbText = '';
+         let etdText = '';
+         let nextPortText = '';
+         
+         // Try to parse from notes first
+         if (v.notes) {
+            const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
+            const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
+            const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
+            
+            if (etbMatch) {
+               etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
+            }
+            if (etdMatch) {
+               etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
+            }
+            if (nextPortMatch) {
+               nextPortText = ` (${nextPortMatch[1]})`;
+            }
+         }
+         
+         // If no notes parsing, use ETD field
+         if (!etdText && v.etd) {
+            const etdDate = new Date(v.etd);
+            const day = String(etdDate.getDate()).padStart(2, '0');
+            const month = String(etdDate.getMonth() + 1).padStart(2, '0');
+            const hours = String(etdDate.getHours()).padStart(2, '0');
+            const minutes = String(etdDate.getMinutes()).padStart(2, '0');
+            etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
+         }
+         
+         // Use nextPort field if available
+         if (!nextPortText && v.nextPort) {
+            nextPortText = ` (${v.nextPort.toUpperCase()})`;
+         }
+         
+         // Build the vessel line
+         let vesselLine = `* ${vesselName}`;
+         if (etbText) {
+            vesselLine += ` - ${etbText}`;
+         }
+         if (etdText) {
+            vesselLine += ` – ${etdText}`;
+         }
+         vesselLine += nextPortText;
+         
+         output.push(vesselLine);
+      });
+      
+      output.push(''); // Empty line after each port group
+   });
+
+   const text = output.join('\n');
+
+   navigator.clipboard.writeText(text).then(() => {
+      showNotification(`Copied ${filtered.length} Brazil vessel(s)!`);
+   }).catch(() => alert('Failed to copy'));
+}
+
+// Paste Modal (REMOVED - keeping functions commented for reference)
+/*
 function openPasteModal() {
    document.getElementById('paste-modal').classList.remove('hidden');
    document.getElementById('paste-textarea').value = '';
@@ -810,6 +1112,7 @@ function parseMondayBoardLine(line, inspectionType) {
       id: Date.now() + Math.random(),
       vesselName: '',
       port: '',
+      nextPort: '',
       inspectionType: inspectionType,
       etd: '',
       vesselPosition: '',
@@ -910,6 +1213,7 @@ function parseMondayBoardLine(line, inspectionType) {
 
    return null;
 }
+*/
 
 function parseETDToDatetime(etdString) {
    const parts = etdString.split(' ');
@@ -1023,12 +1327,13 @@ function importExcel() {
                }
 
                // Find column indices based on format
-               let nameCol, dateCol, statusCol, vesselPosCol, portCol, updatedEtdCol, textCol, inspectionTypeCol;
+               let nameCol, dateCol, statusCol, vesselPosCol, portCol, nextPortCol, updatedEtdCol, textCol, inspectionTypeCol;
 
                if (isOwnFormat) {
                   // Our export format
                   nameCol = headers.indexOf('Vessel Name');
                   portCol = headers.indexOf('Port');
+                  nextPortCol = headers.indexOf('Next Port');
                   inspectionTypeCol = headers.indexOf('Inspection Type');
                   dateCol = headers.indexOf('ETD');
                   vesselPosCol = headers.indexOf('Vessel Position');
@@ -1042,6 +1347,7 @@ function importExcel() {
                   statusCol = headers.indexOf('Status');
                   vesselPosCol = headers.indexOf('Vessel Position');
                   portCol = headers.indexOf('Port of Inspection');
+                  nextPortCol = headers.indexOf('Next port');
                   updatedEtdCol = headers.indexOf('Updated ETD from Agent');
                   textCol = headers.indexOf('Text');
                   inspectionTypeCol = -1; // Not in Monday.com format
@@ -1051,6 +1357,7 @@ function importExcel() {
                   format: isOwnFormat ? 'Our Export' : 'Monday.com',
                   name: nameCol,
                   port: portCol,
+                  nextPort: nextPortCol,
                   inspectionType: inspectionTypeCol,
                   date: dateCol,
                   vesselPos: vesselPosCol,
@@ -1078,6 +1385,7 @@ function importExcel() {
                      id: Date.now() + Math.random(),
                      vesselName: vesselName.toUpperCase().trim(),
                      port: '',
+                     nextPort: '',
                      inspectionType: 'Both', // Default, will be updated if available
                      etd: '',
                      vesselPosition: '',
@@ -1090,6 +1398,14 @@ function importExcel() {
                   const port = row[portCol];
                   if (port && typeof port === 'string') {
                      vessel.port = port.toUpperCase().trim();
+                  }
+
+                  // Get next port
+                  if (nextPortCol >= 0) {
+                     const nextPort = row[nextPortCol];
+                     if (nextPort && typeof nextPort === 'string') {
+                        vessel.nextPort = nextPort.toUpperCase().trim();
+                     }
                   }
 
                   // Get inspection type (if available in our export format)
@@ -1210,6 +1526,7 @@ function exportExcel() {
       '#': i + 1,
       'Vessel Name': v.vesselName,
       'Port': v.port,
+      'Next Port': v.nextPort || '',
       'Inspection Type': v.inspectionType,
       'ETD': v.etd,
       'Time Left': v.timeLeft ? v.timeLeft.text : '',
@@ -1344,7 +1661,6 @@ function handleKeyboardShortcuts(e) {
       showNotification('Data auto-saved!');
    }
    if (e.key === 'Escape') {
-      closePasteModal();
       hideContextMenu();
    }
 }
