@@ -125,8 +125,8 @@ const PORT_FLAGS = {
    'BE ANTWERP': '🇧🇪',
    'ROTTERDAM': '🇳🇱',
    'NL ROTTERDAM': '🇳🇱',
-   'LAS PALMAS': '🇮🇨',
-   'ES LAS PALMAS': '🇮🇨',
+   'LAS PALMAS': 'CI',
+   'ES LAS PALMAS': 'CI',
    'VALENCIA': '🇪🇸',
    'ES VALENCIA': '🇪🇸',
    'MARSAXLOKK': '🇲🇹',
@@ -134,28 +134,30 @@ const PORT_FLAGS = {
 };
 
 // Get flag for a port
-function getPortFlag(port) {
-   if (!port) return '';
-   const portUpper = port.toUpperCase().trim();
-   
-   // Direct match
-   if (PORT_FLAGS[portUpper]) {
-      return PORT_FLAGS[portUpper] + ' ';
-   }
-   
-   // Remove common country code prefixes (BR, PA, BS, etc.) and try again
-   const withoutPrefix = portUpper.replace(/^(BR|PA|BS|CO|CL|CR|DE|FR|BE|NL|ES|MT)\s+/, '');
-   if (PORT_FLAGS[withoutPrefix]) {
-      return PORT_FLAGS[withoutPrefix] + ' ';
-   }
-   
-   // Partial match - check if port name contains any of the flag keys
-   for (const [portName, flag] of Object.entries(PORT_FLAGS)) {
-      if (portUpper.includes(portName)) {
-         return flag + ' ';
+function getPortFlag(portName) {
+   if (!portName) return '';
+   const upperPort = portName.toUpperCase();
+   for (const [region, data] of Object.entries(PORT_CATEGORIES)) {
+      if (data.ports.includes(upperPort)) {
+         // Return the 2-letter ISO code for the region
+         const codes = {
+            'Panama': 'pa',
+            'Brazil': 'br',
+            'Freeport': 'bs',
+            'Colombia': 'co',
+            'Chile': 'cl',
+            'Belgium': 'be',
+            'Spain': 'es',
+            'Canary Islands': 'ci', // Corrected
+            'Malta': 'mt',
+            'Netherlands': 'nl',
+            'Costa Rica': 'cr',
+            'Peru': 'pe',
+            'Ecuador': 'ec'
+         };
+         return codes[region] || '';
       }
    }
-   
    return '';
 }
 
@@ -609,9 +611,34 @@ function createTableRow(vessel, index) {
    row.appendChild(vesselCell);
 
    // Port
+   // Port Cell Amendment in createTableRow
+   // Inside createTableRow where you handle the Port Cell
    const portCell = document.createElement('td');
+   const portContainer = document.createElement('div');
+   portContainer.className = 'port-display-wrapper';
+
+   const flagImg = document.createElement('img');
+   flagImg.className = 'port-flag-icon round-flag'; // Added round-flag class
+   const countryCode = getPortFlag(vessel.port);
+
+   // Set the image source
+   flagImg.src = countryCode ?
+      `https://flagcdn.com/w80/${countryCode}.png` :
+      'https://flagcdn.com/w80/un.png'; // 'un' is the United Nations flag, a good generic placeholder
+
    const portSelect = createSelectCell('port', vessel.port, PORTS, vessel.id);
-   portCell.appendChild(portSelect);
+
+   // Update flag image when selection changes
+   portSelect.addEventListener('change', (e) => {
+      const newCode = getPortFlag(e.target.value);
+      flagImg.src = newCode ?
+         `https://flagcdn.com/w80/${newCode}.png` :
+         'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+   });
+
+   portContainer.appendChild(flagImg);
+   portContainer.appendChild(portSelect);
+   portCell.appendChild(portContainer);
    row.appendChild(portCell);
 
    // Next Port
@@ -666,6 +693,7 @@ function createTableRow(vessel, index) {
    actionsCell.innerHTML = `<button class="btn btn-danger btn-small delete-btn" onclick="deleteRow(${vessel.id})">✕</button>`;
    row.appendChild(actionsCell);
 
+
    row.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       showContextMenu(e, vessel.id);
@@ -707,13 +735,10 @@ function createSelectCell(field, value, options, vesselId) {
    options.forEach(option => {
       const opt = document.createElement('option');
       opt.value = option;
-      // Add flag before port name if it's the port field
-      if (field === 'port') {
-         const flag = getPortFlag(option);
-         opt.textContent = flag + option;
-      } else {
-         opt.textContent = option;
-      }
+      // If you want the dropdown to be cleaner, just use 'option' 
+      // instead of 'getPortFlag(option) + option'
+      opt.textContent = option;
+
       if (option === value) opt.selected = true;
       select.appendChild(opt);
    });
@@ -721,7 +746,6 @@ function createSelectCell(field, value, options, vesselId) {
    select.addEventListener('change', (e) => {
       updateVesselField(vesselId, field, e.target.value);
    });
-
    return select;
 }
 
@@ -870,25 +894,25 @@ function copyVessels(inspectionType) {
 
    // Build formatted output
    let output = [];
-   
+
    sortedPorts.forEach(port => {
       const vessels = portGroups[port];
       output.push(`====${port}====`);
-      
+
       vessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
-         
+
          // Parse ETB and ETD from notes or create from ETD field
          let etbText = '';
          let etdText = '';
          let nextPortText = '';
-         
+
          // Try to parse from notes first (format: "ETB 03/01 12:00 – ETD 04/01 15:15 (EU)")
          if (v.notes) {
             const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
-            
+
             if (etbMatch) {
                etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
             }
@@ -899,7 +923,7 @@ function copyVessels(inspectionType) {
                nextPortText = ` (${nextPortMatch[1]})`;
             }
          }
-         
+
          // If no notes parsing, use ETD field
          if (!etdText && v.etd) {
             const etdDate = new Date(v.etd);
@@ -909,12 +933,12 @@ function copyVessels(inspectionType) {
             const minutes = String(etdDate.getMinutes()).padStart(2, '0');
             etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
          }
-         
+
          // Use nextPort field if available
          if (!nextPortText && v.nextPort) {
             nextPortText = ` (${v.nextPort.toUpperCase()})`;
          }
-         
+
          // Build the vessel line
          let vesselLine = `* ${vesselName}`;
          if (etbText) {
@@ -924,10 +948,10 @@ function copyVessels(inspectionType) {
             vesselLine += ` – ${etdText}`;
          }
          vesselLine += nextPortText;
-         
+
          output.push(vesselLine);
       });
-      
+
       output.push(''); // Empty line after each port group
    });
 
@@ -941,7 +965,7 @@ function copyVessels(inspectionType) {
 // Copy Brazil vessels (all inspection types)
 function copyBrazilVessels() {
    const brazilPorts = ['SANTOS', 'PARANAGUA', 'RIO GRANDE', 'ITAJAI', 'NAVEGANTES', 'RIO DE JANEIRO', 'RDJ', 'SALVADOR', 'PECEM'];
-   
+
    const filtered = vessels.filter(v => {
       const isBrazil = brazilPorts.some(port => v.port && v.port.toUpperCase().includes(port));
       return isBrazil;
@@ -985,25 +1009,25 @@ function copyBrazilVessels() {
 
    // Build formatted output
    let output = [];
-   
+
    sortedPorts.forEach(port => {
       const vessels = portGroups[port];
       output.push(`====${port}====`);
-      
+
       vessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
-         
+
          // Parse ETB and ETD from notes or create from ETD field
          let etbText = '';
          let etdText = '';
          let nextPortText = '';
-         
+
          // Try to parse from notes first
          if (v.notes) {
             const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
-            
+
             if (etbMatch) {
                etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
             }
@@ -1014,7 +1038,7 @@ function copyBrazilVessels() {
                nextPortText = ` (${nextPortMatch[1]})`;
             }
          }
-         
+
          // If no notes parsing, use ETD field
          if (!etdText && v.etd) {
             const etdDate = new Date(v.etd);
@@ -1024,12 +1048,12 @@ function copyBrazilVessels() {
             const minutes = String(etdDate.getMinutes()).padStart(2, '0');
             etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
          }
-         
+
          // Use nextPort field if available
          if (!nextPortText && v.nextPort) {
             nextPortText = ` (${v.nextPort.toUpperCase()})`;
          }
-         
+
          // Build the vessel line
          let vesselLine = `* ${vesselName}`;
          if (etbText) {
@@ -1039,10 +1063,10 @@ function copyBrazilVessels() {
             vesselLine += ` – ${etdText}`;
          }
          vesselLine += nextPortText;
-         
+
          output.push(vesselLine);
       });
-      
+
       output.push(''); // Empty line after each port group
    });
 
