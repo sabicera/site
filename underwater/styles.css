@@ -29,7 +29,7 @@ body.light-theme {
 	--secondary-bg: #ffffff;
 	--accent-color: #0b5ed7;
 	--text-color: #212529;
-	--border-color: #dee2e6;
+	--border-color: #384b5f;
 	--header-bg: #e9ecef;
 	--row-hover: rgba(13, 110, 253, 0.1);
 	--row-selected: rgba(13, 110, 253, 0.2);
@@ -363,7 +363,7 @@ main {
 
 .col-port {
 	min-width: 150px;
-	width: 180px;
+	width: 250px;
 }
 
 .col-nextport {
@@ -958,4 +958,29 @@ body.light-theme .overdue-row {
 .loading {
 	opacity: 0.5;
 	pointer-events: none;
+}
+
+.port-display-wrapper {
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    gap: 10px; /* Space between flag and dropdown */
+}
+
+.round-flag {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover; /* This prevents the flag from stretching */
+    border: 1px solid var(--border-color); /* Optional: adds a subtle ring */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    flex-shrink: 0; /* Prevents the circle from getting squashed */
+}
+
+/* Ensure the dropdown takes up the remaining space nicely */
+.port-display-wrapper select {
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 4px;
 }
