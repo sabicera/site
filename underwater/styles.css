@@ -45,7 +45,7 @@ body.light-theme {
 }
 
 body {
-	font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	background-color: var(--primary-bg);
 	color: var(--text-color);
 	transition: background-color 0.3s, color 0.3s;
@@ -366,6 +366,11 @@ main {
 	width: 180px;
 }
 
+.col-nextport {
+	min-width: 120px;
+	width: 150px;
+}
+
 .col-inspection {
 	min-width: 120px;
 	width: 150px;
@@ -400,6 +405,14 @@ main {
 .col-actions {
 	width: 80px;
 	text-align: center;
+	vertical-align: middle;
+}
+
+.col-actions .delete-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto;
 }
 
 /* Editable Cells */
