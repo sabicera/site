@@ -433,6 +433,7 @@ main {
 	background-color: var(--input-focus);
 	outline: 2px solid var(--accent-color);
 	outline-offset: -2px;
+	background-color: var(--primary-bg);
 }
 
 .cell-number {
@@ -751,6 +752,112 @@ footer {
 	margin: 4px 0;
 }
 
+/* Notes cell with tooltip */
+.col-notes {
+    min-width: 200px;
+    max-width: 300px;
+    width: 250px;
+    position: relative;
+}
+
+.notes-cell-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.notes-display {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    padding: 8px;
+    display: block;
+}
+
+/* Tooltip popup */
+.notes-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 400px;
+    min-width: 250px;
+    margin-bottom: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Tooltip arrow */
+.notes-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: var(--card-bg);
+}
+
+/* Show tooltip on hover */
+.notes-cell-wrapper:hover .notes-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* If tooltip would go off-screen on the right, adjust */
+.notes-tooltip.align-right {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.notes-tooltip.align-right::after {
+    left: auto;
+    right: 20px;
+    transform: none;
+}
+
+/* If tooltip would go off-screen on the left, adjust */
+.notes-tooltip.align-left {
+    left: 0;
+    transform: none;
+}
+
+.notes-tooltip.align-left::after {
+    left: 20px;
+    transform: none;
+}
+
+/* Edit mode for notes */
+.notes-cell-wrapper .cell-content {
+    display: none;
+}
+
+.notes-cell-wrapper.editing .notes-display {
+    display: none;
+}
+
+.notes-cell-wrapper.editing .cell-content {
+    display: block;
+}
+
+.notes-cell-wrapper.editing .notes-tooltip {
+    display: none;
+}
+
 /* Scrollbar Styles */
 .table-container::-webkit-scrollbar {
 	width: 12px;
@@ -856,7 +963,7 @@ tr[data-inspection="U/W"] {
 }
 
 .countdown {
-	color: #17a2b8;
+	color: var(--text-color);
 	font-size: 0.95rem;
 }
 
@@ -881,13 +988,11 @@ tr[data-inspection="U/W"] {
 
 /* Priority row highlighting - more subtle */
 .urgent-row {
-	border-left: 4px solid #ef4444 !important;
 	background-color: rgba(239, 68, 68, 0.05) !important;
 }
 
 .priority-row {
-	border-left: 4px solid #f59e0b !important;
-	background-color: rgba(245, 158, 11, 0.05) !important;
+	background-color: rgba(59, 59, 59, 0.048) !important;
 }
 
 .overdue-row {
@@ -907,13 +1012,11 @@ tr[data-inspection="U/W"] {
 
 	0%,
 	100% {
-		background-color: rgba(220, 53, 69, 0.15);
-		box-shadow: inset 10px 0px 20px rgba(220, 53, 69, 0.3);
+		box-shadow: inset 10px 0 20px 0 rgb(220, 53, 70);
 	}
 
 	50% {
-		background-color: rgba(220, 53, 69, 0.35);
-		box-shadow: inset 10px 0px 20px 20px rgba(220, 53, 69, 0.5);
+		box-shadow: inset 10px 0 10px 0 rgba(220, 53, 70, 0.637);
 	}
 }
 
@@ -921,27 +1024,12 @@ tr[data-inspection="U/W"] {
 
 	0%,
 	100% {
-		background-color: rgb(220 53 69 / 21%);
-        box-shadow: inset 10px 0px 20px 0px rgb(220 53 69);
+		box-shadow: inset 10px 0 20px 0px rgb(46, 119, 255);
 	}
 
 	50% {
-		background-color: rgb(212 220 53 / 35%);
-		box-shadow: inset 10px 0px 20px 0px rgb(220 204 53);
+		box-shadow: inset 10px 0 10px 0px rgb(46, 255, 109);
 	}
-}
-
-/* For light theme */
-body.light-theme .urgent-row {
-	background-color: rgba(220, 53, 69, 0.05) !important;
-}
-
-body.light-theme .priority-row {
-	background-color: rgba(255, 193, 7, 0.05) !important;
-}
-
-body.light-theme .overdue-row {
-	background-color: rgba(108, 117, 125, 0.08) !important;
 }
 
 /* Vessel cell for clickable links */
