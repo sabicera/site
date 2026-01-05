@@ -250,6 +250,7 @@ function setTheme(isDark) {
    }
 }
 
+
 // Event listeners
 function setupEventListeners() {
    // Helper function to safely add event listener
@@ -264,7 +265,6 @@ function setupEventListeners() {
 
    safeAddListener('import-btn', 'click', importExcel);
    safeAddListener('export-btn', 'click', exportExcel);
-   safeAddListener('cleanup-btn', 'click', manualCleanup);
    safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
    safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
    safeAddListener('copy-brazil-btn', 'click', copyBrazilVessels);
@@ -425,8 +425,31 @@ function renderVessels() {
       return;
    }
 
-   // Sort vessels by ETD (soonest first)
+   // Sort vessels by time left (soonest/least time first)
    let sortedVessels = [...vessels].sort((a, b) => {
+      // Overdue vessels come first
+      if (a.timeLeft?.overdue && !b.timeLeft?.overdue) return -1;
+      if (!a.timeLeft?.overdue && b.timeLeft?.overdue) return 1;
+      
+      // Both overdue: sort by most overdue first (highest hours overdue)
+      if (a.timeLeft?.overdue && b.timeLeft?.overdue) {
+         const aTotal = (a.timeLeft.hours * 60) + a.timeLeft.minutes;
+         const bTotal = (b.timeLeft.hours * 60) + b.timeLeft.minutes;
+         return bTotal - aTotal; // Descending (most overdue first)
+      }
+      
+      // Both have time left: sort by least time remaining first
+      if (a.timeLeft && b.timeLeft && !a.timeLeft.overdue && !b.timeLeft.overdue) {
+         const aTotalMinutes = (a.timeLeft.days * 24 * 60) + (a.timeLeft.hours * 60) + a.timeLeft.minutes;
+         const bTotalMinutes = (b.timeLeft.days * 24 * 60) + (b.timeLeft.hours * 60) + b.timeLeft.minutes;
+         return aTotalMinutes - bTotalMinutes; // Ascending (least time first)
+      }
+      
+      // Vessels without time left go to the end
+      if (!a.timeLeft && b.timeLeft) return 1;
+      if (a.timeLeft && !b.timeLeft) return -1;
+      
+      // Both without time left: sort by ETD if available
       if (!a.etd && !b.etd) return 0;
       if (!a.etd) return 1;
       if (!b.etd) return -1;
@@ -681,10 +704,51 @@ function createTableRow(vessel, index) {
    statusCell.appendChild(statusSelect);
    row.appendChild(statusCell);
 
-   // Notes
+   // Notes with tooltip
    const notesCell = document.createElement('td');
+   notesCell.className = 'col-notes';
+
+   const notesWrapper = document.createElement('div');
+   notesWrapper.className = 'notes-cell-wrapper';
+
+   // Display element (truncated text)
+   const notesDisplay = document.createElement('div');
+   notesDisplay.className = 'notes-display';
+   notesDisplay.textContent = vessel.notes || '';
+   notesDisplay.title = 'Click to edit'; // Accessibility
+
+   // Tooltip element (full text)
+   const notesTooltip = document.createElement('div');
+   notesTooltip.className = 'notes-tooltip';
+   notesTooltip.textContent = vessel.notes || 'No notes';
+
+   // Edit input (hidden by default)
    const notesInput = createEditableCell('notes', vessel.notes, 'text', vessel.id);
-   notesCell.appendChild(notesInput);
+
+   // Click to edit
+   notesDisplay.addEventListener('click', () => {
+      notesWrapper.classList.add('editing');
+      notesInput.focus();
+   });
+
+   // Blur to save and exit edit mode
+   notesInput.addEventListener('blur', () => {
+      notesWrapper.classList.remove('editing');
+      notesDisplay.textContent = notesInput.value || '';
+      notesTooltip.textContent = notesInput.value || 'No notes';
+   });
+
+   // Press Enter to save
+   notesInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+         notesInput.blur();
+      }
+   });
+
+   notesWrapper.appendChild(notesDisplay);
+   notesWrapper.appendChild(notesTooltip);
+   notesWrapper.appendChild(notesInput);
+   notesCell.appendChild(notesWrapper);
    row.appendChild(notesCell);
 
    // Actions
@@ -787,24 +851,6 @@ function duplicateRow(vesselId) {
    }
 }
 
-function moveRowUp(vesselId) {
-   const index = vessels.findIndex(v => v.id === vesselId);
-   if (index > 0) {
-      [vessels[index], vessels[index - 1]] = [vessels[index - 1], vessels[index]];
-      renderVessels();
-      saveData();
-   }
-}
-
-function moveRowDown(vesselId) {
-   const index = vessels.findIndex(v => v.id === vesselId);
-   if (index < vessels.length - 1) {
-      [vessels[index], vessels[index + 1]] = [vessels[index + 1], vessels[index]];
-      renderVessels();
-      saveData();
-   }
-}
-
 // Context menu
 function showContextMenu(event, vesselId) {
    const menu = document.getElementById('context-menu');
@@ -829,21 +875,11 @@ function hideContextMenu() {
 
 function handleContextMenuAction(action, vesselId) {
    switch (action) {
-      case 'edit':
-         const row = document.querySelector(`tr[data-id="${vesselId}"]`);
-         if (row) row.querySelector('.cell-content')?.focus();
-         break;
       case 'duplicate':
          duplicateRow(vesselId);
          break;
       case 'delete':
          deleteRow(vesselId);
-         break;
-      case 'move-up':
-         moveRowUp(vesselId);
-         break;
-      case 'move-down':
-         moveRowDown(vesselId);
          break;
    }
 }
@@ -1076,168 +1112,6 @@ function copyBrazilVessels() {
       showNotification(`Copied ${filtered.length} Brazil vessel(s)!`);
    }).catch(() => alert('Failed to copy'));
 }
-
-// Paste Modal (REMOVED - keeping functions commented for reference)
-/*
-function openPasteModal() {
-   document.getElementById('paste-modal').classList.remove('hidden');
-   document.getElementById('paste-textarea').value = '';
-   document.getElementById('paste-textarea').focus();
-}
-
-function closePasteModal() {
-   document.getElementById('paste-modal').classList.add('hidden');
-}
-
-function processPastedVessels() {
-   const textarea = document.getElementById('paste-textarea');
-   const text = textarea.value.trim();
-
-   if (!text) {
-      alert('Please paste vessel data first.');
-      return;
-   }
-
-   const inspectionType = document.querySelector('input[name="inspection-type"]:checked').value;
-   const lines = text.split('\n').filter(line => line.trim());
-   const newVessels = [];
-
-   lines.forEach(line => {
-      const vessel = parseMondayBoardLine(line, inspectionType);
-      if (vessel) newVessels.push(vessel);
-   });
-
-   if (newVessels.length === 0) {
-      alert('No valid vessel data found.');
-      return;
-   }
-
-   vessels.push(...newVessels);
-   renderVessels();
-   saveData();
-   closePasteModal();
-   showNotification(`Added ${newVessels.length} vessel(s)!`);
-}
-
-function parseMondayBoardLine(line, inspectionType) {
-   line = line.trim();
-
-   // Skip header rows and empty lines
-   if (!line ||
-      line.includes('VESSELS SAILING') ||
-      line.includes('UPCOMING INSPECTIONS') ||
-      line.includes('Name') ||
-      line.includes('Subtitles') ||
-      line.length < 3) {
-      return null;
-   }
-
-   const vessel = {
-      id: Date.now() + Math.random(),
-      vesselName: '',
-      port: '',
-      nextPort: '',
-      inspectionType: inspectionType,
-      etd: '',
-      vesselPosition: '',
-      status: 'Pending',
-      notes: '',
-      timeLeft: null
-   };
-
-   // Split by tabs (Excel copy paste format)
-   const parts = line.split('\t').map(p => p.trim());
-
-   // First column is usually the vessel name
-   if (parts.length > 0 && parts[0]) {
-      vessel.vesselName = parts[0].toUpperCase();
-
-      // Column 11 is "Text" - extract notes
-      if (parts.length > 11 && parts[11]) {
-         vessel.notes = parts[11];
-      }
-
-      // Find port column (usually "Port of Inspection")
-      for (let i = 0; i < parts.length; i++) {
-         const part = parts[i];
-         if (part) {
-            // Check if this part matches a known port
-            const portMatch = PORTS.find(port =>
-               part.toUpperCase() === port.toUpperCase() ||
-               part.toUpperCase().includes(port.toUpperCase())
-            );
-            if (portMatch && !vessel.port) {
-               vessel.port = portMatch;
-            }
-
-            // Check for vessel position
-            if (part.toUpperCase().includes('ANCHORAGE')) {
-               vessel.vesselPosition = 'Anchorage';
-            } else if (part.toUpperCase().includes('NOT BERTHED')) {
-               vessel.vesselPosition = 'Not Berthed Yet';
-            } else if (part.toUpperCase().includes('BERTHED')) {
-               vessel.vesselPosition = 'Berthed';
-            } else if (part.toUpperCase().includes('WORKING')) {
-               vessel.vesselPosition = 'Working';
-            } else if (part.toUpperCase().includes('SAILED')) {
-               vessel.vesselPosition = 'Sailed';
-            }
-         }
-      }
-
-      // Look for date in any column - try multiple formats
-      for (let i = 0; i < parts.length; i++) {
-         const part = parts[i];
-         if (part && !vessel.etd) {
-            // Try YYYY-MM-DD format
-            let dateMatch = part.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-            if (dateMatch) {
-               const year = dateMatch[1];
-               const month = dateMatch[2].padStart(2, '0');
-               const day = dateMatch[3].padStart(2, '0');
-               vessel.etd = `${year}-${month}-${day}T00:00`;
-               continue;
-            }
-
-            // Try "DD Mon" or "DD Mon, YYYY" format (e.g., "26 Dec" or "2 Jan, 2026")
-            dateMatch = part.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(?:,?\s+(\d{4}))?/i);
-            if (dateMatch) {
-               const day = dateMatch[1].padStart(2, '0');
-               const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-               const monthIndex = monthNames.findIndex(m =>
-                  dateMatch[2].toLowerCase().startsWith(m.toLowerCase())
-               );
-               const month = (monthIndex + 1).toString().padStart(2, '0');
-               const year = dateMatch[3] || new Date().getFullYear();
-               vessel.etd = `${year}-${month}-${day}T00:00`;
-               continue;
-            }
-         }
-      }
-
-      // Look for ETD in "Updated ETD from Agent" column which has format like "ETD 27/12 19:00 (USA)"
-      const fullLine = line.toUpperCase();
-      const etdMatch = fullLine.match(/ETD\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
-      if (etdMatch && !vessel.etd) {
-         const day = etdMatch[1].padStart(2, '0');
-         const month = etdMatch[2].padStart(2, '0');
-         let year = etdMatch[3] || new Date().getFullYear().toString();
-         if (year.length === 2) year = '20' + year;
-         const hours = etdMatch[4].padStart(2, '0');
-         const minutes = etdMatch[5].padStart(2, '0');
-         vessel.etd = `${year}-${month}-${day}T${hours}:${minutes}`;
-      }
-
-      if (vessel.etd) {
-         vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
-      }
-
-      return vessel;
-   }
-
-   return null;
-}
-*/
 
 function parseETDToDatetime(etdString) {
    const parts = etdString.split(' ');
