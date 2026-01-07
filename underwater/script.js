@@ -22,7 +22,7 @@ const PORT_CATEGORIES = {
       offset: -5
    },
    'Colombia': {
-      ports: ['CARTAGENA'],
+      ports: ['CARTAGENA','BUENAVENTURA'],
       timezone: 'America/Bogota',
       offset: -5
    },
@@ -104,6 +104,7 @@ const PORT_FLAGS = {
    'BS FREEPORT ANC': '🇧🇸',
    // Colombia
    'CARTAGENA': '🇨🇴',
+   'BUENAVENTURA': '🇨🇴',
    'CO CARTAGENA': '🇨🇴',
    // Chile
    'LIRQUEN': '🇨🇱',
@@ -1618,4 +1619,5 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
 
