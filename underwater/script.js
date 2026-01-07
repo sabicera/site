@@ -7,7 +7,7 @@ let searchQuery = '';
 // Ports categorized by region with timezones
 const PORT_CATEGORIES = {
    'Panama': {
-      ports: ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH', 'CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'],
+      ports: ['BALBOA', 'BALB ANCHORAGE', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH', 'CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'],
       timezone: 'America/Panama',
       offset: -5
    },
@@ -58,6 +58,7 @@ const PORT_FLAGS = {
    'PA BALBOA': '🇵🇦',
    'CRISTOBAL': '🇵🇦',
    'PA CRISTOBAL': '🇵🇦',
+   'BALB ANCHORAGE'; '🇵🇦',
    'COLON': '🇵🇦',
    'PA COLON': '🇵🇦',
    'RODMAN': '🇵🇦',
@@ -1617,3 +1618,4 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
