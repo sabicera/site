@@ -58,7 +58,7 @@ const PORT_FLAGS = {
    'PA BALBOA': '🇵🇦',
    'CRISTOBAL': '🇵🇦',
    'PA CRISTOBAL': '🇵🇦',
-   'BALB ANCHORAGE'; '🇵🇦',
+   'BALB ANCHORAGE': '🇵🇦',
    'COLON': '🇵🇦',
    'PA COLON': '🇵🇦',
    'RODMAN': '🇵🇦',
@@ -1619,5 +1619,6 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
 
 
