@@ -27,7 +27,7 @@ const PORT_CATEGORIES = {
       offset: -5
    },
    'Chile': {
-      ports: ['LIRQUEN', 'SAN ANTONIO', 'VALPARAISO'],
+      ports: ['LIRQUEN', 'SAN ANTONIO', 'CORONEL', 'VALPARAISO'],
       timezone: 'America/Santiago',
       offset: -3
    },
@@ -109,6 +109,8 @@ const PORT_FLAGS = {
    // Chile
    'LIRQUEN': '🇨🇱',
    'CL LIRQUEN': '🇨🇱',
+   'CORONEL': '🇨🇱',
+   'CL CORONEL': '🇨🇱',
    'SAN ANTONIO': '🇨🇱',
    'CL SAN ANTONIO': '🇨🇱',
    'VALPARAISO': '🇨🇱',
@@ -117,6 +119,8 @@ const PORT_FLAGS = {
    'MOIN': '🇨🇷',
    'CR MOIN': '🇨🇷',
    // Europe
+   'MALAGA': '🇪🇸',
+   'ES MALAGA': '🇪🇸',
    'MALTA': '🇲🇹',
    'MT MALTA': '🇲🇹',
    'HAMBURG': '🇩🇪',
@@ -1619,6 +1623,7 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
 
 
 
