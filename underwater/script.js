@@ -37,7 +37,7 @@ const PORT_CATEGORIES = {
       offset: -6
    },
    'Europe': {
-      ports: ['MALTA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', ],
+      ports: ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', ],
       timezone: 'Europe/Brussels',
       offset: 1
    },
@@ -1619,6 +1619,7 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
 
 
 
