@@ -11,8 +11,10 @@ function calculate() {
     const children = parseInt(document.getElementById('children').value);
     const hhIncome = parseFloat(document.getElementById('hhIncome').value) || 0;
     const rentInput = parseFloat(document.getElementById('rentDeduction').value) || 0;
-    const si_cap = 68904;
-    const gesy_cap = 180000;
+    const si_monthly_cap = 5742;
+    const gesy_monthly_cap = 15000;
+    const si_cap = si_monthly_cap * installments; 
+    const gesy_cap = gesy_monthly_cap * installments;
 
     // 1. Mandatory Contributions on Total Annual Gross
     const si = Math.min(gross, si_cap) * 0.088;
@@ -76,5 +78,6 @@ function calculate() {
 }
 
 calculate();
+
 
 
