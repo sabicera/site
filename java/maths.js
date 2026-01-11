@@ -57,17 +57,17 @@ function calculate() {
 
     // 6. Output to UI
     const f = (n) => "€" + Math.round(n).toLocaleString();
-    const update = (id, val) => {
+    const update = (id, val, monthlyBase = installments) => {
         document.getElementById('a' + id).innerText = f(val);
-        document.getElementById('m' + id).innerText = f(val / installments);
+        document.getElementById('m' + id).innerText = f(val / monthlyBase);
     };
 
-    update('Gross', gross);
-    update('Soc', si);
-    update('Gesy', gesy);
-    update('Prov', pf);
-    update('Tax', actualTax);
-    update('Net', gross - si - gesy - pf - actualTax);
+    update('Gross', gross, installments);
+    update('Soc', si, 12);
+    update('Gesy', gesy, 12);
+    update('Prov', pf, 12);
+    update('Tax', actualTax, 12);
+    update('Net', gross - si - gesy - pf - actualTax, installments);
 
     document.getElementById('sProv').innerText = "+" + f(gainPF);
     document.getElementById('sChild').innerText = "+" + f(gainChild);
@@ -76,4 +76,5 @@ function calculate() {
 }
 
 calculate();
+
 
