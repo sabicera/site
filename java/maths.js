@@ -11,10 +11,12 @@ function calculate() {
     const children = parseInt(document.getElementById('children').value);
     const hhIncome = parseFloat(document.getElementById('hhIncome').value) || 0;
     const rentInput = parseFloat(document.getElementById('rentDeduction').value) || 0;
+    const si_cap = 68904;
+    const gesy_cap = 180000;
 
     // 1. Mandatory Contributions on Total Annual Gross
-    const si = Math.min(gross, 66612) * 0.088;
-    const gesy = gross * 0.0265;
+    const si = Math.min(gross, si_cap) * 0.088;
+    const gesy = Math.min(gross, gesy_cap) * 0.0265;
 
     // 2. Provident Fund Exclusion (12-month base only)
     const baseMonthlySalary = gross / installments;
@@ -74,3 +76,4 @@ function calculate() {
 }
 
 calculate();
+
