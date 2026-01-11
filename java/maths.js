@@ -11,10 +11,8 @@ function calculate() {
     const children = parseInt(document.getElementById('children').value);
     const hhIncome = parseFloat(document.getElementById('hhIncome').value) || 0;
     const rentInput = parseFloat(document.getElementById('rentDeduction').value) || 0;
-    const si_monthly_cap = 5742;
-    const gesy_monthly_cap = 15000;
-    const si_cap = si_monthly_cap * installments; 
-    const gesy_cap = gesy_monthly_cap * installments;
+    const si_cap = 68904;
+    const gesy_cap = 180000;
 
     // 1. Mandatory Contributions on Total Annual Gross
     const si = Math.min(gross, si_cap) * 0.088;
@@ -59,17 +57,17 @@ function calculate() {
 
     // 6. Output to UI
     const f = (n) => "€" + Math.round(n).toLocaleString();
-    const update = (id, val, monthlyBase = installments) => {
+    const update = (id, val) => {
         document.getElementById('a' + id).innerText = f(val);
-        document.getElementById('m' + id).innerText = f(val / monthlyBase);
+        document.getElementById('m' + id).innerText = f(val / installments);
     };
 
-    update('Gross', gross, installments);
-    update('Soc', si, 12);
-    update('Gesy', gesy, 12);
-    update('Prov', pf, 12);
-    update('Tax', actualTax, 12);
-    update('Net', gross - si - gesy - pf - actualTax, installments);
+    update('Gross', gross);
+    update('Soc', si);
+    update('Gesy', gesy);
+    update('Prov', pf);
+    update('Tax', actualTax);
+    update('Net', gross - si - gesy - pf - actualTax);
 
     document.getElementById('sProv').innerText = "+" + f(gainPF);
     document.getElementById('sChild').innerText = "+" + f(gainChild);
@@ -78,6 +76,4 @@ function calculate() {
 }
 
 calculate();
-
-
 
