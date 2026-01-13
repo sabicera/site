@@ -953,7 +953,7 @@ function copyVessels(inspectionType) {
          if (v.notes) {
             const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
+            const nextPortMatch = v.notes.match(/\(([A-Z\s]+)\)/);
 
             if (etbMatch) {
                etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
@@ -962,7 +962,33 @@ function copyVessels(inspectionType) {
                etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
             }
             if (nextPortMatch) {
-               nextPortText = ` (${nextPortMatch[1]})`;
+               // Keep the continent code as-is (EU, USA, ASIA, or specific port)
+               const nextPortValue = nextPortMatch[1].trim();
+               
+               // If it's already a continent code, keep it
+               if (['EU', 'USA', 'ASIA', 'EUROPE', 'AMERICA', '-'].includes(nextPortValue)) {
+                  nextPortText = ` (${nextPortValue})`;
+               } else {
+                  // Try to convert specific port to continent code
+                  const nextPortUpper = nextPortValue.toUpperCase();
+                  let continentCode = '';
+                  
+                  const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
+                  const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
+                  const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
+                  
+                  if (europePorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'EU';
+                  } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'USA';
+                  } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'ASIA';
+                  } else {
+                     continentCode = nextPortValue; // Keep original if no match
+                  }
+                  
+                  nextPortText = ` (${continentCode})`;
+               }
             }
          }
 
@@ -976,9 +1002,28 @@ function copyVessels(inspectionType) {
             etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
          }
 
-         // Use nextPort field if available
+         // Use nextPort field if available and convert to continent/region
          if (!nextPortText && v.nextPort) {
-            nextPortText = ` (${v.nextPort.toUpperCase()})`;
+            const nextPortUpper = v.nextPort.toUpperCase();
+            let continentCode = '';
+            
+            // Map ports to continent codes
+            const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
+            const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
+            const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
+            
+            if (europePorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'EU';
+            } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'USA';
+            } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'ASIA';
+            } else {
+               // If not in predefined lists, keep original
+               continentCode = nextPortUpper;
+            }
+            
+            nextPortText = ` (${continentCode})`;
          }
 
          // Build the vessel line
@@ -1068,7 +1113,7 @@ function copyBrazilVessels() {
          if (v.notes) {
             const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
             const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const nextPortMatch = v.notes.match(/\(([A-Z]+)\)/);
+            const nextPortMatch = v.notes.match(/\(([A-Z\s]+)\)/);
 
             if (etbMatch) {
                etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
@@ -1077,7 +1122,33 @@ function copyBrazilVessels() {
                etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
             }
             if (nextPortMatch) {
-               nextPortText = ` (${nextPortMatch[1]})`;
+               // Keep the continent code as-is (EU, USA, ASIA, or specific port)
+               const nextPortValue = nextPortMatch[1].trim();
+               
+               // If it's already a continent code, keep it
+               if (['EU', 'USA', 'ASIA', 'EUROPE', 'AMERICA', '-'].includes(nextPortValue)) {
+                  nextPortText = ` (${nextPortValue})`;
+               } else {
+                  // Try to convert specific port to continent code
+                  const nextPortUpper = nextPortValue.toUpperCase();
+                  let continentCode = '';
+                  
+                  const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
+                  const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
+                  const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
+                  
+                  if (europePorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'EU';
+                  } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'USA';
+                  } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
+                     continentCode = 'ASIA';
+                  } else {
+                     continentCode = nextPortValue; // Keep original if no match
+                  }
+                  
+                  nextPortText = ` (${continentCode})`;
+               }
             }
          }
 
@@ -1091,9 +1162,28 @@ function copyBrazilVessels() {
             etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
          }
 
-         // Use nextPort field if available
+         // Use nextPort field if available and convert to continent/region
          if (!nextPortText && v.nextPort) {
-            nextPortText = ` (${v.nextPort.toUpperCase()})`;
+            const nextPortUpper = v.nextPort.toUpperCase();
+            let continentCode = '';
+            
+            // Map ports to continent codes
+            const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
+            const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
+            const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
+            
+            if (europePorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'EU';
+            } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'USA';
+            } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
+               continentCode = 'ASIA';
+            } else {
+               // If not in predefined lists, keep original
+               continentCode = nextPortUpper;
+            }
+            
+            nextPortText = ` (${continentCode})`;
          }
 
          // Build the vessel line
@@ -1623,8 +1713,3 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
-
-
-
-
-
