@@ -1352,9 +1352,17 @@ function importExcel() {
             // Find ALL header rows (there may be multiple sections)
             const headerIndices = [];
             rawData.forEach((row, idx) => {
-               if (row[0] && typeof row[0] === 'string') {
-                  const firstCell = row[0].trim().toUpperCase();
-                  if (firstCell === 'NAME' || firstCell === 'VESSEL NAME') {
+               if (row && row.length > 0) {
+                  // Check if any cell in this row contains "Name" or "Vessel Name"
+                  const hasNameHeader = row.some(cell => {
+                     if (cell && typeof cell === 'string') {
+                        const cellUpper = cell.trim().toUpperCase();
+                        return cellUpper === 'NAME' || cellUpper === 'VESSEL NAME';
+                     }
+                     return false;
+                  });
+                  
+                  if (hasNameHeader) {
                      headerIndices.push(idx);
                      console.log('Found header at row', idx);
                   }
@@ -1560,14 +1568,28 @@ function parseAndFormatDateTime(value) {
    if (!value) return '';
 
    try {
-      // Handle ISO format (already formatted)
+      // Handle ISO format (already formatted) - both with and without seconds
       if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
          return value;
       }
 
-      // Handle "ETD DD/MM HHMM" or "ETD DD/MM HH:MM" format
+      // Handle our export format: "DD/MM HH:MM" 
       if (typeof value === 'string') {
-         value = value.trim().replace(/^-\s*/, '');
+         value = value.trim();
+         
+         // Match DD/MM HH:MM format (our export format)
+         const displayMatch = value.match(/^(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})$/);
+         if (displayMatch) {
+            const day = displayMatch[1].padStart(2, '0');
+            const month = displayMatch[2].padStart(2, '0');
+            const year = new Date().getFullYear();
+            const hours = displayMatch[3].padStart(2, '0');
+            const minutes = displayMatch[4].padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+         }
+         
+         // Try to match ETD/ETB with various formats
+         value = value.replace(/^-\s*/, '');
          
          // Try to match ETD with various formats: "ETD DD/MM HH:MM" or "ETD DD/MM HHMM"
          const etdMatch = value.match(/ETD\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
@@ -1681,8 +1703,8 @@ function exportExcel() {
       'Port': v.port,
       'Next Port': v.nextPort || '',
       'Inspection Type': v.inspectionType,
-      'ETB': v.etb ? formatDateTimeDisplay(v.etb) : '',
-      'ETD': v.etd ? formatDateTimeDisplay(v.etd) : '',
+      'ETB': v.etb || '',  // Export in ISO format for re-import
+      'ETD': v.etd || '',  // Export in ISO format for re-import
       'Time Left': v.timeLeft ? v.timeLeft.text : '',
       'Vessel Position': v.vesselPosition,
       'Status': v.status,
