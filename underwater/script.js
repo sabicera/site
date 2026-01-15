@@ -667,10 +667,40 @@ function createTableRow(vessel, index) {
       }
    }
 
-   // Row number
+   // Row number (clickable to copy vessel info)
    const numCell = document.createElement('td');
-   numCell.className = 'cell-number';
+   numCell.className = 'cell-number clickable-row-number';
    numCell.textContent = index;
+   numCell.title = 'Click to copy vessel name, ETB, and ETD';
+   
+   // Add click handler to copy vessel info
+   numCell.addEventListener('click', () => {
+      const vesselName = vessel.vesselName || '';
+      const etb = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+      const etd = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+      
+      let copyText = vesselName;
+      if (etb) {
+         copyText += ` - ETB ${etb}`;
+      }
+      if (etd) {
+         copyText += ` - ETD ${etd}`;
+      }
+      
+      navigator.clipboard.writeText(copyText).then(() => {
+         // Visual feedback - flash the row number
+         numCell.classList.add('copied-flash');
+         setTimeout(() => {
+            numCell.classList.remove('copied-flash');
+         }, 500);
+         
+         showNotification(`Copied: ${copyText}`);
+      }).catch(err => {
+         console.error('Failed to copy:', err);
+         alert('Failed to copy to clipboard');
+      });
+   });
+   
    row.appendChild(numCell);
 
    // Vessel Name with link
