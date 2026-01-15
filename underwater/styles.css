@@ -1,10 +1,7 @@
-/* Main theme variables */
 :root {
 	--primary-bg: #0f172a;
-	/* Deeper midnight blue */
 	--secondary-bg: #1e293b;
 	--accent-color: #38bdf8;
-	/* Modern bright blue */
 	--text-color: #f1f5f9;
 	--border-color: #334155;
 	--header-bg: #1e293b;
@@ -23,7 +20,6 @@
 	--input-focus: rgba(15, 76, 117, 0.3);
 }
 
-/* Light theme variables */
 body.light-theme {
 	--primary-bg: #f5f5f5;
 	--secondary-bg: #ffffff;
@@ -59,7 +55,6 @@ body {
 	max-width: 100%;
 }
 
-/* Header Styles */
 header {
 	display: flex;
 	justify-content: space-between;
@@ -195,7 +190,6 @@ input:checked+.slider:before {
 	flex-wrap: wrap;
 }
 
-/* Button Styles */
 .btn {
 	display: inline-flex;
 	align-items: center;
@@ -286,7 +280,6 @@ input:checked+.slider:before {
 	background-color: var(--btn-danger-hover);
 }
 
-/* Main Content */
 main {
 	flex: 1;
 	overflow: hidden;
@@ -304,7 +297,6 @@ main {
 	background-color: var(--secondary-bg);
 }
 
-/* Excel-like Table Styles */
 #vessel-table {
 	width: 100%;
 	border-collapse: separate;
@@ -350,7 +342,6 @@ main {
 	position: relative;
 }
 
-/* Column widths */
 .col-number {
 	width: 50px;
 	text-align: center;
@@ -374,6 +365,11 @@ main {
 .col-inspection {
 	min-width: 120px;
 	width: 150px;
+}
+
+.col-etb {
+	min-width: 150px;
+	width: 180px;
 }
 
 .col-etd {
@@ -415,7 +411,6 @@ main {
 	margin: 0 auto;
 }
 
-/* Editable Cells */
 .cell-content {
 	width: 100%;
 	height: 100%;
@@ -444,7 +439,6 @@ main {
 	opacity: 0.7;
 }
 
-/* Select dropdowns */
 select.cell-content {
 	cursor: pointer;
 	appearance: none;
@@ -458,7 +452,6 @@ body.light-theme select.cell-content {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
 }
 
-/* Vessel name with link */
 .vessel-link {
 	color: #3498db;
 	text-decoration: none;
@@ -479,7 +472,6 @@ body.light-theme .vessel-link:hover {
 	color: #004494;
 }
 
-/* Status badges */
 .status-badge {
 	display: inline-block;
 	padding: 4px 10px;
@@ -519,7 +511,6 @@ body.light-theme .vessel-link:hover {
 	color: var(--text-color);
 }
 
-/* Footer Styles */
 footer {
 	padding: 10px 20px;
 	background-color: var(--header-bg);
@@ -543,7 +534,6 @@ footer {
 	opacity: 0.5;
 }
 
-/* Context Menu */
 .context-menu {
 	position: fixed;
 	background-color: var(--secondary-bg);
@@ -595,10 +585,8 @@ footer {
 .clock-item span:last-child {
 	color: var(--text-color);
 	font-variant-numeric: tabular-nums;
-	/* Prevents text "jumping" as numbers change */
 }
 
-/* Modal Styles */
 .modal {
 	position: fixed;
 	top: 0;
@@ -619,6 +607,10 @@ footer {
 .modal-dialog {
 	width: 90%;
 	max-width: 600px;
+}
+
+.date-display {
+	text-align: center;
 }
 
 .modal-content {
@@ -719,7 +711,6 @@ footer {
 	border-top: 1px solid var(--border-color);
 }
 
-/* Context Menu */
 .context-menu {
 	position: fixed;
 	background-color: var(--secondary-bg);
@@ -752,7 +743,6 @@ footer {
 	margin: 4px 0;
 }
 
-/* Notes cell with tooltip */
 .col-notes {
     min-width: 200px;
     max-width: 300px;
@@ -775,7 +765,6 @@ footer {
     display: block;
 }
 
-/* Tooltip popup */
 .notes-tooltip {
     position: absolute;
     bottom: 100%;
@@ -800,7 +789,6 @@ footer {
     line-height: 1.5;
 }
 
-/* Tooltip arrow */
 .notes-tooltip::after {
     content: '';
     position: absolute;
@@ -811,13 +799,11 @@ footer {
     border-top-color: var(--card-bg);
 }
 
-/* Show tooltip on hover */
 .notes-cell-wrapper:hover .notes-tooltip {
     opacity: 1;
     visibility: visible;
 }
 
-/* If tooltip would go off-screen on the right, adjust */
 .notes-tooltip.align-right {
     left: auto;
     right: 0;
@@ -830,7 +816,6 @@ footer {
     transform: none;
 }
 
-/* If tooltip would go off-screen on the left, adjust */
 .notes-tooltip.align-left {
     left: 0;
     transform: none;
@@ -841,7 +826,6 @@ footer {
     transform: none;
 }
 
-/* Edit mode for notes */
 .notes-cell-wrapper .cell-content {
     display: none;
 }
@@ -858,7 +842,6 @@ footer {
     display: none;
 }
 
-/* Scrollbar Styles */
 .table-container::-webkit-scrollbar {
 	width: 12px;
 	height: 12px;
@@ -877,7 +860,6 @@ footer {
 	background: var(--btn-primary-hover);
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
 	header {
 		flex-direction: column;
@@ -913,7 +895,6 @@ footer {
 	}
 }
 
-/* Empty state */
 .empty-state {
 	padding: 40px 20px;
 	text-align: center;
@@ -930,7 +911,6 @@ footer {
 	font-size: 0.9rem;
 }
 
-/* Highlight K9 and U/W rows */
 tr[data-inspection="K9"] {
 	border-left: 3px solid #fd7e14;
 }
@@ -939,7 +919,6 @@ tr[data-inspection="U/W"] {
 	border-left: 3px solid #17a2b8;
 }
 
-/* Category headers */
 .category-header {
 	background-color: var(--header-bg) !important;
 }
@@ -954,7 +933,6 @@ tr[data-inspection="U/W"] {
 	border-top: 2px solid var(--border-color);
 }
 
-/* Time Left cell styles */
 .time-left-cell {
 	text-align: center;
 	font-weight: 600;
@@ -975,7 +953,6 @@ tr[data-inspection="U/W"] {
 }
 
 @keyframes pulse {
-
 	0%,
 	100% {
 		opacity: 1;
@@ -986,7 +963,6 @@ tr[data-inspection="U/W"] {
 	}
 }
 
-/* Priority row highlighting - more subtle */
 .urgent-row {
 	background-color: rgba(239, 68, 68, 0.05) !important;
 }
@@ -999,7 +975,6 @@ tr[data-inspection="U/W"] {
 	background-color: rgba(108, 117, 125, 0.12) !important;
 }
 
-/* Flashing effects for critical timeframes */
 .flash-red {
 	animation: flashRed 1s ease-in-out infinite;
 }
@@ -1009,7 +984,6 @@ tr[data-inspection="U/W"] {
 }
 
 @keyframes flashRed {
-
 	0%,
 	100% {
 		box-shadow: inset 10px 0 20px 0 rgb(220, 53, 70);
@@ -1021,7 +995,6 @@ tr[data-inspection="U/W"] {
 }
 
 @keyframes flashYellow {
-
 	0%,
 	100% {
 		box-shadow: inset 10px 0 20px 0px rgb(46, 119, 255);
@@ -1032,7 +1005,6 @@ tr[data-inspection="U/W"] {
 	}
 }
 
-/* Vessel cell for clickable links */
 .vessel-cell {
 	cursor: pointer;
 	padding: 10px;
@@ -1042,7 +1014,6 @@ tr[data-inspection="U/W"] {
 	background-color: var(--input-focus);
 }
 
-/* Loading indicator */
 .loading {
 	opacity: 0.5;
 	pointer-events: none;
@@ -1052,20 +1023,19 @@ tr[data-inspection="U/W"] {
     display: flex;
     align-items: center;
     padding-left: 10px;
-    gap: 10px; /* Space between flag and dropdown */
+    gap: 10px;
 }
 
 .round-flag {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    object-fit: cover; /* This prevents the flag from stretching */
-    border: 1px solid var(--border-color); /* Optional: adds a subtle ring */
+    object-fit: cover;
+    border: 1px solid var(--border-color);
     box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-    flex-shrink: 0; /* Prevents the circle from getting squashed */
+    flex-shrink: 0;
 }
 
-/* Ensure the dropdown takes up the remaining space nicely */
 .port-display-wrapper select {
     border: none;
     color: var(--text-color);
