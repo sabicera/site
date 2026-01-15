@@ -375,9 +375,12 @@ main {
 	width: 150px;
 }
 
+.col-etb {
+	width: 150px;
+}
+
 .col-etd {
-	min-width: 150px;
-	width: 180px;
+	width: 150px;
 }
 
 .col-timeleft {
@@ -1116,4 +1119,37 @@ tr[data-inspection="U/W"] {
 .date-input:focus {
     outline: 2px solid var(--accent-color);
     outline-offset: -2px;
+}
+
+
+/* Clickable row number styling */
+.clickable-row-number {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.clickable-row-number:hover {
+    background: var(--accent-color) !important;
+    color: var(--primary-bg);
+    font-weight: bold;
+    transform: scale(1.1);
+}
+
+.clickable-row-number:active {
+    transform: scale(0.95);
+}
+
+/* Flash animation when copied */
+@keyframes copyFlash {
+    0%, 100% {
+        background: var(--accent-color);
+    }
+    50% {
+        background: var(--btn-success);
+    }
+}
+
+.copied-flash {
+    animation: copyFlash 1s ease;
 }
