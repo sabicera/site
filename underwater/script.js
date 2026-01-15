@@ -22,6 +22,45 @@ function formatDateTimeDisplay(datetimeString) {
    }
 }
 
+// Helper function to parse user-entered date input
+function parseUserDateInput(input) {
+   if (!input) return '';
+   
+   input = input.trim();
+   
+   // Try to match various formats:
+   // DD/MM HH:MM, DD/MM HHMM, DD/MM HH MM
+   const patterns = [
+      // DD/MM HH:MM or DD/MM/YY HH:MM or DD/MM/YYYY HH:MM
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):(\d{2})$/,
+      // DD/MM HHMM (no colon or space)
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{2})(\d{2})$/,
+      // DD/MM HH MM (space instead of colon)
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2})\s+(\d{2})$/,
+   ];
+   
+   for (const pattern of patterns) {
+      const match = input.match(pattern);
+      if (match) {
+         const day = match[1].padStart(2, '0');
+         const month = match[2].padStart(2, '0');
+         let year = match[3] || new Date().getFullYear().toString();
+         if (year.length === 2) year = '20' + year;
+         const hours = match[4].padStart(2, '0');
+         const minutes = match[5].padStart(2, '0');
+         
+         // Validate values
+         if (parseInt(month) > 12 || parseInt(day) > 31 || parseInt(hours) > 23 || parseInt(minutes) > 59) {
+            return null;
+         }
+         
+         return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+   }
+   
+   return null;
+}
+
 // Helper function to parse Excel date serial numbers
 function parseExcelDate(excelDate) {
    if (typeof excelDate === 'number') {
@@ -700,61 +739,89 @@ function createTableRow(vessel, index) {
    inspectionCell.appendChild(inspectionSelect);
    row.appendChild(inspectionCell);
 
-   // ETB (new column)
+   // ETB (editable text input)
    const etbCell = document.createElement('td');
-   const etbDisplay = document.createElement('div');
-   etbDisplay.className = 'date-display';
-   etbDisplay.textContent = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '--';
+   const etbInput = document.createElement('input');
+   etbInput.type = 'text';
+   etbInput.className = 'cell-content date-input';
+   etbInput.placeholder = 'DD/MM HH:MM';
+   etbInput.value = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+   etbInput.dataset.field = 'etb';
+   etbInput.dataset.vesselId = vessel.id;
    
-   const etbInput = createEditableCell('etb', vessel.etb, 'datetime-local', vessel.id);
-   etbInput.style.display = 'none';
-   
-   etbDisplay.addEventListener('click', () => {
-      etbDisplay.style.display = 'none';
-      etbInput.style.display = 'block';
-      etbInput.focus();
+   // Parse on blur to convert to ISO format
+   etbInput.addEventListener('blur', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         // Try to parse the input
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etb', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         } else {
+            // Keep the original value if parsing fails
+            e.target.value = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+         }
+      } else {
+         updateVesselField(vessel.id, 'etb', '');
+      }
    });
    
-   etbInput.addEventListener('blur', () => {
-      etbDisplay.textContent = etbInput.value ? formatDateTimeDisplay(etbInput.value) : '--';
-      etbInput.style.display = 'none';
-      etbDisplay.style.display = 'block';
+   // Update on change as well
+   etbInput.addEventListener('change', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etb', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         }
+      }
    });
    
-   etbInput.addEventListener('change', () => {
-      etbDisplay.textContent = etbInput.value ? formatDateTimeDisplay(etbInput.value) : '--';
-   });
-   
-   etbCell.appendChild(etbDisplay);
    etbCell.appendChild(etbInput);
    row.appendChild(etbCell);
 
-   // ETD
+   // ETD (editable text input)
    const etdCell = document.createElement('td');
-   const etdDisplay = document.createElement('div');
-   etdDisplay.className = 'date-display';
-   etdDisplay.textContent = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '--';
+   const etdInput = document.createElement('input');
+   etdInput.type = 'text';
+   etdInput.className = 'cell-content date-input';
+   etdInput.placeholder = 'DD/MM HH:MM';
+   etdInput.value = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+   etdInput.dataset.field = 'etd';
+   etdInput.dataset.vesselId = vessel.id;
    
-   const etdInput = createEditableCell('etd', vessel.etd, 'datetime-local', vessel.id);
-   etdInput.style.display = 'none';
-   
-   etdDisplay.addEventListener('click', () => {
-      etdDisplay.style.display = 'none';
-      etdInput.style.display = 'block';
-      etdInput.focus();
+   // Parse on blur to convert to ISO format
+   etdInput.addEventListener('blur', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         // Try to parse the input
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etd', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         } else {
+            // Keep the original value if parsing fails
+            e.target.value = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+         }
+      } else {
+         updateVesselField(vessel.id, 'etd', '');
+      }
    });
    
-   etdInput.addEventListener('blur', () => {
-      etdDisplay.textContent = etdInput.value ? formatDateTimeDisplay(etdInput.value) : '--';
-      etdInput.style.display = 'none';
-      etdDisplay.style.display = 'block';
+   // Update on change as well
+   etdInput.addEventListener('change', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etd', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         }
+      }
    });
    
-   etdInput.addEventListener('change', () => {
-      etdDisplay.textContent = etdInput.value ? formatDateTimeDisplay(etdInput.value) : '--';
-   });
-   
-   etdCell.appendChild(etdDisplay);
    etdCell.appendChild(etdInput);
    row.appendChild(etdCell);
 
