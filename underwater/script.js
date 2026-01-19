@@ -1135,7 +1135,7 @@ function copyVessels(inspectionType) {
                let continentCode = '';
                
                // Map ports to continent codes
-               const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
+               const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON', 'MOIN'];
                const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE', 'USA'];
                const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
                
@@ -1895,3 +1895,4 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
+
