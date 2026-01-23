@@ -1062,6 +1062,14 @@ function copyVessels(inspectionType) {
    const filtered = vessels.filter(v => {
       const matchesType = v.inspectionType === inspectionType || v.inspectionType === 'Both';
       const isPanama = ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH', 'CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'].includes(v.port);
+      
+      // Special handling for BALB ANCH / PAN CAN: include if has notes but no ETB/ETD
+      if (v.port === 'BALB ANCH / PAN CAN') {
+         const hasNotes = v.notes && v.notes.trim().length > 0;
+         const hasNoETBETD = (!v.etb || v.etb.trim().length === 0) && (!v.etd || v.etd.trim().length === 0);
+         return matchesType && hasNotes && hasNoETBETD;
+      }
+      
       return matchesType && isPanama;
    });
 
@@ -1163,6 +1171,11 @@ function copyVessels(inspectionType) {
             vesselLine += ` - ${etdText}`;
          }
          vesselLine += nextPortText;
+         
+         // For BALB ANCH / PAN CAN vessels without ETB/ETD, add the notes
+         if (v.port === 'BALB ANCH / PAN CAN' && !v.etb && !v.etd && v.notes) {
+            vesselLine += ` - ${v.notes}`;
+         }
 
          output.push(vesselLine);
       });
