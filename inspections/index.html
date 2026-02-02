@@ -7,43 +7,6 @@
       <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
       <link rel="stylesheet" href="styles.css">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-      <style>
-         /* Specific styles for the termination notice */
-         #termination-modal {
-         display: flex;
-         z-index: 9999;
-         }
-         .termination-content {
-         text-align: center; 
-         padding: 20px; 
-         border: 2px solid #dc3545; 
-         border-radius: 8px;
-         box-shadow: 0 0 20px rgba(0,0,0,0.5);
-         }
-         #termination-countdown {
-         font-size: 2.2rem; 
-         font-weight: bold; 
-         color: #ff4d4d; 
-         margin: 20px 0; 
-         font-family: 'Courier New', Courier, monospace;
-         text-shadow: 1px 1px 2px black;
-         }
-         .new-site-btn {
-         display: inline-block; 
-         padding: 15px 30px; 
-         background-color: #28a745; 
-         color: white; 
-         text-decoration: none; 
-         border-radius: 5px; 
-         font-weight: bold; 
-         font-size: 1.2rem; 
-         transition: transform 0.2s, background-color 0.2s;
-         }
-         .new-site-btn:hover {
-         background-color: #218838;
-         transform: scale(1.05);
-         }
-      </style>
    </head>
    <body>
       <div class="app-container">
@@ -180,64 +143,11 @@
             </main>
          </div>
       </div>
-      <div id="termination-modal" class="modal">
-         <div class="modal-content termination-content">
-            <div class="modal-header" style="background-color: var(--btn-danger);">
-               <h2 style="width: 100%; color: white; margin: 0;">TERMINATION NOTICE</h2>
-            </div>
-            <div class="modal-body" style="padding: 30px; background-color: var(--secondary-bg);">
-               <p style="font-size: 1.2rem; color: var(--text-color); margin-bottom: 10px;">
-                  This site will be <strong>permanently terminated</strong> in:
-               </p>
-               <div id="termination-countdown">00d 00h 00m 00s</div>
-               <p style="font-size: 1.1rem; color: var(--text-color);">
-                  Please migrate to the new platform immediately:
-               </p>
-               <a href="https://sabicera.github.io/site/underwater/index.html" class="new-site-btn">
-               Go to New Site
-               </a>
-               <p style="font-size: 1.1rem; color: var(--text-color);">
-                  Thank you !!!
-               </p>
-            </div>
-         </div>
       </div>
       <script src="database.js"></script>
       <script src="script.js"></script>
       <script src="combined-view.js"></script>
       <script src="europe.js"></script>
-      <script>
-         // Countdown Logic
-         (function() {
-             const targetDate = new Date("January 8, 2026 23:59:59").getTime();
-             const countdownDisplay = document.getElementById('termination-countdown');
-             const modal = document.getElementById('termination-modal');
-         
-             const timer = setInterval(function() {
-                 const now = new Date().getTime();
-                 const distance = targetDate - now;
-         
-                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-         
-                 countdownDisplay.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
-         
-                 if (distance < 0) {
-                     clearInterval(timer);
-                     countdownDisplay.innerHTML = "SITE TERMINATED";
-                     window.location.href = "https://sabicera.github.io/site/underwater/index.html";
-                 }
-             }, 1000);
-         
-             // Close modal when clicking outside content
-             window.addEventListener('click', function(event) {
-                 if (event.target == modal) {
-                     modal.style.display = "none";
-                 }
-             });
-         })();
-      </script>
    </body>
 </html>
+
