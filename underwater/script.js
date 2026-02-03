@@ -1527,20 +1527,22 @@ function importExcel() {
                }
 
                // Get notes
-               if (textCol >= 0) {
-                  const textNotes = row[textCol];
-                  if (textNotes && typeof textNotes === 'string') {
-                     vessel.notes = textNotes.trim();
-                     
-                     // Check if notes contain inspection type info
-                     const notesUpper = vessel.notes.toUpperCase();
-                     if (notesUpper.includes('K9 ONLY')) {
-                        vessel.inspectionType = 'K9';
-                     } else if (notesUpper.includes('U/W ONLY') || notesUpper.includes('UW ONLY')) {
-                        vessel.inspectionType = 'U/W';
+                  if (textCol >= 0) {
+                     const textNotes = row[textCol];
+                     if (textNotes && typeof textNotes === 'string') {
+                        vessel.notes = textNotes.trim();
+                        const notesUpper = vessel.notes.toUpperCase();
+                  
+                        // Check for K9 or K9 ONLY
+                        if (notesUpper.includes('K9 ONLY') || notesUpper.includes('K9')) {
+                           vessel.inspectionType = 'K9';
+                        } 
+                        // Check for U/W, UW, or U/W ONLY
+                        else if (notesUpper.includes('U/W') || notesUpper.includes('UW')) {
+                           vessel.inspectionType = 'U/W';
+                        }
                      }
                   }
-               }
 
                // Calculate time left
                if (vessel.etd) {
