@@ -1527,22 +1527,36 @@ function importExcel() {
                }
 
                // Get notes
-                  if (textCol >= 0) {
-                     const textNotes = row[textCol];
-                     if (textNotes && typeof textNotes === 'string') {
-                        vessel.notes = textNotes.trim();
-                        const notesUpper = vessel.notes.toUpperCase();
-                  
-                        // Check for K9 or K9 ONLY
-                        if (notesUpper.includes('K9 ONLY') || notesUpper.includes('K9')) {
-                           vessel.inspectionType = 'K9';
-                        } 
-                        // Check for U/W, UW, or U/W ONLY
-                        else if (notesUpper.includes('U/W') || notesUpper.includes('UW')) {
-                           vessel.inspectionType = 'U/W';
-                        }
+               if (textCol >= 0) {
+                  const textNotes = row[textCol];
+                  if (textNotes && typeof textNotes === 'string') {
+                     vessel.notes = textNotes.trim();
+                     const notesUpper = vessel.notes.toUpperCase();
+               
+                     // More precise checking - look for whole words/phrases
+                     // Check for K9 ONLY first (most specific)
+                     if (notesUpper.includes('K9 ONLY')) {
+                        vessel.inspectionType = 'K9';
+                     }
+                     // Check for U/W ONLY
+                     else if (notesUpper.includes('U/W ONLY') || notesUpper.includes('UW ONLY')) {
+                        vessel.inspectionType = 'U/W';
+                     }
+                     // Check for both K9 and U/W mentioned together
+                     else if (notesUpper.includes('K9') && notesUpper.includes('U/W')) {
+                        vessel.inspectionType = 'Both';
+                     }
+                     // Check for K9 (but not "NO K9" or "NOT K9")
+                     else if (notesUpper.includes('K9') && !notesUpper.includes('NO K9') && !notesUpper.includes('NOT K9')) {
+                        vessel.inspectionType = 'K9';
+                     }
+                     // Check for U/W or UW (but not "NO U/W" or "NOT U/W")
+                     else if ((notesUpper.includes('U/W') || notesUpper.includes('UW')) && 
+                              !notesUpper.includes('NO U/W') && !notesUpper.includes('NOT U/W')) {
+                        vessel.inspectionType = 'U/W';
                      }
                   }
+               }
 
                // Calculate time left
                if (vessel.etd) {
@@ -1911,3 +1925,4 @@ if (document.readyState === 'loading') {
    initApp();
 }
 
+console.log('Added vessel:', vessel.vesselName, 'Type:', vessel.inspectionType, 'Port:', vessel.port);
