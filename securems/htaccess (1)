@@ -1,0 +1,229 @@
+# ============================================================================
+# SECURE PDF - OPTIMIZED .HTACCESS
+# Performance-focused configuration with caching and compression
+# ============================================================================
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # API Routing
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^api/(.*)$ api.php [QSA,L]
+</IfModule>
+
+# ============================================================================
+# PERFORMANCE: GZIP COMPRESSION
+# ============================================================================
+
+<IfModule mod_deflate.c>
+  # Compress HTML, CSS, JavaScript, Text, XML
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/ld+json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE font/ttf
+  AddOutputFilterByType DEFLATE font/otf
+  AddOutputFilterByType DEFLATE font/woff
+  AddOutputFilterByType DEFLATE font/woff2
+</IfModule>
+
+# ============================================================================
+# PERFORMANCE: BROWSER CACHING
+# ============================================================================
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  
+  # Default expiration: 1 hour
+  ExpiresDefault "access plus 1 hour"
+  
+  # HTML - 0 seconds (always check for updates)
+  ExpiresByType text/html "access plus 0 seconds"
+  
+  # CSS and JavaScript - 1 year (with versioning)
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType application/x-javascript "access plus 1 year"
+  
+  # Fonts - 1 year
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/otf "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+  
+  # Images - 1 year
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  
+  # JSON and XML - 0 seconds
+  ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType application/ld+json "access plus 0 seconds"
+  ExpiresByType application/xml "access plus 0 seconds"
+  ExpiresByType text/xml "access plus 0 seconds"
+</IfModule>
+
+# ============================================================================
+# PERFORMANCE: CACHE-CONTROL HEADERS
+# ============================================================================
+
+<IfModule mod_headers.c>
+  # HTML: No caching (always fresh)
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+  
+  # CSS and JavaScript: 1 year, public
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  
+  # Images: 1 year, public
+  <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|webp)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  
+  # Fonts: 1 year, public
+  <FilesMatch "\.(woff|woff2|ttf|otf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    
+    # CORS for fonts
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+  
+  # Service Worker: No cache
+  <FilesMatch "service-worker\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+  
+  # API endpoints: No cache
+  <FilesMatch "\.(php)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+  
+  # Security headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  
+  # Remove server signature
+  Header unset Server
+  Header unset X-Powered-By
+</IfModule>
+
+# ============================================================================
+# PERFORMANCE: ETags
+# ============================================================================
+
+<IfModule mod_headers.c>
+  # Enable ETags for efficient caching
+  FileETag MTime Size
+</IfModule>
+
+# ============================================================================
+# SECURITY: HTTPS Redirect (Uncomment if using HTTPS)
+# ============================================================================
+
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} off
+#   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>
+
+# ============================================================================
+# PERFORMANCE: Preload Headers
+# ============================================================================
+
+<IfModule mod_headers.c>
+  # Preload critical resources
+  <FilesMatch "\.html$">
+    Header add Link "</service-worker.js>; rel=preload; as=script"
+    Header add Link "<https://fonts.googleapis.com>; rel=preconnect"
+    Header add Link "<https://fonts.gstatic.com>; rel=preconnect; crossorigin"
+    Header add Link "<https://cdnjs.cloudflare.com>; rel=dns-prefetch"
+  </FilesMatch>
+</IfModule>
+
+# ============================================================================
+# ERROR DOCUMENTS
+# ============================================================================
+
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# ============================================================================
+# PERFORMANCE: Optimize Apache
+# ============================================================================
+
+# Disable directory listing
+Options -Indexes
+
+# Follow symbolic links
+Options +FollowSymLinks
+
+# Disable server signature
+ServerSignature Off
+
+# ============================================================================
+# MIME TYPES (if mod_mime is available)
+# ============================================================================
+
+<IfModule mod_mime.c>
+  # JavaScript
+  AddType text/javascript js mjs
+  AddType application/javascript js mjs
+  
+  # JSON
+  AddType application/json json map
+  AddType application/ld+json jsonld
+  
+  # Fonts
+  AddType font/woff woff
+  AddType font/woff2 woff2
+  AddType font/ttf ttf
+  AddType font/otf otf
+  
+  # Images
+  AddType image/webp webp
+  AddType image/svg+xml svg svgz
+  
+  # Service Worker
+  AddType text/javascript service-worker.js
+</IfModule>
+
+# ============================================================================
+# PERFORMANCE: Keep-Alive
+# ============================================================================
+
+<IfModule mod_headers.c>
+  Header set Connection keep-alive
+</IfModule>
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================
