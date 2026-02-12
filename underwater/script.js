@@ -341,6 +341,7 @@ function setupEventListeners() {
    };
 
    safeAddListener('import-btn', 'click', importExcel);
+   safeAddListener('import-json-btn', 'click', importJSON);
    safeAddListener('export-btn', 'click', exportExcel);
    safeAddListener('add-row-btn', 'click', addNewRow);
    safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
@@ -1388,6 +1389,77 @@ function parseETDText(text) {
    }
    
    return '';
+}
+
+// Import JSON - simpler and more reliable than Excel
+function importJSON() {
+   const input = document.getElementById('json-file-input');
+   if (!input) {
+      alert('File input element not found');
+      return;
+   }
+
+   input.click();
+   input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onerror = (error) => {
+         console.error('FileReader error:', error);
+         alert('Error reading JSON file. Please try again.');
+      };
+
+      reader.onload = (event) => {
+         try {
+            const jsonData = JSON.parse(event.target.result);
+            
+            if (!Array.isArray(jsonData)) {
+               alert('Invalid JSON format. Expected an array of vessels.');
+               return;
+            }
+
+            console.log(`Loaded ${jsonData.length} vessels from JSON`);
+
+            // Process each vessel and calculate time left
+            const importedVessels = jsonData.map(v => {
+               const vessel = {
+                  id: Date.now() + Math.random(),
+                  vesselName: v.vesselName || '',
+                  port: v.port || '',
+                  nextPort: v.nextPort || '',
+                  inspectionType: v.inspectionType || 'Both',
+                  etb: v.etb || '',
+                  etd: v.etd || '',
+                  vesselPosition: v.vesselPosition || '',
+                  status: v.status || 'Pending',
+                  notes: v.notes || '',
+                  timeLeft: null
+               };
+
+               // Calculate time left
+               if (vessel.etd) {
+                  vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
+               }
+
+               return vessel;
+            });
+
+            if (confirm(`Import ${importedVessels.length} vessels from JSON?\n\nThis will replace all current data.`)) {
+               vessels = importedVessels;
+               renderVessels();
+               saveData();
+               showNotification(`Successfully imported ${importedVessels.length} vessels!`);
+            }
+         } catch (err) {
+            alert('Error parsing JSON file:\n' + err.message);
+            console.error('JSON import error:', err);
+         }
+      };
+
+      reader.readAsText(file);
+      input.value = '';
+   };
 }
 
 // Import Excel
