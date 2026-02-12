@@ -179,5 +179,4 @@ const VESSEL_ID_DATABASE = {
     "EUROPE": "144594",
     "EUROPE": "144594",
     "EUROPE": "144594",
-
 };
