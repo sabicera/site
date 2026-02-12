@@ -1402,20 +1402,42 @@ function importExcel() {
    input.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
+      
+      // Check file size (limit to 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+         alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Please use a file smaller than 5MB.`);
+         return;
+      }
+      
+      console.log(`Loading file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
 
       const reader = new FileReader();
+      reader.onerror = (error) => {
+         console.error('FileReader error:', error);
+         alert('Error reading file. Please try again.');
+      };
+      
       reader.onload = (event) => {
          try {
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, {
-               type: 'array',
-               cellDates: true
+            console.log('File loaded, parsing Excel...');
+            const workbook = XLSX.read(event.target.result, {
+               type: 'binary',
+               cellDates: true,
+               cellText: false,
+               cellStyles: false
             });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Get the range to avoid processing empty cells
+            const range = XLSX.utils.decode_range(firstSheet['!ref']);
+            console.log(`Sheet range: ${range.s.r} to ${range.e.r} rows`);
+            
             const rawData = XLSX.utils.sheet_to_json(firstSheet, {
                header: 1,
                raw: false,
-               dateNF: 'yyyy-mm-dd"T"hh:mm'
+               defval: null,
+               blankrows: false
             });
 
             console.log('Raw Excel Data:', rawData.slice(0, 5));
@@ -1599,7 +1621,7 @@ function importExcel() {
          }
       };
 
-      reader.readAsArrayBuffer(file);
+      reader.readAsBinaryString(file);
       input.value = '';
    };
 }
