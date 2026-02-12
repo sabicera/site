@@ -1463,32 +1463,43 @@ function importJSON() {
 }
 
 // Import Excel
-function importExcel() {
-   const input = document.getElementById('excel-file-input');
-   if (!input) {
-      alert('File input element not found');
-      return;
-   }
+function handleExcelImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-   input.click();
-   input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      // Check file size (limit to 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-         alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Please use a file smaller than 5MB.`);
-         return;
-      }
-      
-      console.log(`Loading file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
+    console.log("Loading file:", file.name, "size:", file.size);
 
-      const reader = new FileReader();
-      reader.onerror = (error) => {
-         console.error('FileReader error:', error);
-         alert('Error reading file. Please try again.');
-      };
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            // Use Uint8Array for better memory management
+            const data = new Uint8Array(e.target.result);
+            
+            // Read the workbook with type: 'array'
+            const workbook = XLSX.read(data, {
+                type: 'array',
+                cellDates: true, // Useful for your ETD/Date columns
+                cellNF: false,
+                cellText: false
+            });
+
+            console.log("Workbook loaded successfully");
+            processWorkbook(workbook); // Your function to handle the data
+
+        } catch (error) {
+            console.error("Import error:", error);
+            alert("Error parsing Excel file. Please ensure it is a valid .xlsx or .xls file.");
+        }
+    };
+
+    reader.onerror = function(ex) {
+        console.error("File reading error:", ex);
+    };
+
+    // Use readAsArrayBuffer instead of readAsBinaryString or readAsText
+    reader.readAsArrayBuffer(file);
+}
       
       reader.onload = (event) => {
          try {
