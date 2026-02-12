@@ -36,6 +36,7 @@
             </div>
             <div class="header-buttons">
                <button id="import-btn" class="btn btn-primary">Import Excel</button>
+               <button id="import-json-btn" class="btn btn-primary">Import JSON</button>
                <button id="export-btn" class="btn btn-primary">Export Excel</button>
                <button id="copy-k9-btn" class="btn btn-success">Copy K9</button>
                <button id="copy-uw-btn" class="btn btn-success">Copy U/W</button>
@@ -90,6 +91,8 @@
       </div>
       <!-- Hidden file input for Excel import -->
       <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;">
+      <!-- Hidden file input for JSON import -->
+      <input type="file" id="json-file-input" accept=".json" style="display: none;">
       <!-- Context Menu -->
       <div id="context-menu" class="context-menu hidden">
          <div class="context-menu-item" data-action="duplicate">Duplicate Row</div>
