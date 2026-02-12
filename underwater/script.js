@@ -1330,6 +1330,66 @@ function parseETDToDatetime(etdString) {
    return `${year}-${month}-${day}T${timePart}`;
 }
 
+// IMPROVED: Better ETD text parsing for various formats
+function parseETDText(text) {
+   if (!text || typeof text !== 'string') return '';
+   
+   text = text.trim();
+   const currentYear = new Date().getFullYear();
+   
+   // Pattern 1: "ETD DD/MM HH:MM (REGION)" or "ETD DD/MM HH:MM"
+   const match1 = text.match(/ETD\s+(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/i);
+   if (match1) {
+      const day = match1[1].padStart(2, '0');
+      const month = match1[2].padStart(2, '0');
+      const hours = match1[3].padStart(2, '0');
+      const minutes = match1[4].padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 2: "ETD – HH:MM/DDth" or "ETD – HH:MM/DD"
+   const match2 = text.match(/ETD\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})/i);
+   if (match2) {
+      const hours = match2[1].padStart(2, '0');
+      const minutes = match2[2].padStart(2, '0');
+      const day = match2[3].padStart(2, '0');
+      const month = String(new Date().getMonth() + 1).padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 3: "ETB DD/HHMM ETS DD/HHMM" or "ETB DD/HHMM ETD DD/HHMM"
+   const match3 = text.match(/ET[SD]\s+(\d{1,2})\/(\d{2})(\d{2})/i);
+   if (match3) {
+      const day = match3[1].padStart(2, '0');
+      const hours = match3[2];
+      const minutes = match3[3];
+      const month = String(new Date().getMonth() + 1).padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 4: "ETA DD/MM" or "eta: DD/MM HH:MM"
+   const match4 = text.match(/ETA[:\s]+(\d{1,2})\/(\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?/i);
+   if (match4) {
+      const day = match4[1].padStart(2, '0');
+      const month = match4[2].padStart(2, '0');
+      const hours = match4[3] ? match4[3].padStart(2, '0') : '00';
+      const minutes = match4[4] ? match4[4] : '00';
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 5: "ETB DD/MM HH:MM" (similar to ETD but for ETB)
+   const match5 = text.match(/ETB\s+(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/i);
+   if (match5) {
+      const day = match5[1].padStart(2, '0');
+      const month = match5[2].padStart(2, '0');
+      const hours = match5[3].padStart(2, '0');
+      const minutes = match5[4].padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   return '';
+}
+
 // Import Excel
 function importExcel() {
    const input = document.getElementById('excel-file-input');
@@ -1366,11 +1426,10 @@ function importExcel() {
             const headerIndices = [];
             rawData.forEach((row, idx) => {
                if (row && row.length > 0) {
-                  // Check if any cell in this row contains "Name" or "Vessel Name"
+                  // Check if any cell in this row is exactly "Name"
                   const hasNameHeader = row.some(cell => {
                      if (cell && typeof cell === 'string') {
-                        const cellUpper = cell.trim().toUpperCase();
-                        return cellUpper === 'NAME' || cellUpper === 'VESSEL NAME';
+                        return cell.trim().toUpperCase() === 'NAME';
                      }
                      return false;
                   });
@@ -1383,7 +1442,7 @@ function importExcel() {
             });
 
             if (headerIndices.length === 0) {
-               alert('Could not find header row with "Name" or "Vessel Name"');
+               alert('Could not find header row with "Name"');
                return;
             }
 
@@ -1394,35 +1453,17 @@ function importExcel() {
                const headers = rawData[headerIndex].map(h => h ? h.trim() : '');
                console.log(`Section ${sectionNum + 1} headers:`, headers);
 
-               // Determine format and get column indices
-               let nameCol, portCol, nextPortCol, inspectionTypeCol, dateCol, vesselPosCol, statusCol, textCol, updatedEtdCol, etbCol;
-               const isOwnFormat = headers.includes('Vessel Name');
-
-               if (isOwnFormat) {
-                  // Our export format
-                  nameCol = headers.indexOf('Vessel Name');
-                  portCol = headers.indexOf('Port');
-                  nextPortCol = headers.indexOf('Next Port');
-                  inspectionTypeCol = headers.indexOf('Inspection Type');
-                  etbCol = headers.indexOf('ETB');
-                  dateCol = headers.indexOf('ETD');
-                  vesselPosCol = headers.indexOf('Vessel Position');
-                  statusCol = headers.indexOf('Status');
-                  textCol = headers.indexOf('Notes');
-                  updatedEtdCol = -1;
-               } else {
-                  // Monday.com format
-                  nameCol = headers.indexOf('Name');
-                  dateCol = headers.indexOf('Date');
-                  statusCol = headers.indexOf('Status');
-                  vesselPosCol = headers.indexOf('Vessel Position');
-                  portCol = headers.indexOf('Port of Inspection');
-                  nextPortCol = headers.indexOf('Next port');
-                  updatedEtdCol = headers.indexOf('Updated ETD from Agent');
-                  textCol = headers.indexOf('Text');
-                  inspectionTypeCol = -1;
-                  etbCol = -1;
-               }
+               // Get column indices
+               const nameCol = headers.indexOf('Name');
+               const portCol = headers.indexOf('Port of Inspection');
+               const nextPortCol = headers.indexOf('Next port');
+               const inspectionTypeCol = -1;  // Monday.com doesn't have this
+               const dateCol = headers.indexOf('Date');
+               const vesselPosCol = headers.indexOf('Vessel Position');
+               const statusCol = headers.indexOf('Status');
+               const textCol = headers.indexOf('Text');
+               const updatedEtdCol = headers.indexOf('Updated ETD from Agent');
+               const etbCol = -1;  // Monday.com doesn't have separate ETB column
 
                // Find the end of this section (next header or end of file)
                const nextHeaderIndex = headerIndices[sectionNum + 1];
@@ -1443,130 +1484,101 @@ function importExcel() {
                      vesselName.length < 2 ||
                      vesselName.includes('VESSELS SAILING') ||
                      vesselName.includes('UPCOMING') ||
+                     vesselName.includes('MONITOR') ||
                      vesselName.includes('UWI & K9') ||
-                     vesselName.includes(' to ')) {  // Skip date range rows like "2026-01-16 to 2026-01-23"
+                     (vesselName.includes(' to ') && vesselName.includes('-'))) {  // Date ranges
                      continue;
                   }
 
-               const vessel = {
-                  id: Date.now() + Math.random(),
-                  vesselName: vesselName.toUpperCase().trim(),
-                  port: '',
-                  nextPort: '',
-                  inspectionType: 'Both',
-                  etb: '',
-                  etd: '',
-                  vesselPosition: '',
-                  status: 'Pending',
-                  notes: '',
-                  timeLeft: null
-               };
+                  const vessel = {
+                     id: Date.now() + Math.random(),
+                     vesselName: vesselName.toUpperCase().trim(),
+                     port: '',
+                     nextPort: '',
+                     inspectionType: 'Both',  // Default
+                     etb: '',
+                     etd: '',
+                     vesselPosition: '',
+                     status: 'Pending',
+                     notes: '',
+                     timeLeft: null
+                  };
 
-               // Get port
-               const port = row[portCol];
-               if (port && typeof port === 'string') {
-                  vessel.port = port.toUpperCase().trim();
-               }
-
-               // Get next port
-               if (nextPortCol >= 0) {
-                  const nextPort = row[nextPortCol];
-                  if (nextPort && typeof nextPort === 'string') {
-                     vessel.nextPort = nextPort.toUpperCase().trim();
+                  // Get port
+                  if (portCol >= 0 && row[portCol]) {
+                     vessel.port = String(row[portCol]).toUpperCase().trim();
                   }
-               }
 
-               // Get inspection type
-               if (inspectionTypeCol >= 0) {
-                  const inspectionType = row[inspectionTypeCol];
-                  if (inspectionType && typeof inspectionType === 'string') {
-                     vessel.inspectionType = inspectionType.trim();
+                  // Get next port
+                  if (nextPortCol >= 0 && row[nextPortCol]) {
+                     vessel.nextPort = String(row[nextPortCol]).toUpperCase().trim();
                   }
-               }
 
-               // Get vessel position
-               if (vesselPosCol >= 0) {
-                  const vesselPos = row[vesselPosCol];
-                  if (vesselPos && typeof vesselPos === 'string') {
-                     vessel.vesselPosition = vesselPos.trim();
+                  // Get vessel position
+                  if (vesselPosCol >= 0 && row[vesselPosCol]) {
+                     const pos = String(row[vesselPosCol]).trim();
+                     // Map Monday.com positions to our position options
+                     const posUpper = pos.toUpperCase();
+                     if (posUpper.includes('PORT')) vessel.vesselPosition = 'Berthed';
+                     else if (posUpper.includes('ANCH')) vessel.vesselPosition = 'Anchorage';
+                     else if (posUpper.includes('NOT BERTHED')) vessel.vesselPosition = 'Not Berthed Yet';
+                     else vessel.vesselPosition = pos;
                   }
-               }
 
-               // Get status
-               if (statusCol >= 0) {
-                  const statusValue = row[statusCol];
-                  if (statusValue && typeof statusValue === 'string') {
-                     vessel.status = statusValue.trim();
+                  // Get status
+                  if (statusCol >= 0 && row[statusCol]) {
+                     vessel.status = String(row[statusCol]).trim();
                   }
-               }
 
-               // Get ETB if available
-               if (etbCol >= 0) {
-                  const etbValue = row[etbCol];
-                  if (etbValue) {
-                     vessel.etb = parseAndFormatDateTime(etbValue);
-                  }
-               }
-
-               // Get ETD - try to extract both ETB and ETD from the field
-               let etdValue = updatedEtdCol >= 0 ? (row[updatedEtdCol] || row[dateCol]) : row[dateCol];
-               if (etdValue) {
-                  // Check if this field contains both ETB and ETD
-                  if (typeof etdValue === 'string' && (etdValue.includes('ETB') || etdValue.includes('ETD'))) {
-                     const extracted = extractETBandETD(etdValue);
-                     if (extracted.etb && !vessel.etb) {
-                        vessel.etb = extracted.etb;
+                  // Get ETD from "Updated ETD from Agent" column
+                  let etdText = '';
+                  if (updatedEtdCol >= 0 && row[updatedEtdCol]) {
+                     etdText = String(row[updatedEtdCol]).trim();
+                  } else if (dateCol >= 0 && row[dateCol]) {
+                     // Fallback to Date column if Updated ETD is empty
+                     const dateValue = row[dateCol];
+                     if (dateValue instanceof Date || typeof dateValue === 'number') {
+                        vessel.etd = parseAndFormatDateTime(dateValue);
                      }
-                     if (extracted.etd) {
-                        vessel.etd = extracted.etd;
-                     }
-                  } else {
-                     // Just ETD, no ETB
-                     vessel.etd = parseAndFormatDateTime(etdValue);
                   }
-               }
 
-               // Get notes
-               if (textCol >= 0) {
-                  const textNotes = row[textCol];
-                  if (textNotes && typeof textNotes === 'string') {
-                     vessel.notes = textNotes.trim();
+                  // Parse ETD text if we have it
+                  if (etdText) {
+                     // Try to extract both ETB and ETD
+                     const extracted = extractETBandETD(etdText);
+                     if (extracted.etb) vessel.etb = extracted.etb;
+                     if (extracted.etd) vessel.etd = extracted.etd;
+                     
+                     // If extraction didn't work, try simple parsing
+                     if (!vessel.etd) {
+                        vessel.etd = parseETDText(etdText);
+                     }
+                  }
+
+                  // Get notes/text
+                  if (textCol >= 0 && row[textCol]) {
+                     vessel.notes = String(row[textCol]).trim();
+                     
+                     // Extract inspection type from notes
                      const notesUpper = vessel.notes.toUpperCase();
-               
-                     // More precise checking - look for whole words/phrases
-                     // Check for K9 ONLY first (most specific)
-                     if (notesUpper.includes('K9 ONLY')) {
+                     if (notesUpper === 'K9 ONLY' || notesUpper === 'K9') {
                         vessel.inspectionType = 'K9';
-                     }
-                     // Check for U/W ONLY
-                     else if (notesUpper.includes('U/W ONLY') || notesUpper.includes('UW ONLY')) {
+                     } else if (notesUpper === 'UW ONLY' || notesUpper === 'U/W ONLY' || notesUpper === 'UW') {
                         vessel.inspectionType = 'U/W';
-                     }
-                     // Check for both K9 and U/W mentioned together
-                     else if (notesUpper.includes('K9') && notesUpper.includes('U/W')) {
+                     } else if (notesUpper === 'BOTH' || (notesUpper.includes('K9') && notesUpper.includes('U/W'))) {
                         vessel.inspectionType = 'Both';
                      }
-                     // Check for K9 (but not "NO K9" or "NOT K9")
-                     else if (notesUpper.includes('K9') && !notesUpper.includes('NO K9') && !notesUpper.includes('NOT K9')) {
-                        vessel.inspectionType = 'K9';
-                     }
-                     // Check for U/W or UW (but not "NO U/W" or "NOT U/W")
-                     else if ((notesUpper.includes('U/W') || notesUpper.includes('UW')) && 
-                              !notesUpper.includes('NO U/W') && !notesUpper.includes('NOT U/W')) {
-                        vessel.inspectionType = 'U/W';
-                     }
                   }
-               }
 
-               // Calculate time left
-               if (vessel.etd) {
-                  vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
-               }
+                  // Calculate time left
+                  if (vessel.etd) {
+                     vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
+                  }
 
-               allVessels.push(vessel);
-               console.log('Added vessel:', vessel.vesselName, vessel.port, 'ETB:', vessel.etb, 'ETD:', vessel.etd);
-            }
-         }); // End of forEach for each header section
+                  allVessels.push(vessel);
+                  console.log('Added vessel:', vessel.vesselName, 'Port:', vessel.port, 'ETB:', vessel.etb, 'ETD:', vessel.etd, 'Type:', vessel.inspectionType);
+               }
+            });
 
             console.log(`Total vessels imported: ${allVessels.length}`);
 
@@ -1655,24 +1667,25 @@ function extractETBandETD(text) {
    if (!text || typeof text !== 'string') return { etb: '', etd: '' };
    
    const result = { etb: '', etd: '' };
+   const currentYear = new Date().getFullYear();
    
    // Pattern 1: "ETB DD/MM HHMM - ETD DD/MM HH:MM" or "ETB DD/MM HH:MM - ETD DD/MM HH:MM"
    const etbMatch = text.match(/ETB\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
    if (etbMatch) {
       const day = etbMatch[1].padStart(2, '0');
       const month = etbMatch[2].padStart(2, '0');
-      let year = etbMatch[3] || new Date().getFullYear().toString();
+      let year = etbMatch[3] || currentYear.toString();
       if (year.length === 2) year = '20' + year;
       const hours = etbMatch[4].padStart(2, '0');
       const minutes = etbMatch[5].padStart(2, '0');
       result.etb = `${year}-${month}-${day}T${hours}:${minutes}`;
    }
    
-   const etdMatch = text.match(/ETD\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
+   const etdMatch = text.match(/ET[SD]\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
    if (etdMatch) {
       const day = etdMatch[1].padStart(2, '0');
       const month = etdMatch[2].padStart(2, '0');
-      let year = etdMatch[3] || new Date().getFullYear().toString();
+      let year = etdMatch[3] || currentYear.toString();
       if (year.length === 2) year = '20' + year;
       const hours = etdMatch[4].padStart(2, '0');
       const minutes = etdMatch[5].padStart(2, '0');
@@ -1680,7 +1693,6 @@ function extractETBandETD(text) {
    }
    
    // Pattern 2: "ETB – HH:MM/DDTH-MON, YYYY ETD – HH:MM /DDST-MON, YYYY"
-   // Example: "ETB – 06:15/20TH-JAN,  2026 ETD – 09:00 /21ST-JAN, 2026"
    if (!result.etb || !result.etd) {
       const complexEtbMatch = text.match(/ETB\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})[A-Z]{2}[- ]([A-Z]{3})[,\s]*(\d{4})/i);
       if (complexEtbMatch) {
@@ -1699,7 +1711,7 @@ function extractETBandETD(text) {
          result.etb = `${year}-${month}-${day}T${hours}:${minutes}`;
       }
       
-      const complexEtdMatch = text.match(/ETD\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})[A-Z]{2}[- ]([A-Z]{3})[,\s]*(\d{4})/i);
+      const complexEtdMatch = text.match(/ET[SD]\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})[A-Z]{2}[- ]([A-Z]{3})[,\s]*(\d{4})/i);
       if (complexEtdMatch) {
          const hours = complexEtdMatch[1].padStart(2, '0');
          const minutes = complexEtdMatch[2].padStart(2, '0');
@@ -1924,5 +1936,3 @@ if (document.readyState === 'loading') {
 } else {
    initApp();
 }
-
-console.log('Added vessel:', vessel.vesselName, 'Type:', vessel.inspectionType, 'Port:', vessel.port);
