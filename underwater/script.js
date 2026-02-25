@@ -4,6 +4,77 @@ let selectedRow = null;
 let updateInterval = null;
 let searchQuery = '';
 
+// Helper function to format datetime as DD/MM HH:MM
+function formatDateTimeDisplay(datetimeString) {
+   if (!datetimeString) return '';
+   try {
+      const date = new Date(datetimeString);
+      if (isNaN(date.getTime())) return datetimeString;
+      
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${day}/${month} ${hours}:${minutes}`;
+   } catch (e) {
+      return datetimeString;
+   }
+}
+
+// Helper function to parse user-entered date input
+function parseUserDateInput(input) {
+   if (!input) return '';
+   
+   input = input.trim();
+   
+   // Try to match various formats:
+   // DD/MM HH:MM, DD/MM HHMM, DD/MM HH MM
+   const patterns = [
+      // DD/MM HH:MM or DD/MM/YY HH:MM or DD/MM/YYYY HH:MM
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):(\d{2})$/,
+      // DD/MM HHMM (no colon or space)
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{2})(\d{2})$/,
+      // DD/MM HH MM (space instead of colon)
+      /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2})\s+(\d{2})$/,
+   ];
+   
+   for (const pattern of patterns) {
+      const match = input.match(pattern);
+      if (match) {
+         const day = match[1].padStart(2, '0');
+         const month = match[2].padStart(2, '0');
+         let year = match[3] || new Date().getFullYear().toString();
+         if (year.length === 2) year = '20' + year;
+         const hours = match[4].padStart(2, '0');
+         const minutes = match[5].padStart(2, '0');
+         
+         // Validate values
+         if (parseInt(month) > 12 || parseInt(day) > 31 || parseInt(hours) > 23 || parseInt(minutes) > 59) {
+            return null;
+         }
+         
+         return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+   }
+   
+   return null;
+}
+
+// Helper function to parse Excel date serial numbers
+function parseExcelDate(excelDate) {
+   if (typeof excelDate === 'number') {
+      // Excel date serial number (days since 1900-01-01)
+      const date = new Date((excelDate - 25569) * 86400 * 1000);
+      return date;
+   } else if (excelDate instanceof Date) {
+      return excelDate;
+   } else if (typeof excelDate === 'string') {
+      return new Date(excelDate);
+   }
+   return null;
+}
+
 // Ports categorized by region with timezones
 const PORT_CATEGORIES = {
    'Panama': {
@@ -270,148 +341,135 @@ function setupEventListeners() {
    };
 
    safeAddListener('import-btn', 'click', importExcel);
+   safeAddListener('import-json-btn', 'click', importJSON);
    safeAddListener('export-btn', 'click', exportExcel);
+   safeAddListener('add-row-btn', 'click', addNewRow);
    safeAddListener('copy-k9-btn', 'click', () => copyVessels('K9'));
    safeAddListener('copy-uw-btn', 'click', () => copyVessels('U/W'));
    safeAddListener('copy-brazil-btn', 'click', copyBrazilVessels);
-   safeAddListener('add-row-btn', 'click', addNewRow);
-   //safeAddListener('clear-all-btn', 'click', clearAllVessels);
+   safeAddListener('search-input', 'input', handleSearch);
+   safeAddListener('clear-search-btn', 'click', clearSearch);
 
-   // Search functionality
-   const searchInput = document.getElementById('search-input');
-   const clearSearchBtn = document.getElementById('clear-search-btn');
-
-   if (searchInput && clearSearchBtn) {
-      searchInput.addEventListener('input', (e) => {
-         searchQuery = e.target.value.toLowerCase();
-         clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
-         renderVessels();
-      });
-
-      clearSearchBtn.addEventListener('click', () => {
-         searchInput.value = '';
-         searchQuery = '';
-         clearSearchBtn.style.display = 'none';
-         renderVessels();
-      });
-   }
-
-   document.addEventListener('click', hideContextMenu);
+   document.addEventListener('click', (e) => {
+      if (!e.target.closest('#context-menu')) hideContextMenu();
+   });
    document.addEventListener('keydown', handleKeyboardShortcuts);
 }
 
-// Start countdown updates
+// Search functionality
+function handleSearch(e) {
+   searchQuery = e.target.value.trim();
+   const clearBtn = document.getElementById('clear-search-btn');
+   if (clearBtn) {
+      clearBtn.style.display = searchQuery ? 'block' : 'none';
+   }
+   renderVessels();
+}
+
+function clearSearch() {
+   const searchInput = document.getElementById('search-input');
+   const clearBtn = document.getElementById('clear-search-btn');
+   if (searchInput) searchInput.value = '';
+   if (clearBtn) clearBtn.style.display = 'none';
+   searchQuery = '';
+   renderVessels();
+}
+
+// Calculate time left until ETD
+function calculateTimeLeft(etdStr, port) {
+   if (!etdStr) return null;
+
+   try {
+      const etdDate = new Date(etdStr);
+      if (isNaN(etdDate.getTime())) return null;
+
+      const now = new Date();
+      const nowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+         now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+
+      // Get port timezone offset
+      const portOffset = getPortTimezoneOffset(port);
+
+      // Convert port local time to UTC for comparison
+      const etdUTC = Date.UTC(etdDate.getFullYear(), etdDate.getMonth(), etdDate.getDate(),
+         etdDate.getHours() - portOffset, etdDate.getMinutes());
+
+      const diff = etdUTC - nowUTC;
+
+      if (diff < 0) {
+         const absDiff = Math.abs(diff);
+         const hours = Math.floor(absDiff / (1000 * 60 * 60));
+         const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+         return {
+            text: `${hours}h ${minutes}m overdue`,
+            hours,
+            minutes,
+            overdue: true
+         };
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      let text = '';
+      if (days > 0) text += `${days}d `;
+      text += `${hours}h ${minutes}m`;
+
+      return {
+         text,
+         days,
+         hours,
+         minutes,
+         overdue: false
+      };
+   } catch (e) {
+      console.error('Error calculating time left:', e);
+      return null;
+   }
+}
+
+// Auto-update countdowns
 function startCountdownUpdates() {
    if (updateInterval) clearInterval(updateInterval);
    updateInterval = setInterval(() => {
-      updateCountdowns();
-   }, 1000);
-}
-
-function updateCountdowns() {
-   vessels.forEach(vessel => {
-      if (vessel.etd) {
-         vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
-      }
-   });
-   // Update only the time left cells without re-rendering entire table
-   vessels.forEach(vessel => {
-      const row = document.querySelector(`tr[data-id="${vessel.id}"]`);
-      if (row && vessel.timeLeft) {
-         const timeCell = row.querySelector('.time-left-cell');
-         if (timeCell) {
-            timeCell.innerHTML = `<span class="${vessel.timeLeft.overdue ? 'overdue' : 'countdown'}">${vessel.timeLeft.text}</span>`;
+      vessels.forEach(v => {
+         if (v.etd) {
+            v.timeLeft = calculateTimeLeft(v.etd, v.port);
          }
-      }
-   });
-}
-
-function calculateTimeLeft(etdString, port) {
-   if (!etdString) return null;
-
-   // Split the datetime string
-   const parts = etdString.split('T');
-   if (parts.length !== 2) return null;
-
-   const dateParts = parts[0].split('-');
-   const timeParts = parts[1].split(':');
-
-   // Create date in UTC, then adjust for port timezone
-   const year = parseInt(dateParts[0]);
-   const month = parseInt(dateParts[1]) - 1;
-   const day = parseInt(dateParts[2]);
-   const hour = parseInt(timeParts[0]);
-   const minute = parseInt(timeParts[1]);
-   const etdAsUTC = Date.UTC(year, month, day, hour, minute, 0);
-   const portOffset = getPortTimezoneOffset(port);
-   const etdUTC = etdAsUTC - (portOffset * 60 * 60 * 1000);
-
-   // Get current UTC time
-   const nowUTC = Date.now();
-
-   // Calculate difference
-   const diff = etdUTC - nowUTC;
-
-   if (diff < 0) {
-      const absDiff = Math.abs(diff);
-      const hours = Math.floor(absDiff / (1000 * 60 * 60));
-      const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
-      return {
-         overdue: true,
-         hours,
-         minutes,
-         text: `Overdue ${hours}h ${minutes}m`,
-         portOffset: portOffset
-      };
-   }
-
-   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-   let text = '';
-   if (days > 0) text += `${days}d `;
-   text += `${hours}h ${minutes}m`;
-
-   return {
-      overdue: false,
-      days,
-      hours,
-      minutes,
-      text,
-      portOffset: portOffset
-   };
+      });
+      renderVessels();
+   }, 60000); // Update every minute
 }
 
 // Add new row
 function addNewRow() {
    const newVessel = {
       id: Date.now(),
-      vesselName: '',
+      vesselName: 'NEW VESSEL',
       port: '',
       nextPort: '',
-      inspectionType: 'None',
+      inspectionType: 'Both',
+      etb: '',
       etd: '',
       vesselPosition: '',
       status: 'Pending',
       notes: '',
       timeLeft: null
    };
-
-   vessels.push(newVessel);
+   vessels.unshift(newVessel);
    renderVessels();
    saveData();
 
    setTimeout(() => {
-      const lastRow = document.querySelector(`tr[data-id="${newVessel.id}"]`);
-      if (lastRow) {
-         const vesselInput = lastRow.querySelector('.cell-content[data-field="vesselName"]');
-         if (vesselInput) vesselInput.focus();
+      const firstInput = document.querySelector(`input[data-vessel-id="${newVessel.id}"]`);
+      if (firstInput) {
+         firstInput.select();
+         firstInput.focus();
       }
    }, 100);
 }
 
-// Render vessels with categorization
 function renderVessels() {
    const tbody = document.getElementById('vessel-tbody');
    tbody.innerHTML = '';
@@ -422,7 +480,7 @@ function renderVessels() {
    if (vessels.length === 0) {
       tbody.innerHTML = `
             <tr>
-                <td colspan="11" class="empty-state">
+                <td colspan="12" class="empty-state">
                     <h3>No vessels added yet</h3>
                     <p>Click "Import Excel" or "Add Row" to start</p>
                 </td>
@@ -476,7 +534,7 @@ function renderVessels() {
       if (sortedVessels.length === 0) {
          tbody.innerHTML = `
                 <tr>
-                    <td colspan="11" class="empty-state">
+                    <td colspan="12" class="empty-state">
                         <h3>No vessels found</h3>
                         <p>No vessels match "${searchQuery}". Try a different search term.</p>
                     </td>
@@ -521,7 +579,7 @@ function renderVessels() {
          const headerRow = document.createElement('tr');
          headerRow.className = 'category-header';
          headerRow.innerHTML = `
-                <td colspan="11" class="category-title">
+                <td colspan="12" class="category-title">
                     <strong>${category}</strong> (${categoryVessels.length} vessel${categoryVessels.length > 1 ? 's' : ''})
                 </td>
             `;
@@ -610,10 +668,40 @@ function createTableRow(vessel, index) {
       }
    }
 
-   // Row number
+   // Row number (clickable to copy vessel info)
    const numCell = document.createElement('td');
-   numCell.className = 'cell-number';
+   numCell.className = 'cell-number clickable-row-number';
    numCell.textContent = index;
+   numCell.title = 'Click to copy vessel name, ETB, and ETD';
+   
+   // Add click handler to copy vessel info
+   numCell.addEventListener('click', () => {
+      const vesselName = vessel.vesselName || '';
+      const etb = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+      const etd = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+      
+      let copyText = vesselName;
+      if (etb) {
+         copyText += ` - ETB ${etb}`;
+      }
+      if (etd) {
+         copyText += ` - ETD ${etd}`;
+      }
+      
+      navigator.clipboard.writeText(copyText).then(() => {
+         // Visual feedback - flash the row number
+         numCell.classList.add('copied-flash');
+         setTimeout(() => {
+            numCell.classList.remove('copied-flash');
+         }, 500);
+         
+         showNotification(`Copied: ${copyText}`);
+      }).catch(err => {
+         console.error('Failed to copy:', err);
+         alert('Failed to copy to clipboard');
+      });
+   });
+   
    row.appendChild(numCell);
 
    // Vessel Name with link
@@ -682,9 +770,89 @@ function createTableRow(vessel, index) {
    inspectionCell.appendChild(inspectionSelect);
    row.appendChild(inspectionCell);
 
-   // ETD
+   // ETB (editable text input)
+   const etbCell = document.createElement('td');
+   const etbInput = document.createElement('input');
+   etbInput.type = 'text';
+   etbInput.className = 'cell-content date-input';
+   etbInput.placeholder = 'DD/MM HH:MM';
+   etbInput.value = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+   etbInput.dataset.field = 'etb';
+   etbInput.dataset.vesselId = vessel.id;
+   
+   // Parse on blur to convert to ISO format
+   etbInput.addEventListener('blur', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         // Try to parse the input
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etb', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         } else {
+            // Keep the original value if parsing fails
+            e.target.value = vessel.etb ? formatDateTimeDisplay(vessel.etb) : '';
+         }
+      } else {
+         updateVesselField(vessel.id, 'etb', '');
+      }
+   });
+   
+   // Update on change as well
+   etbInput.addEventListener('change', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etb', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         }
+      }
+   });
+   
+   etbCell.appendChild(etbInput);
+   row.appendChild(etbCell);
+
+   // ETD (editable text input)
    const etdCell = document.createElement('td');
-   const etdInput = createEditableCell('etd', vessel.etd, 'datetime-local', vessel.id);
+   const etdInput = document.createElement('input');
+   etdInput.type = 'text';
+   etdInput.className = 'cell-content date-input';
+   etdInput.placeholder = 'DD/MM HH:MM';
+   etdInput.value = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+   etdInput.dataset.field = 'etd';
+   etdInput.dataset.vesselId = vessel.id;
+   
+   // Parse on blur to convert to ISO format
+   etdInput.addEventListener('blur', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         // Try to parse the input
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etd', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         } else {
+            // Keep the original value if parsing fails
+            e.target.value = vessel.etd ? formatDateTimeDisplay(vessel.etd) : '';
+         }
+      } else {
+         updateVesselField(vessel.id, 'etd', '');
+      }
+   });
+   
+   // Update on change as well
+   etdInput.addEventListener('change', (e) => {
+      const inputValue = e.target.value.trim();
+      if (inputValue) {
+         const parsed = parseUserDateInput(inputValue);
+         if (parsed) {
+            updateVesselField(vessel.id, 'etd', parsed);
+            e.target.value = formatDateTimeDisplay(parsed);
+         }
+      }
+   });
+   
    etdCell.appendChild(etdInput);
    row.appendChild(etdCell);
 
@@ -895,6 +1063,14 @@ function copyVessels(inspectionType) {
    const filtered = vessels.filter(v => {
       const matchesType = v.inspectionType === inspectionType || v.inspectionType === 'Both';
       const isPanama = ['BALBOA', 'CRISTOBAL', 'COLON', 'RODMAN', 'MANZANILLO (PANAMA)', 'MANZANILLO', 'COLON ANCHORAGE', 'BALB ANCH', 'CRISTOBAL ANCHORAGE', 'BALBOA ANCHORAGE', 'BALB ANCH / PAN CAN', 'COLON INNER ANCHORAGE', 'CRISTOBAL ANCH'].includes(v.port);
+      
+      // Special handling for BALB ANCH / PAN CAN: include if has notes but no ETB/ETD
+      if (v.port === 'BALB ANCH / PAN CAN') {
+         const hasNotes = v.notes && v.notes.trim().length > 0;
+         const hasNoETBETD = (!v.etb || v.etb.trim().length === 0) && (!v.etd || v.etd.trim().length === 0);
+         return matchesType && hasNotes && hasNoETBETD;
+      }
+      
       return matchesType && isPanama;
    });
 
@@ -944,70 +1120,21 @@ function copyVessels(inspectionType) {
       vessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
 
-         // Parse ETB and ETD from notes or create from ETD field
+         // Parse ETB and ETD to DD/MM HHMM format
          let etbText = '';
          let etdText = '';
          let nextPortText = '';
 
-         // Try to parse from notes first (format: "ETB 03/01 12:00 – ETD 04/01 15:15 (EU)")
-         if (v.notes) {
-            const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const nextPortMatch = v.notes.match(/\(([A-Z\s]+)\)/);
-
-            if (etbMatch) {
-               etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
-            }
-            if (etdMatch) {
-               etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
-            }
-            if (nextPortMatch) {
-               // Keep the continent code as-is (EU, USA, ASIA, or specific port)
-               const nextPortValue = nextPortMatch[1].trim();
-               
-               // Skip if it's just a dash or empty
-               if (nextPortValue === '-' || nextPortValue === '') {
-                  nextPortText = '';
-               }
-               // If it's already a continent code, keep it
-               else if (['EU', 'USA', 'ASIA', 'EUROPE', 'AMERICA'].includes(nextPortValue)) {
-                  nextPortText = ` (${nextPortValue})`;
-               } else {
-                  // Try to convert specific port to continent code
-                  const nextPortUpper = nextPortValue.toUpperCase();
-                  let continentCode = '';
-                  
-                  const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
-                  const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
-                  const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
-                  
-                  if (europePorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'EU';
-                  } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'USA';
-                  } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'ASIA';
-                  } else {
-                     continentCode = nextPortValue; // Keep original if no match
-                  }
-                  
-                  nextPortText = ` (${continentCode})`;
-               }
-            }
+         if (v.etb) {
+            etbText = `ETB ${formatDateTimeDisplay(v.etb)}`;
          }
 
-         // If no notes parsing, use ETD field
-         if (!etdText && v.etd) {
-            const etdDate = new Date(v.etd);
-            const day = String(etdDate.getDate()).padStart(2, '0');
-            const month = String(etdDate.getMonth() + 1).padStart(2, '0');
-            const hours = String(etdDate.getHours()).padStart(2, '0');
-            const minutes = String(etdDate.getMinutes()).padStart(2, '0');
-            etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
+         if (v.etd) {
+            etdText = `ETD ${formatDateTimeDisplay(v.etd)}`;
          }
 
          // Use nextPort field if available and convert to continent/region
-         if (!nextPortText && v.nextPort) {
+         if (v.nextPort) {
             const nextPortUpper = v.nextPort.toUpperCase();
             
             // Skip if it's just a dash
@@ -1017,8 +1144,8 @@ function copyVessels(inspectionType) {
                let continentCode = '';
                
                // Map ports to continent codes
-               const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
-               const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
+               const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON', 'MOIN'];
+               const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE', 'USA'];
                const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
                
                if (europePorts.some(port => nextPortUpper.includes(port))) {
@@ -1039,12 +1166,17 @@ function copyVessels(inspectionType) {
          // Build the vessel line
          let vesselLine = `* ${vesselName}`;
          if (etbText) {
-            vesselLine += ` - ${etbText}`;
+            vesselLine += ` – ${etbText}`;
          }
          if (etdText) {
-            vesselLine += ` – ${etdText}`;
+            vesselLine += ` - ${etdText}`;
          }
          vesselLine += nextPortText;
+         
+         // For BALB ANCH / PAN CAN vessels without ETB/ETD, add the notes
+         if (v.port === 'BALB ANCH / PAN CAN' && !v.etb && !v.etd && v.notes) {
+            vesselLine += ` - ${v.notes}`;
+         }
 
          output.push(vesselLine);
       });
@@ -1114,70 +1246,21 @@ function copyBrazilVessels() {
       vessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
 
-         // Parse ETB and ETD from notes or create from ETD field
+         // Parse ETB and ETD to DD/MM HHMM format
          let etbText = '';
          let etdText = '';
          let nextPortText = '';
 
-         // Try to parse from notes first
-         if (v.notes) {
-            const etbMatch = v.notes.match(/ETB\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const etdMatch = v.notes.match(/ETD\s+(\d{2}\/\d{2})\s+(\d{2}:\d{2})/i);
-            const nextPortMatch = v.notes.match(/\(([A-Z\s]+)\)/);
-
-            if (etbMatch) {
-               etbText = `ETB ${etbMatch[1]} ${etbMatch[2]}`;
-            }
-            if (etdMatch) {
-               etdText = `ETD ${etdMatch[1]} ${etdMatch[2]}`;
-            }
-            if (nextPortMatch) {
-               // Keep the continent code as-is (EU, USA, ASIA, or specific port)
-               const nextPortValue = nextPortMatch[1].trim();
-               
-               // Skip if it's just a dash or empty
-               if (nextPortValue === '-' || nextPortValue === '') {
-                  nextPortText = '';
-               }
-               // If it's already a continent code, keep it
-               else if (['EU', 'USA', 'ASIA', 'EUROPE', 'AMERICA'].includes(nextPortValue)) {
-                  nextPortText = ` (${nextPortValue})`;
-               } else {
-                  // Try to convert specific port to continent code
-                  const nextPortUpper = nextPortValue.toUpperCase();
-                  let continentCode = '';
-                  
-                  const europePorts = ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', 'FELIXSTOWE', 'SOUTHAMPTON', 'LONDON'];
-                  const usaPorts = ['NEW YORK', 'NORFOLK', 'SAVANNAH', 'CHARLESTON', 'MIAMI', 'HOUSTON', 'LOS ANGELES', 'LONG BEACH', 'OAKLAND', 'SEATTLE'];
-                  const asiaPorts = ['SINGAPORE', 'HONG KONG', 'SHANGHAI', 'NINGBO', 'BUSAN', 'TOKYO', 'YOKOHAMA', 'KAOHSIUNG', 'LAEM CHABANG', 'PORT KLANG', 'TANJUNG PELEPAS', 'COLOMBO', 'JEBEL ALI', 'DUBAI'];
-                  
-                  if (europePorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'EU';
-                  } else if (usaPorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'USA';
-                  } else if (asiaPorts.some(port => nextPortUpper.includes(port))) {
-                     continentCode = 'ASIA';
-                  } else {
-                     continentCode = nextPortValue; // Keep original if no match
-                  }
-                  
-                  nextPortText = ` (${continentCode})`;
-               }
-            }
+         if (v.etb) {
+            etbText = `ETB ${formatDateTimeDisplay(v.etb)}`;
          }
 
-         // If no notes parsing, use ETD field
-         if (!etdText && v.etd) {
-            const etdDate = new Date(v.etd);
-            const day = String(etdDate.getDate()).padStart(2, '0');
-            const month = String(etdDate.getMonth() + 1).padStart(2, '0');
-            const hours = String(etdDate.getHours()).padStart(2, '0');
-            const minutes = String(etdDate.getMinutes()).padStart(2, '0');
-            etdText = `ETD ${day}/${month} ${hours}:${minutes}`;
+         if (v.etd) {
+            etdText = `ETD ${formatDateTimeDisplay(v.etd)}`;
          }
 
          // Use nextPort field if available and convert to continent/region
-         if (!nextPortText && v.nextPort) {
+         if (v.nextPort) {
             const nextPortUpper = v.nextPort.toUpperCase();
             
             // Skip if it's just a dash
@@ -1209,10 +1292,10 @@ function copyBrazilVessels() {
          // Build the vessel line
          let vesselLine = `* ${vesselName}`;
          if (etbText) {
-            vesselLine += ` - ${etbText}`;
+            vesselLine += ` – ${etbText}`;
          }
          if (etdText) {
-            vesselLine += ` – ${etdText}`;
+            vesselLine += ` - ${etdText}`;
          }
          vesselLine += nextPortText;
 
@@ -1248,150 +1331,329 @@ function parseETDToDatetime(etdString) {
    return `${year}-${month}-${day}T${timePart}`;
 }
 
-// Clear all
-function clearAllVessels() {
-   if (vessels.length === 0) return;
-   if (confirm(`Delete all ${vessels.length} vessels?`)) {
-      vessels = [];
-      renderVessels();
-      saveData();
-      showNotification('All vessels cleared!');
+// IMPROVED: Better ETD text parsing for various formats
+function parseETDText(text) {
+   if (!text || typeof text !== 'string') return '';
+   
+   text = text.trim();
+   const currentYear = new Date().getFullYear();
+   
+   // Pattern 1: "ETD DD/MM HH:MM (REGION)" or "ETD DD/MM HH:MM"
+   const match1 = text.match(/ETD\s+(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/i);
+   if (match1) {
+      const day = match1[1].padStart(2, '0');
+      const month = match1[2].padStart(2, '0');
+      const hours = match1[3].padStart(2, '0');
+      const minutes = match1[4].padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
    }
+   
+   // Pattern 2: "ETD – HH:MM/DDth" or "ETD – HH:MM/DD"
+   const match2 = text.match(/ETD\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})/i);
+   if (match2) {
+      const hours = match2[1].padStart(2, '0');
+      const minutes = match2[2].padStart(2, '0');
+      const day = match2[3].padStart(2, '0');
+      const month = String(new Date().getMonth() + 1).padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 3: "ETB DD/HHMM ETS DD/HHMM" or "ETB DD/HHMM ETD DD/HHMM"
+   const match3 = text.match(/ET[SD]\s+(\d{1,2})\/(\d{2})(\d{2})/i);
+   if (match3) {
+      const day = match3[1].padStart(2, '0');
+      const hours = match3[2];
+      const minutes = match3[3];
+      const month = String(new Date().getMonth() + 1).padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 4: "ETA DD/MM" or "eta: DD/MM HH:MM"
+   const match4 = text.match(/ETA[:\s]+(\d{1,2})\/(\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?/i);
+   if (match4) {
+      const day = match4[1].padStart(2, '0');
+      const month = match4[2].padStart(2, '0');
+      const hours = match4[3] ? match4[3].padStart(2, '0') : '00';
+      const minutes = match4[4] ? match4[4] : '00';
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 5: "ETB DD/MM HH:MM" (similar to ETD but for ETB)
+   const match5 = text.match(/ETB\s+(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/i);
+   if (match5) {
+      const day = match5[1].padStart(2, '0');
+      const month = match5[2].padStart(2, '0');
+      const hours = match5[3].padStart(2, '0');
+      const minutes = match5[4].padStart(2, '0');
+      return `${currentYear}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   return '';
 }
 
-// Manual cleanup - removes vessels without name, port, or ETD
-function manualCleanup() {
-   if (vessels.length === 0) {
-      alert('No vessels to clean up.');
+// Import JSON - simpler and more reliable than Excel
+function importJSON() {
+   const input = document.getElementById('json-file-input');
+   if (!input) {
+      alert('File input element not found');
       return;
    }
 
-   const removedCount = validateAndCleanVessels();
-
-   if (removedCount > 0) {
-      saveData();
-      renderVessels();
-      showNotification(`Removed ${removedCount} incomplete vessel(s)!`);
-   } else {
-      showNotification('All vessels are valid - nothing to clean up!');
-   }
-}
-
-// Import/Export Excel
-function importExcel() {
-   const input = document.getElementById('excel-file-input');
    input.click();
-
    input.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
+      reader.onerror = (error) => {
+         console.error('FileReader error:', error);
+         alert('Error reading JSON file. Please try again.');
+      };
+
       reader.onload = (event) => {
          try {
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, {
-               type: 'array',
-               cellDates: true
+            const jsonData = JSON.parse(event.target.result);
+            
+            if (!Array.isArray(jsonData)) {
+               alert('Invalid JSON format. Expected an array of vessels.');
+               return;
+            }
+
+            console.log(`Loaded ${jsonData.length} vessels from JSON`);
+
+            // Process each vessel and calculate time left
+            const importedVessels = jsonData.map(v => {
+               const vessel = {
+                  id: Date.now() + Math.random(),
+                  vesselName: v.vesselName || '',
+                  port: v.port || '',
+                  nextPort: v.nextPort || '',
+                  inspectionType: v.inspectionType || 'Both',
+                  etb: v.etb || '',
+                  etd: v.etd || '',
+                  vesselPosition: v.vesselPosition || '',
+                  status: v.status || 'Pending',
+                  notes: v.notes || '',
+                  timeLeft: null
+               };
+
+               // Calculate time left
+               if (vessel.etd) {
+                  vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
+               }
+
+               return vessel;
             });
 
-            let allVessels = [];
+            if (confirm(`Import ${importedVessels.length} vessels from JSON?\n\nThis will replace all current data.`)) {
+               vessels = importedVessels;
+               renderVessels();
+               saveData();
+               showNotification(`Successfully imported ${importedVessels.length} vessels!`);
+            }
+         } catch (err) {
+            alert('Error parsing JSON file:\n' + err.message);
+            console.error('JSON import error:', err);
+         }
+      };
 
-            // Process all sheets
-            workbook.SheetNames.forEach(sheetName => {
-               console.log(`Processing sheet: ${sheetName}`);
-               const sheet = workbook.Sheets[sheetName];
+      reader.readAsText(file);
+      input.value = '';
+   };
+}
 
-               // Get all data as array of arrays (raw format)
-               const rawData = XLSX.utils.sheet_to_json(sheet, {
-                  header: 1,
-                  defval: ''
-               });
+// Import Excel
+function importExcel() {
+   const input = document.getElementById('excel-file-input');
+   if (!input) {
+      alert('File input element not found');
+      return;
+   }
 
-               console.log(`Total rows in sheet: ${rawData.length}`);
+   input.click();
+   input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Check file size (limit to 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+         alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Please use a file smaller than 5MB.`);
+         return;
+      }
+      
+      console.log(`Loading file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
 
-               // Find the header row (contains "Name" or "Vessel Name")
-               let headerIndex = -1;
-               let headers = [];
-               let isOwnFormat = false;
+      const reader = new FileReader();
+      reader.onerror = (error) => {
+         console.error('FileReader error:', error);
+         alert('Error reading file. Please try again.');
+      };
+      
+      reader.onload = (event) => {
+         try {
+            console.log('File loaded, parsing Excel...');
+            
+            // Use the most memory-efficient settings
+            const workbook = XLSX.read(event.target.result, {
+               type: 'array',
+               cellDates: true,
+               cellFormula: false,
+               cellStyles: false,
+               sheetStubs: false,
+               bookDeps: false,
+               bookSheets: false,
+               bookProps: false,
+               bookVBA: false
+            });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Use sheet_to_json with header: 1 to get array of arrays
+            const rawData = XLSX.utils.sheet_to_json(firstSheet, {
+               header: 1,
+               raw: false,
+               defval: '',
+               blankrows: false
+            });
 
-               for (let i = 0; i < rawData.length; i++) {
-                  const row = rawData[i];
-                  // Check for our own export format
-                  if (row[1] === 'Vessel Name') {
-                     headerIndex = i;
-                     headers = row;
-                     isOwnFormat = true;
-                     console.log(`Found our export format header at row ${i}:`, headers);
-                     break;
+            console.log('Raw Excel Data (first 3 rows):', rawData.slice(0, 3));
+            console.log('First row type check:', rawData[0], 'Is array?', Array.isArray(rawData[0]));
+            if (rawData[0]) {
+                console.log('First cell of first row:', rawData[0][0], 'Type:', typeof rawData[0][0]);
+            }
+            
+            // Clean up the data - the mini library sometimes returns nested structures
+            const cleanedData = rawData.map(row => {
+               // If row is not an array, skip it
+               if (!Array.isArray(row)) {
+                  console.warn('Skipping non-array row:', row);
+                  return [];
+               }
+               
+               // Clean each cell in the row
+               return row.map(cell => {
+                  // Handle null/undefined
+                  if (cell === null || cell === undefined) return '';
+                  
+                  // If it's already a string, return it
+                  if (typeof cell === 'string') return cell;
+                  
+                  // If it's a number, convert to string
+                  if (typeof cell === 'number') return String(cell);
+                  
+                  // If it's a Date, keep it as is
+                  if (cell instanceof Date) return cell;
+                  
+                  // If it's an array or object (shouldn't happen but mini library quirk)
+                  if (typeof cell === 'object') {
+                     console.warn('Found object in cell, converting:', cell);
+                     return JSON.stringify(cell);
                   }
-                  // Check for Monday.com format
-                  else if (row[0] === 'Name') {
-                     headerIndex = i;
-                     headers = row;
-                     isOwnFormat = false;
-                     console.log(`Found Monday.com format header at row ${i}:`, headers);
-                     break;
+                  
+                  // Default: convert to string
+                  return String(cell);
+               });
+            }).filter(row => {
+               // Remove completely empty rows
+               return row.length > 0 && row.some(cell => cell !== '' && cell !== null);
+            });
+            
+            console.log('Cleaned data sample:', cleanedData.slice(0, 3));
+            
+            console.log(`Cleaned data: ${cleanedData.length} rows (from ${rawData.length})`);
+
+            const allVessels = [];
+            
+            // Find ALL header rows (there may be multiple sections)
+            const headerIndices = [];
+            cleanedData.forEach((row, idx) => {
+               if (row && row.length > 0) {
+                  // Check if any cell in this row is exactly "Name" (case-insensitive)
+                  const hasNameHeader = row.some(cell => {
+                     if (cell && typeof cell === 'string') {
+                        const cellValue = cell.trim().toUpperCase();
+                        return cellValue === 'NAME' || cellValue === 'VESSEL NAME';
+                     }
+                     return false;
+                  });
+                  
+                  if (hasNameHeader) {
+                     headerIndices.push(idx);
+                     console.log('Found header at row', idx, 'Row content:', row.slice(0, 5));
                   }
                }
+            });
 
-               if (headerIndex === -1) {
-                  console.log('No header row found in sheet');
-                  return;
-               }
-
-               // Find column indices based on format
-               let nameCol, dateCol, statusCol, vesselPosCol, portCol, nextPortCol, updatedEtdCol, textCol, inspectionTypeCol;
-
-               if (isOwnFormat) {
-                  // Our export format
-                  nameCol = headers.indexOf('Vessel Name');
-                  portCol = headers.indexOf('Port');
-                  nextPortCol = headers.indexOf('Next Port');
-                  inspectionTypeCol = headers.indexOf('Inspection Type');
-                  dateCol = headers.indexOf('ETD');
-                  vesselPosCol = headers.indexOf('Vessel Position');
-                  statusCol = headers.indexOf('Status');
-                  textCol = headers.indexOf('Notes');
-                  updatedEtdCol = -1; // Not used in our format
-               } else {
-                  // Monday.com format
-                  nameCol = headers.indexOf('Name');
-                  dateCol = headers.indexOf('Date');
-                  statusCol = headers.indexOf('Status');
-                  vesselPosCol = headers.indexOf('Vessel Position');
-                  portCol = headers.indexOf('Port of Inspection');
-                  nextPortCol = headers.indexOf('Next port');
-                  updatedEtdCol = headers.indexOf('Updated ETD from Agent');
-                  textCol = headers.indexOf('Text');
-                  inspectionTypeCol = -1; // Not in Monday.com format
-               }
-
-               console.log('Column indices:', {
-                  format: isOwnFormat ? 'Our Export' : 'Monday.com',
-                  name: nameCol,
-                  port: portCol,
-                  nextPort: nextPortCol,
-                  inspectionType: inspectionTypeCol,
-                  date: dateCol,
-                  vesselPos: vesselPosCol,
-                  status: statusCol,
-                  updatedEtd: updatedEtdCol,
-                  text: textCol
+            if (headerIndices.length === 0) {
+               // Fallback: look for any row with "Name" in it
+               cleanedData.forEach((row, idx) => {
+                  if (row && row.length > 0) {
+                     const hasName = row.some(cell => {
+                        if (cell && typeof cell === 'string') {
+                           return cell.toUpperCase().includes('NAME');
+                        }
+                        return false;
+                     });
+                     if (hasName && idx < 10) { // Only check first 10 rows
+                        headerIndices.push(idx);
+                        console.log('Found potential header at row', idx);
+                     }
+                  }
                });
+            }
 
-               // Process data rows (after header)
-               for (let i = headerIndex + 1; i < rawData.length; i++) {
-                  const row = rawData[i];
+            if (headerIndices.length === 0) {
+               console.error('Could not find header! Showing first 5 rows for debugging:');
+               cleanedData.slice(0, 5).forEach((row, idx) => {
+                  console.log(`Row ${idx}:`, row);
+               });
+               alert('Could not find header row with "Name" column.\n\n' +
+                     'First row shows: ' + (cleanedData[0] ? JSON.stringify(cleanedData[0].slice(0, 3)) : 'empty') +  
+                     '\n\nTip: If file is in Protected View in Excel, click "Enable Editing" and save it first.');
+               return;
+            }
+
+            console.log(`Found ${headerIndices.length} header section(s)`);
+
+            // Process each section
+            headerIndices.forEach((headerIndex, sectionNum) => {
+               const headers = cleanedData[headerIndex].map(h => h ? h.trim() : '');
+               console.log(`Section ${sectionNum + 1} headers:`, headers);
+
+               // Get column indices
+               const nameCol = headers.indexOf('Name');
+               const portCol = headers.indexOf('Port of Inspection');
+               const nextPortCol = headers.indexOf('Next port');
+               const inspectionTypeCol = -1;  // Monday.com doesn't have this
+               const dateCol = headers.indexOf('Date');
+               const vesselPosCol = headers.indexOf('Vessel Position');
+               const statusCol = headers.indexOf('Status');
+               const textCol = headers.indexOf('Text');
+               const updatedEtdCol = headers.indexOf('Updated ETD from Agent');
+               const etbCol = -1;  // Monday.com doesn't have separate ETB column
+
+               // Find the end of this section (next header or end of file)
+               const nextHeaderIndex = headerIndices[sectionNum + 1];
+               const endRow = nextHeaderIndex ? nextHeaderIndex - 1 : cleanedData.length;
+
+               console.log(`Processing section ${sectionNum + 1}: rows ${headerIndex + 1} to ${endRow}`);
+
+               // Process data rows in this section
+               for (let i = headerIndex + 1; i < endRow; i++) {
+                  const row = cleanedData[i];
+                  if (!row || row.length === 0) continue;
+                  
                   const vesselName = row[nameCol];
 
-                  // Skip empty rows or section headers
+                  // Skip empty rows, section headers, or date ranges
                   if (!vesselName ||
                      typeof vesselName !== 'string' ||
                      vesselName.length < 2 ||
                      vesselName.includes('VESSELS SAILING') ||
                      vesselName.includes('UPCOMING') ||
-                     vesselName.includes('UWI & K9')) {
+                     vesselName.includes('MONITOR') ||
+                     vesselName.includes('UWI & K9') ||
+                     (vesselName.includes(' to ') && vesselName.includes('-'))) {  // Date ranges
                      continue;
                   }
 
@@ -1400,7 +1662,8 @@ function importExcel() {
                      vesselName: vesselName.toUpperCase().trim(),
                      port: '',
                      nextPort: '',
-                     inspectionType: 'Both', // Default, will be updated if available
+                     inspectionType: 'Both',  // Default
+                     etb: '',
                      etd: '',
                      vesselPosition: '',
                      status: 'Pending',
@@ -1409,90 +1672,70 @@ function importExcel() {
                   };
 
                   // Get port
-                  const port = row[portCol];
-                  if (port && typeof port === 'string') {
-                     vessel.port = port.toUpperCase().trim();
+                  if (portCol >= 0 && row[portCol]) {
+                     const portValue = row[portCol];
+                     vessel.port = String(portValue).toUpperCase().trim();
                   }
 
                   // Get next port
-                  if (nextPortCol >= 0) {
-                     const nextPort = row[nextPortCol];
-                     if (nextPort && typeof nextPort === 'string') {
-                        vessel.nextPort = nextPort.toUpperCase().trim();
-                     }
-                  }
-
-                  // Get inspection type (if available in our export format)
-                  if (inspectionTypeCol >= 0) {
-                     const inspectionType = row[inspectionTypeCol];
-                     if (inspectionType && typeof inspectionType === 'string') {
-                        vessel.inspectionType = inspectionType.trim();
-                     }
+                  if (nextPortCol >= 0 && row[nextPortCol]) {
+                     const nextPortValue = row[nextPortCol];
+                     vessel.nextPort = String(nextPortValue).toUpperCase().trim();
                   }
 
                   // Get vessel position
-                  if (vesselPosCol >= 0) {
-                     const vesselPos = row[vesselPosCol];
-                     if (vesselPos && typeof vesselPos === 'string') {
-                        vessel.vesselPosition = vesselPos.trim();
-                     } else if (vesselPos === null || vesselPos === undefined) {
-                        vessel.vesselPosition = '';
-                     }
+                  if (vesselPosCol >= 0 && row[vesselPosCol]) {
+                     const pos = String(row[vesselPosCol]).trim();
+                     // Map Monday.com positions to our position options
+                     const posUpper = pos.toUpperCase();
+                     if (posUpper.includes('PORT')) vessel.vesselPosition = 'Berthed';
+                     else if (posUpper.includes('ANCH')) vessel.vesselPosition = 'Anchorage';
+                     else if (posUpper.includes('NOT BERTHED')) vessel.vesselPosition = 'Not Berthed Yet';
+                     else vessel.vesselPosition = pos;
                   }
 
                   // Get status
-                  if (statusCol >= 0) {
-                     const statusValue = row[statusCol];
-                     if (statusValue && typeof statusValue === 'string') {
-                        vessel.status = statusValue.trim();
+                  if (statusCol >= 0 && row[statusCol]) {
+                     vessel.status = String(row[statusCol]).trim();
+                  }
+
+                  // Get ETD from "Updated ETD from Agent" column
+                  let etdText = '';
+                  if (updatedEtdCol >= 0 && row[updatedEtdCol]) {
+                     etdText = String(row[updatedEtdCol]).trim();
+                  } else if (dateCol >= 0 && row[dateCol]) {
+                     // Fallback to Date column if Updated ETD is empty
+                     const dateValue = row[dateCol];
+                     if (dateValue instanceof Date || typeof dateValue === 'number') {
+                        vessel.etd = parseAndFormatDateTime(dateValue);
                      }
                   }
 
-                  // Get ETD - priority to "Updated ETD from Agent" for Monday.com, or "ETD" for our format
-                  let etdValue = updatedEtdCol >= 0 ? (row[updatedEtdCol] || row[dateCol]) : row[dateCol];
-
-                  if (etdValue) {
-                     // Handle ISO format from our export (e.g., "2025-12-27T19:00")
-                     if (typeof etdValue === 'string' && etdValue.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
-                        vessel.etd = etdValue;
-                     }
-                     // Handle "ETD DD/MM HH:MM" format from Monday.com
-                     else if (typeof etdValue === 'string') {
-                        // Remove leading dash and spaces
-                        etdValue = etdValue.trim().replace(/^-\s*/, '');
-
-                        const etdMatch = etdValue.match(/ETD\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
-                        if (etdMatch) {
-                           const day = etdMatch[1].padStart(2, '0');
-                           const month = etdMatch[2].padStart(2, '0');
-                           let year = etdMatch[3] || new Date().getFullYear().toString();
-                           if (year.length === 2) year = '20' + year;
-                           const hours = etdMatch[4].padStart(2, '0');
-                           const minutes = etdMatch[5].padStart(2, '0');
-                           vessel.etd = `${year}-${month}-${day}T${hours}:${minutes}`;
-                        }
-                     }
-                     // Handle Date object
-                     else if (etdValue instanceof Date || typeof etdValue === 'object') {
-                        try {
-                           const date = new Date(etdValue);
-                           if (!isNaN(date.getTime())) {
-                              const year = date.getFullYear();
-                              const month = String(date.getMonth() + 1).padStart(2, '0');
-                              const day = String(date.getDate()).padStart(2, '0');
-                              vessel.etd = `${year}-${month}-${day}T00:00`;
-                           }
-                        } catch (e) {
-                           console.error('Date conversion error:', e);
-                        }
+                  // Parse ETD text if we have it
+                  if (etdText) {
+                     // Try to extract both ETB and ETD
+                     const extracted = extractETBandETD(etdText);
+                     if (extracted.etb) vessel.etb = extracted.etb;
+                     if (extracted.etd) vessel.etd = extracted.etd;
+                     
+                     // If extraction didn't work, try simple parsing
+                     if (!vessel.etd) {
+                        vessel.etd = parseETDText(etdText);
                      }
                   }
 
-                  // Get notes from Text/Notes column
-                  if (textCol >= 0) {
-                     const textNotes = row[textCol];
-                     if (textNotes && typeof textNotes === 'string') {
-                        vessel.notes = textNotes.trim();
+                  // Get notes/text
+                  if (textCol >= 0 && row[textCol]) {
+                     vessel.notes = String(row[textCol]).trim();
+                     
+                     // Extract inspection type from notes
+                     const notesUpper = vessel.notes.toUpperCase();
+                     if (notesUpper === 'K9 ONLY' || notesUpper === 'K9') {
+                        vessel.inspectionType = 'K9';
+                     } else if (notesUpper === 'UW ONLY' || notesUpper === 'U/W ONLY' || notesUpper === 'UW') {
+                        vessel.inspectionType = 'U/W';
+                     } else if (notesUpper === 'BOTH' || (notesUpper.includes('K9') && notesUpper.includes('U/W'))) {
+                        vessel.inspectionType = 'Both';
                      }
                   }
 
@@ -1502,14 +1745,14 @@ function importExcel() {
                   }
 
                   allVessels.push(vessel);
-                  console.log('Added vessel:', vessel.vesselName, vessel.port, vessel.etd, vessel.vesselPosition, vessel.status);
+                  console.log('Added vessel:', vessel.vesselName, 'Port:', vessel.port, 'ETB:', vessel.etb, 'ETD:', vessel.etd, 'Type:', vessel.inspectionType);
                }
             });
 
             console.log(`Total vessels imported: ${allVessels.length}`);
 
             if (allVessels.length === 0) {
-               alert('No valid vessel data found in the Excel file.\n\nMake sure the file has:\n- A row with "Name" in the first column\n- Vessel data in rows below the header');
+               alert('No valid vessel data found in the Excel file.');
                return;
             }
 
@@ -1530,6 +1773,134 @@ function importExcel() {
    };
 }
 
+// Helper function to parse and format datetime from Excel
+function parseAndFormatDateTime(value) {
+   if (!value) return '';
+
+   try {
+      // Handle ISO format (already formatted) - both with and without seconds
+      if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
+         return value;
+      }
+
+      // Handle our export format: "DD/MM HH:MM" 
+      if (typeof value === 'string') {
+         value = value.trim();
+         
+         // Match DD/MM HH:MM format (our export format)
+         const displayMatch = value.match(/^(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})$/);
+         if (displayMatch) {
+            const day = displayMatch[1].padStart(2, '0');
+            const month = displayMatch[2].padStart(2, '0');
+            const year = new Date().getFullYear();
+            const hours = displayMatch[3].padStart(2, '0');
+            const minutes = displayMatch[4].padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+         }
+         
+         // Try to match ETD/ETB with various formats
+         value = value.replace(/^-\s*/, '');
+         
+         // Try to match ETD with various formats: "ETD DD/MM HH:MM" or "ETD DD/MM HHMM"
+         const etdMatch = value.match(/ETD\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
+         if (etdMatch) {
+            const day = etdMatch[1].padStart(2, '0');
+            const month = etdMatch[2].padStart(2, '0');
+            let year = etdMatch[3] || new Date().getFullYear().toString();
+            if (year.length === 2) year = '20' + year;
+            const hours = etdMatch[4].padStart(2, '0');
+            const minutes = etdMatch[5].padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+         }
+      }
+
+      // Handle Excel date serial number or Date object
+      const date = parseExcelDate(value);
+      if (date && !isNaN(date.getTime())) {
+         const year = date.getFullYear();
+         const month = String(date.getMonth() + 1).padStart(2, '0');
+         const day = String(date.getDate()).padStart(2, '0');
+         const hours = String(date.getHours()).padStart(2, '0');
+         const minutes = String(date.getMinutes()).padStart(2, '0');
+         return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+   } catch (e) {
+      console.error('Date parsing error:', e, value);
+   }
+
+   return '';
+}
+
+// Helper function to extract ETB and ETD from combined string
+function extractETBandETD(text) {
+   if (!text || typeof text !== 'string') return { etb: '', etd: '' };
+   
+   const result = { etb: '', etd: '' };
+   const currentYear = new Date().getFullYear();
+   
+   // Pattern 1: "ETB DD/MM HHMM - ETD DD/MM HH:MM" or "ETB DD/MM HH:MM - ETD DD/MM HH:MM"
+   const etbMatch = text.match(/ETB\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
+   if (etbMatch) {
+      const day = etbMatch[1].padStart(2, '0');
+      const month = etbMatch[2].padStart(2, '0');
+      let year = etbMatch[3] || currentYear.toString();
+      if (year.length === 2) year = '20' + year;
+      const hours = etbMatch[4].padStart(2, '0');
+      const minutes = etbMatch[5].padStart(2, '0');
+      result.etb = `${year}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   const etdMatch = text.match(/ET[SD]\s+(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):?(\d{2})/i);
+   if (etdMatch) {
+      const day = etdMatch[1].padStart(2, '0');
+      const month = etdMatch[2].padStart(2, '0');
+      let year = etdMatch[3] || currentYear.toString();
+      if (year.length === 2) year = '20' + year;
+      const hours = etdMatch[4].padStart(2, '0');
+      const minutes = etdMatch[5].padStart(2, '0');
+      result.etd = `${year}-${month}-${day}T${hours}:${minutes}`;
+   }
+   
+   // Pattern 2: "ETB – HH:MM/DDTH-MON, YYYY ETD – HH:MM /DDST-MON, YYYY"
+   if (!result.etb || !result.etd) {
+      const complexEtbMatch = text.match(/ETB\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})[A-Z]{2}[- ]([A-Z]{3})[,\s]*(\d{4})/i);
+      if (complexEtbMatch) {
+         const hours = complexEtbMatch[1].padStart(2, '0');
+         const minutes = complexEtbMatch[2].padStart(2, '0');
+         const day = complexEtbMatch[3].padStart(2, '0');
+         const monthName = complexEtbMatch[4].toUpperCase();
+         const year = complexEtbMatch[5];
+         
+         const monthMap = {
+            'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+            'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+            'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+         };
+         const month = monthMap[monthName] || '01';
+         result.etb = `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+      
+      const complexEtdMatch = text.match(/ET[SD]\s*[–-]\s*(\d{1,2}):(\d{2})\s*\/\s*(\d{1,2})[A-Z]{2}[- ]([A-Z]{3})[,\s]*(\d{4})/i);
+      if (complexEtdMatch) {
+         const hours = complexEtdMatch[1].padStart(2, '0');
+         const minutes = complexEtdMatch[2].padStart(2, '0');
+         const day = complexEtdMatch[3].padStart(2, '0');
+         const monthName = complexEtdMatch[4].toUpperCase();
+         const year = complexEtdMatch[5];
+         
+         const monthMap = {
+            'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+            'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+            'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+         };
+         const month = monthMap[monthName] || '01';
+         result.etd = `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+   }
+   
+   return result;
+}
+
 function exportExcel() {
    if (vessels.length === 0) {
       alert('No data to export!');
@@ -1542,7 +1913,8 @@ function exportExcel() {
       'Port': v.port,
       'Next Port': v.nextPort || '',
       'Inspection Type': v.inspectionType,
-      'ETD': v.etd,
+      'ETB': v.etb || '',  // Export in ISO format for re-import
+      'ETD': v.etd || '',  // Export in ISO format for re-import
       'Time Left': v.timeLeft ? v.timeLeft.text : '',
       'Vessel Position': v.vesselPosition,
       'Status': v.status,
