@@ -102,13 +102,18 @@ const PORT_CATEGORIES = {
       timezone: 'America/Santiago',
       offset: -3
    },
+   'Equador': {
+      ports: ['GUAYAQUIL', 'PUERTO BOLIVAR'],
+      timezone: 'America/Guayaquil',
+      offset: -5
+   },
    'Costa Rica': {
       ports: ['MOIN'],
       timezone: 'America/Costa_Rica',
       offset: -6
    },
    'Europe': {
-      ports: ['MALTA', 'MALAGA', 'HAMBURG', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', ],
+      ports: ['MALTA', 'MALAGA', 'HAMBURG', 'CIVITAVECCHIA', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', ],
       timezone: 'Europe/Brussels',
       offset: 1
    },
@@ -177,6 +182,9 @@ const PORT_FLAGS = {
    'CARTAGENA': '🇨🇴',
    'BUENAVENTURA': '🇨🇴',
    'CO CARTAGENA': '🇨🇴',
+   // Equador
+   'GUAYAQUIL': 'EC',
+   'PUERTO BOLIVAR': 'EC',
    // Chile
    'LIRQUEN': '🇨🇱',
    'CL LIRQUEN': '🇨🇱',
