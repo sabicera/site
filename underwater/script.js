@@ -192,6 +192,7 @@ const PORT_FLAGS = {
    'PUERTO BOLIVAR': 'EC',
    // Dominican Republic
    'CAUCEDO': '🇩🇴',
+   'DO CAUCEDO': '🇩🇴',
    // Chile
    'LIRQUEN': '🇨🇱',
    'CL LIRQUEN': '🇨🇱',
