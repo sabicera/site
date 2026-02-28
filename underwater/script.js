@@ -97,6 +97,11 @@ const PORT_CATEGORIES = {
       timezone: 'America/Bogota',
       offset: -5
    },
+   'Dominican Republic': {
+      ports: ['CAUCEDO'],
+      timezone: 'Atlantic Standard Time',
+      offset: -4
+   },
    'Chile': {
       ports: ['LIRQUEN', 'SAN ANTONIO', 'CORONEL', 'VALPARAISO'],
       timezone: 'America/Santiago',
@@ -185,6 +190,8 @@ const PORT_FLAGS = {
    // Equador
    'GUAYAQUIL': 'EC',
    'PUERTO BOLIVAR': 'EC',
+   // Dominican Republic
+   'CAUCEDO': 'DO',
    // Chile
    'LIRQUEN': '🇨🇱',
    'CL LIRQUEN': '🇨🇱',
