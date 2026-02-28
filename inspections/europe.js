@@ -106,8 +106,11 @@
                     color: white;
                 }
 
-                .location-badge.location-las palmas {
-                    background-color:rgb(46, 62, 204);
+                /* FIX: class names cannot contain spaces.
+                   The JS badge generator uses .replace(/[^a-z0-9]/g, '')
+                   so "Las Palmas" becomes the class "location-laspalmas". */
+                .location-badge.location-laspalmas {
+                    background-color: rgb(46, 62, 204);
                     color: white;
                 }
                 
@@ -271,7 +274,6 @@
             // 10. Include EU ports in combined view if it exists
             updateCombinedViewForEu();
             
-            console.log("European Ports tab initialized");
         }
     }
     
@@ -436,7 +438,6 @@
     function updatePendingEuPortArrivals() {
         if (!window.euTextArea) return;
         
-        console.log("Updating pending EU port arrivals");
         
         const euPortArrivals = parseEuPortETBDates(window.euTextArea.value);
         
@@ -480,7 +481,6 @@
             }
         }
         
-        console.log("Found", window.pendingEuPortArrivals.length, "pending EU port arrivals");
     }
     
     // Generate a unique ID (reuse from main script)
@@ -492,7 +492,6 @@
     
     // Update EU pending table display
     function updateEuPendingTableDisplay() {
-        console.log("Updating EU pending table display");
         
         // Get the EU tbody element
         const euTbody = window.euPendingTbodyInline;
@@ -1027,11 +1026,9 @@
             return;
         }
         
-        console.log("EU Text content:", euTextArea.value);
         
         // Parse ETB dates with a more flexible pattern
         const euPortArrivals = parseEuPortETBDates(euTextArea.value);
-        console.log("Parsed EU port arrivals:", euPortArrivals);
         
         // If there are arrivals, update the table
         if (euPortArrivals.length > 0) {

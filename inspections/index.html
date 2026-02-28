@@ -3,9 +3,10 @@
    <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Inspections & Ports Checker</title>
+      <title>Inspections &amp; Ports Checker</title>
       <link rel="icon" type="image/ico" sizes="32x32" href="underwater.ico">
       <link rel="stylesheet" href="styles.css">
+      <!-- FIX: Loads Inter, which now matches the --general-font CSS variable -->
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
    </head>
    <body>
@@ -16,6 +17,8 @@
                <div id="ports-tab" class="nav-tab">Brazil/Mexico Ports</div>
             </div>
          </div>
+
+         <!-- ── Panama Page ── -->
          <div id="panama-page" class="page active">
             <header>
                <div class="theme-toggle">
@@ -58,7 +61,7 @@
                   </div>
                   <div id="panama-pending-panel" class="panel pending-panel">
                      <div class="panel-header">
-                        <h2>U/W & K9 Countdown</h2>
+                        <h2>U/W &amp; K9 Countdown</h2>
                      </div>
                      <div class="pending-container">
                         <table id="panama-pending-table-inline">
@@ -76,6 +79,8 @@
                </div>
             </main>
          </div>
+
+         <!-- ── Brazil / Mexico Ports Page ── -->
          <div id="ports-page" class="page">
             <header>
                <div class="theme-toggle">
@@ -142,12 +147,13 @@
                </div>
             </main>
          </div>
-      </div>
-      </div>
+         <!-- FIX: Removed stray </div> that was here in the original -->
+
+      </div><!-- /.app-container -->
+
       <script src="database.js"></script>
       <script src="script.js"></script>
       <script src="combined-view.js"></script>
       <script src="europe.js"></script>
    </body>
 </html>
-
