@@ -99,7 +99,7 @@ const PORT_CATEGORIES = {
    },
    'Dominican Republic': {
       ports: ['CAUCEDO'],
-      timezone: 'Atlantic Standard Time',
+      timezone: 'America/Santo_Domingo',
       offset: -4
    },
    'Chile': {
