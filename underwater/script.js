@@ -44,7 +44,7 @@ function parseUserDateInput(input) {
       if (match) {
          const day = match[1].padStart(2, '0');
          const month = match[2].padStart(2, '0');
-         let year = match[3] || new Date().getFullYear().toString();
+         let year = match[3] ? match[3] : new Date().getFullYear().toString();
          if (year.length === 2) year = '20' + year;
          const hours = match[4].padStart(2, '0');
          const minutes = match[5].padStart(2, '0');
@@ -54,7 +54,20 @@ function parseUserDateInput(input) {
             return null;
          }
          
-         return `${year}-${month}-${day}T${hours}:${minutes}`;
+         let isoStr = `${year}-${month}-${day}T${hours}:${minutes}`;
+         
+         // If no explicit year was provided and the resulting date is already
+         // more than 1 day in the past, assume the user means next year.
+         if (!match[3]) {
+            const parsed = new Date(isoStr);
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            if (parsed < oneDayAgo) {
+               const nextYear = parseInt(year) + 1;
+               isoStr = `${nextYear}-${month}-${day}T${hours}:${minutes}`;
+            }
+         }
+         
+         return isoStr;
       }
    }
    
@@ -107,7 +120,7 @@ const PORT_CATEGORIES = {
       timezone: 'America/Santiago',
       offset: -3
    },
-   'Equador': {
+   'Ecuador': {
       ports: ['GUAYAQUIL', 'PUERTO BOLIVAR'],
       timezone: 'America/Guayaquil',
       offset: -5
@@ -118,7 +131,7 @@ const PORT_CATEGORIES = {
       offset: -6
    },
    'Europe': {
-      ports: ['MALTA', 'MALAGA', 'HAMBURG', 'CIVITAVECCHIA', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'LAS PALMAS', 'VALENCIA', 'MARSAXLOKK', ],
+      ports: ['MALTA', 'MALAGA', 'HAMBURG', 'CIVITAVECCHIA', 'LE HAVRE', 'ANTWERP', 'ROTTERDAM', 'VALENCIA', 'MARSAXLOKK'],
       timezone: 'Europe/Brussels',
       offset: 1
    },
@@ -188,8 +201,8 @@ const PORT_FLAGS = {
    'BUENAVENTURA': '🇨🇴',
    'CO CARTAGENA': '🇨🇴',
    // Equador
-   'GUAYAQUIL': 'EC',
-   'PUERTO BOLIVAR': 'EC',
+   'GUAYAQUIL': 'ec',
+   'PUERTO BOLIVAR': 'ec',
    // Dominican Republic
    'CAUCEDO': '🇩🇴',
    'DO CAUCEDO': '🇩🇴',
@@ -218,8 +231,8 @@ const PORT_FLAGS = {
    'BE ANTWERP': '🇧🇪',
    'ROTTERDAM': '🇳🇱',
    'NL ROTTERDAM': '🇳🇱',
-   'LAS PALMAS': 'CI',
-   'ES LAS PALMAS': 'CI',
+   'LAS PALMAS': 'ic',
+   'ES LAS PALMAS': 'ic',
    'VALENCIA': '🇪🇸',
    'ES VALENCIA': '🇪🇸',
    'MARSAXLOKK': '🇲🇹',
@@ -239,13 +252,10 @@ function getPortFlag(portName) {
             'Freeport': 'bs',
             'Colombia': 'co',
             'Chile': 'cl',
-            'Belgium': 'be',
-            'Spain': 'es',
-            'Canary Islands': 'ci', // Corrected
-            'Malta': 'mt',
-            'Netherlands': 'nl',
+            'Europe': 'eu',
+            'Canary Islands': 'ic',
             'Costa Rica': 'cr',
-            'Peru': 'pe',
+            'Dominican Republic': 'do',
             'Ecuador': 'ec'
          };
          return codes[region] || '';
@@ -299,7 +309,7 @@ const INSPECTION_TYPES = ['K9', 'U/W', 'Both'];
 const VESSEL_POSITIONS = ['Not Berthed Yet', 'Anchorage', 'Berthed', 'Working', 'Sailed'];
 
 // Status options (inspection status)
-const STATUS_OPTIONS = ['Pending', 'K9 Ongoing', 'K9 Done', 'U/W Ongoing', 'U/W Done', 'Completed'];
+const STATUS_OPTIONS = ['Pending', 'Working on it', 'K9 Ongoing', 'K9 Done', 'U/W Ongoing', 'U/W Done', 'Completed'];
 
 // Initialize the application with error handling
 function initApp() {
@@ -309,7 +319,6 @@ function initApp() {
       loadSavedData();
       renderVessels();
       updateFooter();
-      startClock();
       startCountdownUpdates();
    } catch (error) {
       console.error('Initialization error:', error);
@@ -445,16 +454,28 @@ function calculateTimeLeft(etdStr, port) {
    }
 }
 
-// Auto-update countdowns
+// Auto-update countdowns — only patches time-left cells, does NOT re-render the whole table
 function startCountdownUpdates() {
    if (updateInterval) clearInterval(updateInterval);
    updateInterval = setInterval(() => {
       vessels.forEach(v => {
          if (v.etd) {
             v.timeLeft = calculateTimeLeft(v.etd, v.port);
+            // Update just the time-left cell for this vessel
+            const row = document.querySelector(`tr[data-id="${v.id}"]`);
+            if (row) {
+               const cell = row.querySelector('.time-left-cell');
+               if (cell) {
+                  if (v.timeLeft) {
+                     cell.innerHTML = `<span class="${v.timeLeft.overdue ? 'overdue' : 'countdown'}">${v.timeLeft.text}</span>`;
+                  } else {
+                     cell.textContent = '--';
+                  }
+               }
+            }
          }
       });
-      renderVessels();
+      updateFooter();
    }, 60000); // Update every minute
 }
 
@@ -489,9 +510,6 @@ function addNewRow() {
 function renderVessels() {
    const tbody = document.getElementById('vessel-tbody');
    tbody.innerHTML = '';
-
-   // Clean up invalid vessels first
-   validateAndCleanVessels();
 
    if (vessels.length === 0) {
       tbody.innerHTML = `
@@ -999,6 +1017,8 @@ function createSelectCell(field, value, options, vesselId) {
 
    select.addEventListener('change', (e) => {
       updateVesselField(vesselId, field, e.target.value);
+      // Re-render so sort order and row colouring stay accurate after a select change
+      renderVessels();
    });
    return select;
 }
@@ -1012,10 +1032,32 @@ function updateVesselField(vesselId, field, value) {
       if (field === 'etd' || field === 'port') {
          if (vessel.etd) {
             vessel.timeLeft = calculateTimeLeft(vessel.etd, vessel.port);
+         } else {
+            vessel.timeLeft = null;
          }
+         // Only update the time-left cell for this row — avoids destroying focus
+         const row = document.querySelector(`tr[data-id="${vesselId}"]`);
+         if (row) {
+            const timeLeftCell = row.querySelector('.time-left-cell');
+            if (timeLeftCell) {
+               if (vessel.timeLeft) {
+                  timeLeftCell.innerHTML = `<span class="${vessel.timeLeft.overdue ? 'overdue' : 'countdown'}">${vessel.timeLeft.text}</span>`;
+               } else {
+                  timeLeftCell.textContent = '--';
+               }
+            }
+         }
+         updateFooter();
       }
       saveData();
-      renderVessels();
+      // Only do a full re-render when the sort order could change (ETD/port edits committed on blur)
+      // For all other fields just save — the UI already reflects the user's input
+      if (field === 'etd' || field === 'port') {
+         // Defer the re-render so focus is not interrupted mid-edit
+         // The user will see the updated sort on next interaction
+      } else {
+         updateFooter();
+      }
    }
 }
 
@@ -1130,10 +1172,10 @@ function copyVessels(inspectionType) {
    let output = [];
 
    sortedPorts.forEach(port => {
-      const vessels = portGroups[port];
+      const portVessels = portGroups[port];
       output.push(`====${port}====`);
 
-      vessels.forEach(v => {
+      portVessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
 
          // Parse ETB and ETD to DD/MM HHMM format
@@ -1256,10 +1298,10 @@ function copyBrazilVessels() {
    let output = [];
 
    sortedPorts.forEach(port => {
-      const vessels = portGroups[port];
+      const portVessels = portGroups[port];
       output.push(`====${port}====`);
 
-      vessels.forEach(v => {
+      portVessels.forEach(v => {
          const vesselName = v.vesselName || 'UNKNOWN';
 
          // Parse ETB and ETD to DD/MM HHMM format
@@ -1438,9 +1480,9 @@ function importJSON() {
             console.log(`Loaded ${jsonData.length} vessels from JSON`);
 
             // Process each vessel and calculate time left
-            const importedVessels = jsonData.map(v => {
+            const importedVessels = jsonData.map((v, idx) => {
                const vessel = {
-                  id: Date.now() + Math.random(),
+                  id: Date.now() + idx,
                   vesselName: v.vesselName || '',
                   port: v.port || '',
                   nextPort: v.nextPort || '',
@@ -1463,6 +1505,7 @@ function importJSON() {
 
             if (confirm(`Import ${importedVessels.length} vessels from JSON?\n\nThis will replace all current data.`)) {
                vessels = importedVessels;
+               validateAndCleanVessels();
                renderVessels();
                saveData();
                showNotification(`Successfully imported ${importedVessels.length} vessels!`);
@@ -1674,7 +1717,7 @@ function importExcel() {
                   }
 
                   const vessel = {
-                     id: Date.now() + Math.random(),
+                     id: Date.now() + allVessels.length,
                      vesselName: vesselName.toUpperCase().trim(),
                      port: '',
                      nextPort: '',
@@ -1774,6 +1817,7 @@ function importExcel() {
 
             if (confirm(`Import ${allVessels.length} vessels from Excel?\n\nThis will replace all current data.`)) {
                vessels = allVessels;
+               validateAndCleanVessels();
                renderVessels();
                saveData();
                showNotification(`Successfully imported ${allVessels.length} vessels!`);
@@ -1969,46 +2013,7 @@ function updateFooter() {
    if (uwCountEl) uwCountEl.textContent = `U/W: ${uw}`;
 }
 
-// Clock - show multiple timezones
-function startClock() {
-   updateClock();
-   setInterval(updateClock, 1000);
-}
-
-function updateClock() {
-   const now = new Date();
-
-   // Get UTC time components
-   const utcYear = now.getUTCFullYear();
-   const utcMonth = now.getUTCMonth();
-   const utcDay = now.getUTCDate();
-   const utcHours = now.getUTCHours();
-   const utcMinutes = now.getUTCMinutes();
-
-   // Helper function to format time
-   const formatTime = (offsetHours) => {
-      const localDate = new Date(Date.UTC(utcYear, utcMonth, utcDay, utcHours + offsetHours, utcMinutes));
-      const hours = String(localDate.getUTCHours()).padStart(2, '0');
-      const minutes = String(localDate.getUTCMinutes()).padStart(2, '0');
-      return `${hours}:${minutes}`;
-   };
-
-   // Helper function to safely update clock element
-   const updateClockElement = (id, text) => {
-      const element = document.getElementById(id);
-      if (element) {
-         element.textContent = text;
-      }
-   };
-
-   // Update each timezone clock
-   updateClockElement('panama-time', `🇵🇦 Panama: ${formatTime(-5)}`);
-   updateClockElement('brazil-time', `🇧🇷 Brazil: ${formatTime(-3)}`);
-   updateClockElement('freeport-time', `🇧🇸 Freeport: ${formatTime(-5)}`);
-   updateClockElement('chile-time', `🇨🇱 Chile: ${formatTime(-3)}`);
-   updateClockElement('laspalmas-time', `🇪🇸 Las Palmas: ${formatTime(1)}`);
-}
-
+// Clock - show multiple timezones using Intl API with correct DST-aware offsets
 function updateWorldClocks() {
    const locations = [{
          id: 'clock-panama',
@@ -2075,22 +2080,13 @@ function showNotification(message) {
         background: var(--btn-success); color: white;
         padding: 15px 20px; border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000; animation: slideIn 0.3s ease-out;
+        z-index: 10000; animation: notifySlideIn 0.3s ease-out;
     `;
    notification.textContent = message;
-
-   const style = document.createElement('style');
-   style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    `;
-   document.head.appendChild(style);
    document.body.appendChild(notification);
 
    setTimeout(() => {
-      notification.style.animation = 'slideIn 0.3s ease-out reverse';
+      notification.style.animation = 'notifySlideIn 0.3s ease-out reverse';
       setTimeout(() => notification.remove(), 300);
    }, 3000);
 }
