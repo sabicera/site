@@ -1153,3 +1153,8 @@ tr[data-inspection="U/W"] {
 .copied-flash {
     animation: copyFlash 1s ease;
 }
+/* Notification slide-in animation */
+@keyframes notifySlideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+}
