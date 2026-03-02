@@ -184,5 +184,12 @@ const VESSEL_ID_DATABASE = {
     "MSC AURIGA": "6256002",
     "MSC ROME": "8831969",
     "MSC CHIYO": "7743902",
+    "MSC GABRIELLA": "463631",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
     "EUROPE": "144594",
 };
