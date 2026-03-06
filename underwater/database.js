@@ -188,8 +188,8 @@ const VESSEL_ID_DATABASE = {
     "MSC SAMIRA III": "364592",
     "MSC GIOVANNA VII": "688936",
     "MSC LUDOVICA": "407264",
-    "EUROPE": "144594",
-    "EUROPE": "144594",
+    "ETOILE": "2107",
+    "MSC KEY F": "716043",
     "EUROPE": "144594",
     "EUROPE": "144594",
 };
