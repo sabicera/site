@@ -5,7 +5,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
       <!-- Primary Meta Tags -->
       <title>Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings</title>
-      <meta name="title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta name="title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary &amp; Tax Savings">
       <meta name="description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary, income tax, social insurance, GESY, provident fund deductions, and child allowances. Accurate Cyprus payroll calculations.">
       <meta name="keywords" content="Cyprus tax calculator, Cyprus salary calculator, Cyprus income tax, GESY calculator, social insurance Cyprus, provident fund Cyprus, net salary Cyprus, Cyprus payroll, tax deductions Cyprus 2026">
       <meta name="author" content="Pavlos Mystakidis">
@@ -14,14 +14,14 @@
       <!-- Open Graph / Facebook -->
       <meta property="og:type" content="website">
       <meta property="og:url" content="https://sabicera.github.io/site/">
-      <meta property="og:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta property="og:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary &amp; Tax Savings">
       <meta property="og:description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary with accurate income tax, social insurance, GESY, and provident fund calculations.">
       <meta property="og:image" content="https://sabicera.github.io/images/cyprus-tax-calculator-og.jpg">
       <meta property="og:locale" content="en_CY">
       <!-- Twitter -->
       <meta property="twitter:card" content="summary_large_image">
       <meta property="twitter:url" content="https://sabicera.github.io/site/">
-      <meta property="twitter:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary & Tax Savings">
+      <meta property="twitter:title" content="Cyprus Tax Calculator 2026 | Calculate Net Salary &amp; Tax Savings">
       <meta property="twitter:description" content="Free Cyprus tax calculator for 2026. Calculate your net take-home salary with accurate income tax, social insurance, GESY, and provident fund calculations.">
       <meta property="twitter:image" content="https://sabicera.github.io/images/cyprus-tax-calculator-og.jpg">
       <!-- Favicon -->
@@ -33,7 +33,8 @@
       <link rel="preconnect" href="https://www.googletagmanager.com">
       <link rel="preconnect" href="https://img.buymeacoffee.com">
       <!-- Google tag (gtag.js) -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-LL3HRC09SF"></script>
+      <!-- NOTE: AI Studio script was removed — it contained an embedded session token (security risk). -->
+      <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-LL3HRC09SF"></script>
       <script>
          window.dataLayer = window.dataLayer || [];
          function gtag(){dataLayer.push(arguments);}
@@ -69,6 +70,9 @@
                      <input type="number" id="providentFundRate" name="providentFundRate" placeholder="Deductible up to 10%." min="0" max="10" oninput="calculate()" aria-describedby="provident-fund-desc">
                      <label for="hhIncome">Total Household Income (€)</label>
                      <input type="number" id="hhIncome" name="hhIncome" placeholder="Combined parents" oninput="calculate()" aria-describedby="household-income-desc">
+                     <span id="hhIncomeHint" style="display:none; color:#e07b00; font-size:0.78rem; margin-top:-8px;">
+                        ⚠️ Enter combined household income to apply the child tax allowance correctly.
+                     </span>
                   </div>
                   <div class="input-card">
                      <label for="rentDeduction">Primary Residence Rent or Mortgage Interest (€)</label>
@@ -78,14 +82,15 @@
                      <label for="children">Dependent Children</label>
                      <div class="stepper">
                         <button type="button" onclick="updateChildren(-1)" aria-label="Decrease number of children">-</button>
-                        <input type="number" id="children" name="children" value="0" readonly tabindex="-1" aria-label="Number of dependent children" aria-live="polite">
+                        <input type="number" id="children" name="children" value="0" readonly="" tabindex="-1" aria-label="Number of dependent children" aria-live="polite">
                         <button type="button" onclick="updateChildren(1)" aria-label="Increase number of children">+</button>
                      </div>
                   </div>
                </div>
             </section>
-            <section aria-label="Tax Calculation Results">
+            <section aria-label="Tax Calculation Results" aria-live="polite">
                <h2 class="sr-only">Calculation Results</h2>
+               <p class="bracket-note">⚠️ Uses <strong>proposed 2026 tax brackets</strong> (€22,000 free threshold). Confirm enactment with the <a href="https://www.mof.gov.cy" target="_blank" rel="noopener">Cyprus Tax Department</a> before relying on these figures.</p>
                <div class="results">
                   <table role="table" aria-label="Salary breakdown and tax calculations">
                      <thead>
