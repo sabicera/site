@@ -349,6 +349,31 @@ th {
 	text-decoration: underline;
 }
 
+/* FIX #12: Buy Me a Coffee link layout */
+.bmc {
+	display: inline-block;
+	margin: 20px auto;
+}
+
+/* FIX #4: Tax bracket disclaimer note */
+.bracket-note {
+	font-size: 0.8rem;
+	color: #92400e;
+	background: #fef3c7;
+	border: 1px solid #fcd34d;
+	border-left: 4px solid #f59e0b;
+	border-radius: 6px;
+	padding: 10px 14px;
+	margin: 12px 0 0 0;
+	line-height: 1.5;
+}
+
+body.dark-mode .bracket-note {
+	color: #fcd34d;
+	background: #1c1608;
+	border-color: #92400e;
+}
+
 small {
 	font-size: 0.75rem;
 	color: #64748b;
