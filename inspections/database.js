@@ -210,5 +210,10 @@ const VESSEL_ID_DATABASE = {
     "MSC FELIXSTOWE": "1037411",
     "MSC PALAK": "4032543",
     "MSC PINA": "463965",
+    "MSC ORION": "6100677",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
+    "EUROPE": "144594",
     "EUROPE": "144594",
 };
