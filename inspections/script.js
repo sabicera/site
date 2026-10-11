@@ -33,6 +33,25 @@ const INSPECTION_STATUSES = {
     K9_DONE: 'k9-done'
 };
 
+document.addEventListener("DOMContentLoaded", function() {
+    // Check if the user already dismissed the banner in this session
+    if (!sessionStorage.getItem('bannerDismissed')) {
+        const banner = document.getElementById('update-banner');
+        if (banner) {
+            banner.style.display = 'block';
+        }
+    }
+});
+
+function dismissBanner() {
+    const banner = document.getElementById('update-banner');
+    if (banner) {
+        banner.style.display = 'none';
+        // Remember that the user closed it for this session
+        sessionStorage.setItem('bannerDismissed', 'true');
+    }
+}
+
 // Page configurations
 const PAGE_CONFIG = {
     'panama': {
